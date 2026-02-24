@@ -1,5 +1,5 @@
 /**
- * Euphy-Bot - Handler V3.1 (Final Fix)
+ * Euphy-Bot - Handler V3.0 (Ultimate Edition)
  * Feature: Auto-Clean Premium, Dual ID Sync, PC Notifications
  */
 
@@ -50,6 +50,7 @@ module.exports = {
             }
 
             // JURUS SAKTI: Sinkronisasi ID Ganda (LID & JID)
+            // Jika ID yang chat tidak premium, cari apakah nomornya terdaftar premium di ID lain
             if (!global.db.data.users[m.sender].premium) {
                 let idOnly = m.sender.split('@')[0];
                 let findOtherId = Object.keys(global.db.data.users).find(k => k.includes(idOnly) && global.db.data.users[k].premium);
@@ -58,23 +59,20 @@ module.exports = {
                 user = global.db.data.users[m.sender];
             }
 
-            // LOGIC AUTO-CLEAN & AUTO-NOTIFY (FIXED SCOPE)
+            // LOGIC AUTO-CLEAN & AUTO-NOTIFY
             if (user.premium && user.premiumTime > 0 && Date.now() >= user.premiumTime) {
-                // Definisikan variabel waktu di sini agar tidak error 'not defined'
-                let waktuExpired = new Date(user.premiumTime).toLocaleString('id-ID');
-                
                 user.premium = false;
                 user.premiumTime = 0; 
                 
                 let target = m.sender;
                 let ownerId = global.owner[0].replace(/[^0-9]/g, '') + '@s.whatsapp.net';
-                let expMsg = `*─── [ PREMIUM EXPIRED ] ───*\n\nWaktu premium kamu sudah habis, @${target.split('@')[0]}!\n*Expired pada:* ${waktuExpired} 🌸`;
+                let expMsg = `*─── [ PREMIUM EXPIRED ] ───*\n\nWaktu premium kamu sudah habis, @${target.split('@')[0]}! 🌸`;
 
                 // 1. Notif di chat saat ini
                 await this.reply(m.chat, expMsg, null, { mentions: [target] });
 
                 // 2. Notif Pribadi (PC) ke USER
-                await this.sendMessage(target, { text: `Halo! Masa premium kamu di Euphy-Bot sudah habis (Terakhir pada ${waktuExpired}). Terima kasih banyak sudah berlangganan! 🙏✨` }).catch(() => null);
+                await this.sendMessage(target, { text: `Halo! Masa premium kamu di Euphy-Bot sudah habis hari ini. Terima kasih banyak sudah berlangganan sebelumnya! 🙏✨` }).catch(() => null);
 
                 // 3. Notif Pribadi (PC) ke OWNER (Yus)
                 await this.sendMessage(ownerId, { text: `[ INFO EXPIRED ]\n\nUser: @${target.split('@')[0]}\nID: ${target}\nStatus premium telah otomatis dicabut oleh sistem. ✅` }).catch(() => null);
