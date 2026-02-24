@@ -15,7 +15,7 @@ module.exports = {
 
         try {
             // Memanggil API milikmu
-            const response = await axios.get(`https://iyusztempest.my.id/api/fun?feature=lahelu&apikey=yusz123`);
+            const response = await axios.get(`https://iyusztempest.my.id/api/fun?feature=lahelu&apikey=${global.apiyus}`);
             
             if (response.data.status !== "success") {
                 return m.reply('Gagal mengambil konten dari Lahelu. Coba lagi nanti ya.');
