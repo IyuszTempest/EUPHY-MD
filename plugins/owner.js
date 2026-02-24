@@ -3,8 +3,9 @@
  */
 
 module.exports = {
-    command: ['owner', 'creator'],
+    command: ['owner', 'creator', 'developer'],
     category: 'main',
+    noPrefix: true,
     call: async (conn, m) => {
         await conn.sendMessage(m.chat, { react: { text: '👑', key: m.key } });
 
