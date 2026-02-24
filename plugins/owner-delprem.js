@@ -4,9 +4,10 @@
  */
 
 module.exports = {
-    command: ['delprem', 'unprem'],
+    command: ['delprem'],
     category: 'owner',
     owner: true,
+    noPrefix: true,
     call: async (conn, m, { args, usedPrefix, command }) => {
         // 1. Ambil target (dari reply, tag, atau ketik nomor)
         let who = m.quoted ? m.quoted.sender : m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : args[0] ? args[0].replace(/[^0-9]/g, '') + '@s.whatsapp.net' : '';
