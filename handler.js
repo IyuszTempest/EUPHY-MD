@@ -4,6 +4,7 @@
  */
 
 const { smsg } = require('./lib/simple');
+const { areJidsSameUser } = require('@whiskeysockets/baileys'); // <--- TAMBAHKAN INI
 const chalk = require('chalk');
 const fs = require('fs');
 const path = require('path');
@@ -157,4 +158,4 @@ module.exports = {
     }
 };
 
-// ... (Plugin Reload System Tetap Sama)
+                
