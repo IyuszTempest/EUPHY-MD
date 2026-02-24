@@ -3,7 +3,7 @@
  */
 
 module.exports = {
-    command: ['kick', 'dor'],
+    command: ['kick'],
     category: 'group',
     admin: true,     // User yang manggil harus admin
     botAdmin: true,  // Bot harus admin
