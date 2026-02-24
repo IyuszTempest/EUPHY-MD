@@ -17,7 +17,7 @@ module.exports = {
 
         try {
             // Memanggil API milikmu
-            const response = await axios.get(`https://iyusztempest.my.id/api/download?feature=ytsearch&query=${encodeURIComponent(text)}&apikey=yusz123`);
+            const response = await axios.get(`https://iyusztempest.my.id/api/download?feature=ytsearch&query=${encodeURIComponent(text)}&apikey=${global.apiyus}`);
             
             if (!response.data.status) {
                 return m.reply('Maaf, pencarian tidak ditemukan atau API sedang bermasalah.');
