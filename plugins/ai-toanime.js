@@ -1,62 +1,75 @@
-/**
- * Plugin F2Anime - Convert Image to Anime
- * Menggunakan API AI/F2Anime
+/** * Plugin F2Anime - Convert Image to Anime
+ * Fix: Uploader Catbox & API IyuszTempest
  */
 
 const axios = require('axios');
+const { uploadImage } = require('../lib/uploadImage'); // Pastikan path ke lib benar
 
 module.exports = {
-    command: ['toanime'],
+    command: ['toanime', 'jadianime'],
     category: 'ai',
     noPrefix: true, 
     premium: true,
-    call: async (conn, m, { text, command }) => {
-        // Ambil URL gambar dari reply atau dari link yang diketik
+    call: async (conn, m, { text, command, usedPrefix }) => {
+        // Ambil media dari reply atau pesan itu sendiri
         let q = m.quoted ? m.quoted : m;
         let mime = (q.msg || q).mimetype || '';
-        let url;
 
-        if (/image/.test(mime)) {
-            // Jika user kirim/reply gambar, harusnya diupload dulu ke telegra.ph atau sejenisnya
-            // Tapi kalau kamu mau pake link langsung dari text, logicnya di bawah:
-            let media = await q.download();
-            // Di sini kamu butuh fungsi upload media ke URL agar bisa dibaca API
-            // Contoh asumsi: kamu punya global.uploadImage(media)
-            url = await global.uploadImage(media); 
-        } else if (text && text.startsWith('http')) {
-            url = text;
+        // Cek apakah ada gambar atau link
+        if (!/image/.test(mime) && !text.startsWith('http')) {
+            return m.reply(`Kirim atau reply gambar dengan caption *${usedPrefix + command}* untuk jadi anime! 🌸`);
         }
 
-        if (!url) return m.reply(`Kirim atau reply gambar dengan caption *${command}* atau masukkan link gambar langsung!`);
-
-        // Memberikan reaksi loading (React)
-        await conn.sendMessage(m.chat, { react: { text: '🪄', key: m.key } });
-
         try {
-            // Memanggil API menggunakan variabel global
-            // Pastikan URL gambar di-encode agar tidak pecah saat dikirim ke API
-            const response = await axios.get(`${global.apiyus}/api/ai?feature=f2anime&query=${encodeURIComponent(url)}&apikey=${global.apikey}`);
+            // Reaksi loading awal
+            await conn.sendMessage(m.chat, { react: { text: '⏳', key: m.key } });
             
-            if (response.data.status === false) {
-                return m.reply(`Gagal: ${response.data.msg}`);
+            let url;
+            if (/image/.test(mime)) {
+                let media = await q.download();
+                if (!media) throw new Error("Gagal mendownload media dari WhatsApp.");
+                
+                // Upload ke Catbox (lebih stabil dari Telegra.ph)
+                url = await uploadImage(media); 
+            } else {
+                url = text;
             }
 
-            const resultUrl = response.data.result || response.data.url;
+            // Reaksi saat memproses ke API
+            await conn.sendMessage(m.chat, { react: { text: '🪄', key: m.key } });
 
-            // Kirim hasil gambar anime
+            // Panggil API IyuszTempest
+            const apiEndpoint = `https://iyusztempest.my.id/api/ai?feature=f2anime&apikey=yusz123&query=${encodeURIComponent(url)}`;
+            const { data } = await axios.get(apiEndpoint);
+            
+            // Validasi hasil sesuai struktur JSON API-mu
+            if (data.status !== "success") {
+                return m.reply(`API Error: ${data.msg || 'Gagal memproses gambar.'}`);
+            }
+
+            // Kirim hasil dengan UI Euphylia Magenta
             await conn.sendMessage(m.chat, { 
-                image: { url: resultUrl }, 
-                caption: `✨ Berhasil diubah menjadi anime!`,
-                mentions: [m.sender]
+                image: { url: data.result }, 
+                caption: `🏮 *SUCCESS TO ANIME*\n\n👤 *Requester:* @${m.sender.split`@`[0]}\n✨ *Style:* F2Anime\n\n_Powered by IyuszTempest_`,
+                contextInfo: {
+                    mentionedJid: [m.sender],
+                    forwardingScore: 999,
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: global.idch,
+                        newsletterName: `AI Anime - ${global.namech}`
+                    }
+                }
             }, { quoted: m });
 
-            // Reaksi sukses
             await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
 
         } catch (e) {
             console.error(e);
-            m.reply('Terjadi kesalahan saat memproses gambar di server AI.');
+            // Detail error agar mudah di-debug di terminal
+            m.reply(`Aduh gagal! ❌\nDetail: ${e.message}`);
             await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } });
         }
     }
 };
+                                   
