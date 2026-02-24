@@ -1,6 +1,6 @@
 /**
- * Euphy-Bot - Index (Universal Plugin Loader + Auto Fix)
- * Fix: Auto Create tmp, Redirecting makeWASocket for downloadM support
+ * Euphy-Bot - Index (V3.3 Optimized)
+ * Fix: Global Uploader Registration & Plugin Sync
  */
 
 const { 
@@ -18,17 +18,19 @@ const os = require("os");
 const express = require("express");
 const readline = require("readline");
 
+// --- [ 1. CONFIG & GLOBAL UPLOADER ] ---
 require('./config');
+const { uploadImage } = require('./lib/uploadImage');
+global.uploadImage = uploadImage; // Registrasi global uploader
 
-// --- [ AUTO FIX DIRECTORY ] ---
-// Mencegah error ENOENT: no such file or directory
+// --- [ 2. AUTO FIX DIRECTORY ] ---
 const tmpDir = path.join(__dirname, 'tmp');
 if (!fs.existsSync(tmpDir)) {
     fs.mkdirSync(tmpDir);
     console.log(chalk.green('[ SYSTEM ] Folder tmp berhasil dibuat otomatis! 📂'));
 }
 
-// PENTING: Ambil makeWASocket dari lib/simple agar downloadM aktif
+// PENTING: Ambil smsg & makeWASocket dari lib/simple agar downloadM & LID support aktif
 const { smsg, makeWASocket } = require('./lib/simple');
 
 const app = express();
@@ -44,11 +46,15 @@ const question = (text) => {
     }));
 };
 
-// --- [ DATABASE SYSTEM ] ---
+// --- [ 3. DATABASE SYSTEM ] ---
 const databasePath = './database.json';
 global.db = { data: { users: {}, chats: {}, settings: {} } };
 if (fs.existsSync(databasePath)) {
-    global.db.data = JSON.parse(fs.readFileSync(databasePath, 'utf8'));
+    try {
+        global.db.data = JSON.parse(fs.readFileSync(databasePath, 'utf8'));
+    } catch (e) {
+        console.log(chalk.red('[ ERROR ] Database korup, memuat data kosong.'));
+    }
 }
 
 async function startEuphy() {
@@ -63,7 +69,7 @@ async function startEuphy() {
         browser: ["Ubuntu", "Chrome", "20.0.04"]
     });
 
-    // --- [ UNIVERSAL PLUGIN LOADER ] ---
+    // --- [ 4. UNIVERSAL PLUGIN LOADER ] ---
     global.plugins = {};
     const pluginsFolder = path.join(__dirname, "plugins");
     if (!fs.existsSync(pluginsFolder)) fs.mkdirSync(pluginsFolder);
@@ -80,7 +86,7 @@ async function startEuphy() {
         }
     }
 
-    // --- [ PAIRING SYSTEM ] ---
+    // --- [ 5. PAIRING SYSTEM ] ---
     if (!conn.authState.creds.registered) {
         console.log(chalk.yellow("[!] Masukkan nomor WhatsApp (628xxx):"));
         let phoneNumber = await question(chalk.cyan("> "));
@@ -105,23 +111,22 @@ async function startEuphy() {
 
     conn.ev.on("creds.update", saveCreds);
 
+    // --- [ 6. MESSAGE HANDLER ] ---
     conn.ev.on("messages.upsert", async (chatUpdate) => {
         try {
             const { handler } = require('./handler');
-            let m = chatUpdate.messages[0];
-            if (!m) return;
-            
-            // Proses pesan lewat smsg agar fungsi m.reply & m.download menempel
-            m = smsg(conn, m);
-            await handler.call(conn, chatUpdate, m);
+            // Menjalankan handler dengan data yang sudah diproses smsg
+            await handler.call(conn, chatUpdate);
         } catch (e) {
-            console.error(e);
+            console.error(chalk.red(`[ HANDLER ERROR ] ${e.message}`));
         }
     });
 
+    // Auto-save database setiap 30 detik
     setInterval(() => {
         fs.writeFileSync(databasePath, JSON.stringify(global.db.data, null, 2));
     }, 30000);
 }
 
 startEuphy();
+    
