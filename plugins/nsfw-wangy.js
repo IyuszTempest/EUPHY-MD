@@ -16,7 +16,7 @@ module.exports = {
 
         try {
             // Memanggil API milikmu
-            const response = await axios.get(`https://iyusztempest.my.id/api/nsfw?feature=wangy&apikey=yusz123`);
+            const response = await axios.get(`https://iyusztempest.my.id/api/nsfw?feature=wangy&apikey=${global.apiyus}`);
             
             if (response.data.status !== "Sukses kak!") {
                 return m.reply('Gagal mengambil gambar. Coba lagi nanti.');
