@@ -7,6 +7,7 @@ module.exports = {
     command: ['addprem'],
     category: 'owner',
     owner: true,
+    noPrefix: true,
     call: async (conn, m, { args, usedPrefix, command }) => {
         // 1. Ambil target (Support LID & JID)
         let who = m.quoted ? m.quoted.sender : m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : args[0] ? args[0].replace(/[^0-9]/g, '') + (args[0].includes('@lid') ? '@lid' : '@s.whatsapp.net') : '';
