@@ -1,30 +1,38 @@
 /**
- * Euphy-Bot - Delete Premium
- * Only for Owner
+ * Euphy-Bot - Delete Premium (Fixed Sync)
+ * Menangani masalah database tidak terdeteksi
  */
 
 module.exports = {
-    command: ['delprem'],
+    command: ['delprem', 'unprem'],
     category: 'owner',
     owner: true,
-    noPrefix: true,
     call: async (conn, m, { args, usedPrefix, command }) => {
+        // 1. Ambil target (dari reply, tag, atau ketik nomor)
         let who = m.quoted ? m.quoted.sender : m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : args[0] ? args[0].replace(/[^0-9]/g, '') + '@s.whatsapp.net' : '';
-        
-        if (!who) return m.reply(`Siapa yang mau dicabut premiumnya?\nContoh: *${usedPrefix + command} @user* atau reply chatnya.`);
-        
-        let user = global.db.data.users[who];
-        if (!user) return m.reply(`User tidak ditemukan di database! ❌`);
-        if (!user.premium) return m.reply(`User tersebut memang bukan user premium. 👤`);
 
-        // Update database
+        if (!who) return m.reply(`Siapa yang mau dicabut premiumnya?\nContoh: *${usedPrefix + command} @user*`);
+
+        // 2. Cek Database secara mendalam
+        let users = global.db.data.users;
+        let user = users[who];
+
+        // Jika tidak ketemu lewat JID, coba cari manual lewat nomor (siapa tahu nyangkut di @lid)
+        if (!user) {
+            let jidTanpaDomain = who.split('@')[0];
+            let findJid = Object.keys(users).find(key => key.startsWith(jidTanpaDomain));
+            if (findJid) {
+                who = findJid;
+                user = users[findJid];
+            }
+        }
+
+        if (!user) return m.reply(`User *@${who.split('@')[0]}* tidak ada di database Euphy! ❌`);
+
+        // 3. Eksekusi Pencabutan Status
         user.premium = false;
-        
-        let cap = `*─── [ PREMIUM REMOVED ] ───*\n\n`;
-        cap += `👤 *User:* @${who.split('@')[0]}\n`;
-        cap += `❌ *Status:* Dicabut\n\n`;
-        cap += `Akses fitur premium telah dinonaktifkan untuk user ini.`;
+        user.premiumTime = 0;
 
-        conn.reply(m.chat, cap, m, { mentions: [who] });
+        m.reply(`Berhasil mencabut status premium @${who.split('@')[0]}! ❌\nSekarang dia kembali jadi rakyat jelata. 🗿`, null, { mentions: [who] });
     }
-};
+}
