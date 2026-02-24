@@ -12,7 +12,7 @@ module.exports = {
         // 1. Ambil target (Support LID & JID)
         let who = m.quoted ? m.quoted.sender : m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : args[0] ? args[0].replace(/[^0-9]/g, '') + (args[0].includes('@lid') ? '@lid' : '@s.whatsapp.net') : '';
         
-        if (!who) return m.reply(`Siapa yang mau dijadiin premium, Yus? 🗿\nContoh: *${usedPrefix + command} @user 30*`);
+        if (!who) return m.reply(`Siapa yang mau dijadiin premium? 🗿\nContoh: *${usedPrefix + command} @user 30*`);
 
         let users = global.db.data.users;
         
@@ -27,7 +27,7 @@ module.exports = {
 
         // 3. Hitung Durasi (Ganti 1000 jadi 86400000 kalau sudah selesai tes 15 detik)
         let duration = args[1] && !isNaN(args[1]) ? parseInt(args[1]) : 30;
-        let expired = Date.now() + (duration * 1000); // Masih mode TEST DETIK
+        let expired = Date.now() + (duration * 86400000); // Masih mode TEST DETIK
         let tglExpired = new Date(expired).toLocaleString('id-ID');
 
         // 4. Update Database
