@@ -9,7 +9,7 @@ module.exports = {
     command: ['toanime', 'jadianime'],
     category: 'ai',
     noPrefix: true, 
-    premium: true,
+    premium: false,
     call: async (conn, m, { text, command, usedPrefix }) => {
         // Ambil media dari reply atau pesan itu sendiri
         let q = m.quoted ? m.quoted : m;
