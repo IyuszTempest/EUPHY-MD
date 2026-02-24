@@ -7,14 +7,15 @@ const fs = require('fs')
 
 // Daftar kategori lengkap sesuai request
 const allTags = {
-    'main': '🏠 ‹ 𝙼𝙰𝙸𝙽 𝙼𝙴𝙽𝚄 ›',
-    'anime': '🌸 ‹ 𝙰𝙽𝙸𝙼𝙴 𝙼𝙴𝙽𝚄 ›', // New
-    'downloader': '📥 ‹ 𝙳𝙾𝚆𝙽𝙻𝙾𝙰𝙳𝙴𝚁 ›',
-    'tools': '🛠️ ‹ 𝚃𝙾𝙾𝙻𝚂 ›',
-    'fun': '🎮 ‹ 𝙵𝚄𝙽 𝙼𝙴𝙽𝚄 ›',      // New
-    'ai': '🤖 ‹ 𝙰𝙸 𝙼𝙴𝙽𝚄 ›',        // New
-    'nsfw': '🔞 ‹ 𝙽𝚂𝙵𝚆 𝙼𝙴𝙽𝚄 ›',    // New
-    'owner': '👑 ‹ 𝙾𝚆𝙽𝙴𝚁 ›'
+    'main': '🍱 `‹ MENU MBG ›`',
+    'anime': '🌸 `‹ MENU WIBU ›`', // New
+    'ai': '🤖 `‹ MENU AI ›`',
+    'downloader': '📥 `‹ MENU DOWNLOADER›`',
+    'fun': '🎮 `‹ MENU FUN ›`',
+    'group': '👥 `‹ MENU GC ›`',   
+    'nsfw': '🔞 `‹ MENU NSFW ›`',    // New
+    'owner': '👑 `‹ MENU OWNER ›`'
+    'tools': '🛠️ `‹ MENU TOOLS ›`',
 };
 
 module.exports = {
