@@ -15,7 +15,7 @@ module.exports = {
 
         try {
             // Memanggil API milikmu
-            const response = await axios.get(`https://iyusztempest.my.id/api/tools?feature=presetam&apikey=yusz123`);
+            const response = await axios.get(`https://iyusztempest.my.id/api/tools?feature=presetam&apikey=${global.apiyus}`);
             
             if (response.data.status !== "success") {
                 return m.reply('Maaf, gagal mengambil preset. Coba beberapa saat lagi.');
