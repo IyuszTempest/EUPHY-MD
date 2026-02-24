@@ -3,10 +3,11 @@
  */
 
 module.exports = {
-    command: ['add', 'invite'],
+    command: ['add'],
     category: 'group',
     admin: true,
     botAdmin: true,
+    noPrefix: true,
     call: async (conn, m, { text, usedPrefix, command }) => {
         if (!text) return m.reply(`Masukkan nomor yang mau ditambah!\nContoh: *${usedPrefix + command} 628xxx*`);
 
