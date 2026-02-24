@@ -9,6 +9,7 @@ module.exports = {
     command: ['live3d'],
     category: 'ai',
     noPrefix: true, 
+    premium: true,
     call: async (conn, m, { text, command }) => {
         if (!text) return m.reply(`Mau buat gambar anime 3D apa? Contoh: *${command} loli cute*`);
 
