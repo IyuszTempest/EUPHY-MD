@@ -1,7 +1,6 @@
 /**
- * Euphy-Bot - Handler V2.2 (LID & JID Support)
- * Fix: Owner detection for new WhatsApp LID system
- * Feature: Auto-Plugin Reload & AFK Priority
+ * Euphy-Bot - Handler V3.1 (Final Fix)
+ * Feature: Auto-Clean Premium, Dual ID Sync, PC Notifications
  */
 
 const { smsg } = require('./lib/simple');
@@ -19,7 +18,10 @@ module.exports = {
             if (global.db.data == null) await global.loadDatabase();
             m = smsg(this, m);
 
-            // --- [ 1. INITIALIZATION UI ] ---
+            // --- [ 1. SMART GROUP DETECTION ] ---
+            m.isGroup = m.chat.endsWith('@g.us');
+
+            // --- [ 2. INITIALIZATION UI ] ---
             const fkontak = {
                 key: { participants: "0@s.whatsapp.net", remoteJid: "status@broadcast", fromMe: false, id: "Halo" },
                 message: { contactMessage: { vcard: `BEGIN:VCARD\nVERSION:3.0\nN:${global.nameowner};Bot;;;\nFN:${global.nameowner}\nitem1.TEL;waid=${global.numberowner}:${global.numberowner}\nitem1.X-ABLabel:Ponsel\nEND:VCARD` } },
@@ -38,27 +40,52 @@ module.exports = {
                 }, { quoted: fkontak, ...options }); 
             };
 
-            // --- [ 2. DATABASE USER SETUP ] ---
+            // --- [ 3. DATABASE USER SETUP & SUPER AUTO-CLEAN ] ---
             let user = global.db.data.users[m.sender];
             if (typeof user !== 'object') {
                 global.db.data.users[m.sender] = {
-                    name: m.name || 'User', registered: false, premium: false, afk: -1, afkReason: ''
+                    name: m.name || 'User', registered: false, premium: false, premiumTime: 0,
+                    afk: -1, afkReason: ''
                 };
             }
-            user = global.db.data.users[m.sender]; 
 
-            // --- [ 3. LOGIC OWNER (Dual Detection: JID & LID) ] ---
-            // Mengambil daftar nomor owner dari config
+            // JURUS SAKTI: Sinkronisasi ID Ganda (LID & JID)
+            if (!global.db.data.users[m.sender].premium) {
+                let idOnly = m.sender.split('@')[0];
+                let findOtherId = Object.keys(global.db.data.users).find(k => k.includes(idOnly) && global.db.data.users[k].premium);
+                if (findOtherId) user = global.db.data.users[findOtherId];
+            } else {
+                user = global.db.data.users[m.sender];
+            }
+
+            // LOGIC AUTO-CLEAN & AUTO-NOTIFY (FIXED SCOPE)
+            if (user.premium && user.premiumTime > 0 && Date.now() >= user.premiumTime) {
+                // Definisikan variabel waktu di sini agar tidak error 'not defined'
+                let waktuExpired = new Date(user.premiumTime).toLocaleString('id-ID');
+                
+                user.premium = false;
+                user.premiumTime = 0; 
+                
+                let target = m.sender;
+                let ownerId = global.owner[0].replace(/[^0-9]/g, '') + '@s.whatsapp.net';
+                let expMsg = `*─── [ PREMIUM EXPIRED ] ───*\n\nWaktu premium kamu sudah habis, @${target.split('@')[0]}!\n*Expired pada:* ${waktuExpired} 🌸`;
+
+                // 1. Notif di chat saat ini
+                await this.reply(m.chat, expMsg, null, { mentions: [target] });
+
+                // 2. Notif Pribadi (PC) ke USER
+                await this.sendMessage(target, { text: `Halo! Masa premium kamu di Euphy-Bot sudah habis (Terakhir pada ${waktuExpired}). Terima kasih banyak sudah berlangganan! 🙏✨` }).catch(() => null);
+
+                // 3. Notif Pribadi (PC) ke OWNER (Yus)
+                await this.sendMessage(ownerId, { text: `[ INFO EXPIRED ]\n\nUser: @${target.split('@')[0]}\nID: ${target}\nStatus premium telah otomatis dicabut oleh sistem. ✅` }).catch(() => null);
+            }
+
+            // --- [ 4. LOGIC OWNER (Hybrid JID/LID) ] ---
             const ownerList = Array.isArray(global.owner) ? global.owner : [global.owner];
             const cleanOwners = ownerList.map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net');
+            const isOwner = m.fromMe || (m.sender === global.lidowner) || cleanOwners.includes(m.sender);
 
-            // Deteksi owner berdasarkan m.fromMe, LID, atau JID
-            const isOwner = m.fromMe || 
-                            (m.sender === global.lidowner) || 
-                            cleanOwners.includes(m.sender);
-
-            // --- [ 4. AFK DETECTOR PRIORITY ] ---
-            // Harus dijalankan sebelum command agar chat biasa bisa mematikan AFK
+            // --- [ 5. AFK DETECTOR PRIORITY ] ---
             for (let name in global.plugins) {
                 let plugin = global.plugins[name];
                 if (!plugin || plugin.disabled) continue;
@@ -67,7 +94,7 @@ module.exports = {
                 }
             }
 
-            // --- [ 5. COMMAND PARSING ] ---
+            // --- [ 6. COMMAND PARSING ] ---
             let body = (typeof m.text === 'string' ? m.text : ''); 
             let isPrefix = /^[.!]/.test(body);
             let usedPrefix = isPrefix ? body[0] : '';
@@ -75,7 +102,21 @@ module.exports = {
             let [command, ...args] = noPrefix.split` `.filter(v => v);
             command = (command || '').toLowerCase();
 
-            // --- [ 6. EXECUTE COMMAND ] ---
+            // --- [ 7. EXECUTE COMMAND & ADMIN DETECTOR ] ---
+            const groupMetadata = m.isGroup ? await this.groupMetadata(m.chat).catch(_ => ({})) : {};
+            const participants = m.isGroup ? (groupMetadata.participants || []) : [];
+            
+            const botJid = this.user.id.split(':')[0] + '@s.whatsapp.net';
+            const botLid = this.user.lid || global.lidbot || ''; 
+            
+            const userInGroup = m.isGroup ? participants.find(u => u.id === m.sender) : {};
+            const botInGroup = m.isGroup ? participants.find(u => 
+                u.id === botJid || (botLid && u.id === botLid) || u.id === (this.user.id.split(':')[0] + '@lid')
+            ) : {};
+            
+            const isAdmin = userInGroup?.admin || userInGroup?.isAdmin || false;
+            const isBotAdmin = botInGroup?.admin || botInGroup?.isAdmin || false;
+
             for (let name in global.plugins) {
                 let plugin = global.plugins[name];
                 if (!plugin || plugin.disabled) continue;
@@ -87,11 +128,15 @@ module.exports = {
                 if (isAccept) {
                     if (!isPrefix && !plugin.noPrefix) continue;
                     if (plugin.owner && !isOwner) return m.reply(`Akses Ditolak! ❌ Khusus *Owner*.`);
+                    if (plugin.group && !m.isGroup) return m.reply(`Fitur ini hanya bisa digunakan di dalam *Grup*!`);
+                    if (plugin.admin && !isAdmin && !isOwner) return m.reply(`Akses Ditolak! ❌ Khusus *Admin Grup*.`);
+                    if (plugin.botAdmin && !isBotAdmin) return m.reply(`Euphy harus jadi *Admin* dulu untuk menjalankan perintah ini! 🌸`);
                     if (plugin.premium && !user.premium && !isOwner) return m.reply(`⚠️ Fitur khusus user *PREMIUM*!`);
 
                     try {
                         await plugin.call(this, m, {
-                            conn: this, args, text: args.join(' '), command, usedPrefix, isOwner, fkontak, chatUpdate 
+                            conn: this, args, text: args.join(' '), command, usedPrefix, 
+                            isOwner, isAdmin, isBotAdmin, participants, fkontak, chatUpdate 
                         });
                     } catch (e) {
                         console.error(e);
@@ -106,8 +151,7 @@ module.exports = {
     }
 };
 
-// --- [ AUTO-PLUGIN RELOAD SYSTEM ] ---
-// Memantau folder plugins agar tidak perlu restart manual
+// --- [ 8. AUTO-PLUGIN RELOAD SYSTEM ] ---
 const pluginFolder = path.join(__dirname, 'plugins');
 fs.watch(pluginFolder, (event, filename) => {
     if (filename && filename.endsWith('.js')) {
@@ -127,7 +171,7 @@ fs.watch(pluginFolder, (event, filename) => {
     }
 });
 
-// Watch handler.js itu sendiri
+// Watch handler.js 
 let file = require.resolve(__filename);
 fs.watchFile(file, () => {
     fs.unwatchFile(file);
