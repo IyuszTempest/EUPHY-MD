@@ -7,6 +7,7 @@ module.exports = {
     // Kita ganti ke array string biar terbaca oleh includes di handler
     command: ['afk'], 
     category: 'main',
+    noPrefix: true,
     call: async (conn, m, { text }) => {
         let user = global.db.data.users[m.sender]
         user.afk = +new Date()
