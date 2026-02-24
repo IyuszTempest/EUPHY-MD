@@ -1,6 +1,5 @@
-/**
- * Plugin Wangy (NSFW)
- * Menggunakan API NSFW/Wangy
+/** * Plugin Wangy (NSFW)
+ * Fix: Manual Buffer & Stability Fix
  */
 
 const axios = require('axios');
@@ -8,36 +7,55 @@ const axios = require('axios');
 module.exports = {
     command: ['wangy'],
     category: 'nsfw',
-    noPrefix: true, 
-    premium: true, // Fitur ini khusus user premium karena konten khusus
+    noPrefix: false, 
+    premium: true,
     call: async (conn, m, { usedPrefix, command }) => {
-        // Memberikan reaksi loading (React)
         await conn.sendMessage(m.chat, { react: { text: '🥵', key: m.key } });
 
         try {
-            // Memanggil API milikmu
-            const response = await axios.get(`https://iyusztempest.my.id/api/nsfw?feature=wangy&apikey=${global.apiyus}`);
+            const apiEndpoint = `https://iyusztempest.my.id/api/nsfw?feature=wangy&apikey=${global.apiyus}`;
+            const { data } = await axios.get(apiEndpoint);
             
-            if (response.data.status !== "Sukses kak!") {
-                return m.reply('Gagal mengambil gambar. Coba lagi nanti.');
+            if (data.status !== "Sukses kak!" || !data.media?.url) {
+                return m.reply('Stok gambar lagi habis, Yus! 🏮');
             }
 
-            const { media } = response.data;
+            const { url: mediaUrl, type: mediaType } = data.media;
 
-            // Kirim gambar dengan peringatan NSFW
-            await conn.sendMessage(m.chat, { 
-                image: { url: media.url }, 
-                caption: `*NSFW CONTENT: WANGY*\n\nGunakan dengan bijak! 🌸`,
-                mentions: [m.sender]
-            }, { quoted: m });
+            // --- [ METODE BUFFER MANUAL ] ---
+            const response = await axios.get(mediaUrl, { 
+                responseType: 'arraybuffer',
+                headers: { 'User-Agent': 'Mozilla/5.0' }
+            });
+            const buffer = Buffer.from(response.data, 'binary');
 
-            // Reaksi sukses
+            let caption = `╭━━〔 🔞 *NSFW CONTENT* 🔞 〕━━┓\n`
+            caption += `┃ 🏮 *Type:* ${mediaType.toUpperCase()}\n`
+            caption += `┃ ⚠️ *Warning:* Gunakan bijak!\n┃ 👤 *Requester:* @${m.sender.split`@`[0]}\n`
+            caption += `┗━━━━━━━━━━━━━━━━━━━━┛\n\n_Powered by IyuszTempest_`
+
+            let messageOptions = {
+                caption: caption,
+                mentions: [m.sender],
+                contextInfo: {
+                    forwardingScore: 999,
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: global.idch,
+                        newsletterName: `NSFW Room - ${global.namech}`
+                    }
+                }
+            };
+
+            if (mediaType === 'image') messageOptions.image = buffer;
+            else if (mediaType === 'video') messageOptions.video = buffer;
+
+            await conn.sendMessage(m.chat, messageOptions, { quoted: m });
             await conn.sendMessage(m.chat, { react: { text: '🔥', key: m.key } });
 
         } catch (e) {
             console.error(e);
-            m.reply('Terjadi kesalahan saat menghubungi API.');
-            await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } });
+            m.reply(`Gagal ambil gambar! ❌\nDetail: ${e.message.slice(0, 50)}`);
         }
     }
 };
