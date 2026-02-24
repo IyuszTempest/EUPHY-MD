@@ -5,9 +5,9 @@
 const axios = require('axios');
 
 module.exports = {
-    command: ['deepimg', 'deepai'],
+    command: ['deepimg'],
     category: 'ai',
-    noPrefix: false, // Diubah ke false agar lebih rapi dengan usedPrefix
+    noPrefix: true, // Diubah ke false agar lebih rapi dengan usedPrefix
     premium: true,
     call: async (conn, m, { text, command, usedPrefix }) => {
         // Pisahkan gaya dan prompt
