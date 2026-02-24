@@ -1,6 +1,6 @@
-/**
- * Plugin JJ Cosplay
- * Menggunakan API Anime/JJ Cosplay
+/** * Plugin JJ Cosplay
+ * Style: Euphylia Magenta - "The King of UI"
+ * Fix: Manual Buffer for Large Video Files
  */
 
 const axios = require('axios');
@@ -8,35 +8,53 @@ const axios = require('axios');
 module.exports = {
     command: ['jjcosplay'],
     category: 'anime',
-    noPrefix: true, 
+    noPrefix: true, // Pakai prefix biar lebih rapi di log
     call: async (conn, m, { usedPrefix, command }) => {
-        // Memberikan reaksi loading (React)
+        // Reaksi loading joget [cite: 2025-05-24]
         await conn.sendMessage(m.chat, { react: { text: '💃', key: m.key } });
 
         try {
-            // Memanggil API menggunakan global.apiyus
-            const response = await axios.get(`${global.apiyus}/api/anime?feature=jjcosplay&apikey=${global.apiyus}`);
+            // Memanggil API IyuszTempest
+            const apiEndpoint = `https://iyusztempest.my.id/api/anime?feature=jjcosplay&apikey=${global.apiyus}`;
+            const { data } = await axios.get(apiEndpoint);
             
-            if (response.data.status !== "success") {
-                return m.reply('Maaf, gagal mengambil video cosplay. Coba lagi nanti ya.');
+            if (data.status !== "success" || !data.media?.url) {
+                return m.reply('Aduh, Euphy gagal nemu video cosplay-nya. Coba lagi ya! 🏮');
             }
 
-            const { media } = response.data;
+            const videoUrl = data.media.url;
 
-            // Kirim video JJ Cosplay
+            // --- [ METODE BUFFER MANUAL UNTUK VIDEO ] ---
+            // Kita kasih timeout lebih lama (30s) karena ukuran video biasanya besar
+            const response = await axios.get(videoUrl, { 
+                responseType: 'arraybuffer',
+                timeout: 30000, 
+                headers: { 'User-Agent': 'Mozilla/5.0' }
+            });
+            const buffer = Buffer.from(response.data, 'binary');
+
+            // Kirim video dengan UI Newsletter
             await conn.sendMessage(m.chat, { 
-                video: { url: media.url }, 
-                caption: `*JJ COSPLAY ANIME* ✨`,
-                mentions: [m.sender]
+                video: buffer, 
+                caption: `╭━━〔 ⛩️ *JJ COSPLAY ANIME* ⛩️ 〕━━┓\n┃ ✨ *Type:* Video MP4\n┃ 🏮 *Source:* IyuszTempest API\n┃ 👤 *Requester:* @${m.sender.split`@`[0]}\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n_✨ Enjoy the show!_`,
+                mentions: [m.sender],
+                contextInfo: {
+                    forwardingScore: 999,
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: global.idch,
+                        newsletterName: `Cosplay Gallery - ${global.namech}`
+                    }
+                }
             }, { quoted: m });
 
-            // Reaksi sukses
             await conn.sendMessage(m.chat, { react: { text: '🔥', key: m.key } });
 
         } catch (e) {
             console.error(e);
-            m.reply('Terjadi kesalahan saat menghubungi server API.');
+            m.reply(`Gagal narik video! ❌\nDetail: ${e.message.slice(0, 50)}`);
             await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } });
         }
     }
 };
+        
