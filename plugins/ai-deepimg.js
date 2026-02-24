@@ -1,45 +1,68 @@
-/**
- * Plugin DeepImage AI - Realistic Image Generator
- * Menggunakan API AI/DeepImg
+/** * Plugin DeepImage AI - Image Generator
+ * Feature: Realistic & Anime Style Switcher
  */
 
 const axios = require('axios');
 
 module.exports = {
-    command: ['deepimg'],
+    command: ['deepimg', 'deepai'],
     category: 'ai',
-    noPrefix: true, 
+    noPrefix: false, // Diubah ke false agar lebih rapi dengan usedPrefix
     premium: true,
-    call: async (conn, m, { text, command }) => {
-        if (!text) return m.reply(`Mau buat gambar realistik apa? Contoh: *${command} futuristic car in forest*`);
+    call: async (conn, m, { text, command, usedPrefix }) => {
+        // Pisahkan gaya dan prompt
+        // Penggunaan: .deepimg anime|loli cute atau .deepimg realistic|futuristic car
+        let [style, ...promptParts] = text.split('|');
+        let prompt = promptParts.join('|');
+        let selectedStyle = (style || '').toLowerCase();
 
-        // Memberikan reaksi loading (React)
+        // Validasi input
+        if (!text || !prompt) {
+            return m.reply(`Cara pakai: *${usedPrefix + command} style|prompt*\n\nContoh:\n1. *${usedPrefix + command} anime|kawaii girl*\n2. *${usedPrefix + command} realistic|cyberpunk city*`);
+        }
+
+        // Default ke realistic jika gaya yang dimasukkan salah
+        if (!['anime', 'realistic'].includes(selectedStyle)) {
+            selectedStyle = 'realistic';
+        }
+
+        // Reaksi kamera untuk kesan realistik
         await conn.sendMessage(m.chat, { react: { text: '📸', key: m.key } });
 
         try {
-            // Memanggil API menggunakan variabel global
-            const response = await axios.get(`${global.apiyus}/api/ai?feature=deepimg&query=${encodeURIComponent(text)}&animestyle=realistic&apikey=${global.apikey}`);
+            // Memanggil API IyuszTempest
+            const apiEndpoint = `https://iyusztempest.my.id/api/ai?feature=deepimg&query=${encodeURIComponent(prompt)}&style=${selectedStyle}&apikey=${global.apiyus}`;
+            const { data } = await axios.get(apiEndpoint);
             
-            if (response.data.status !== "success") {
-                return m.reply('Maaf, AI gagal memproses gambar realistik tersebut. Coba prompt lain ya.');
+            // Validasi sukses sesuai JSON: result.url
+            if (data.status !== "success" || !data.result?.url) {
+                return m.reply('Maaf, Euphy gagal memproses gambar tersebut. Coba prompt lain yuk! 🏮');
             }
 
-            const imageUrl = response.data.result.url;
+            const imageUrl = data.result.url;
 
-            // Kirim hasil gambar AI
+            // Kirim hasil dengan UI Estetik
             await conn.sendMessage(m.chat, { 
                 image: { url: imageUrl }, 
-                caption: `*DEEPIMAGE AI - REALISTIC*\n\nPrompt: "${text}"\nStyle: Realistic\n✨ Berhasil dibuat!`,
-                mentions: [m.sender]
+                caption: `╭━━〔 ⛩️ *DEEPIMAGE AI* ⛩️ 〕━━┓\n┃ 🏮 *Prompt:* ${prompt}\n┃ ✨ *Style:* ${selectedStyle.charAt(0).toUpperCase() + selectedStyle.slice(1)}\n┃ 👤 *Requester:* @${m.sender.split`@`[0]}\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n_Powered by IyuszTempest AI_`,
+                contextInfo: {
+                    mentionedJid: [m.sender],
+                    forwardingScore: 999,
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: global.idch,
+                        newsletterName: `Deep AI Gen - ${global.namech}`
+                    }
+                }
             }, { quoted: m });
 
-            // Reaksi sukses
             await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
 
         } catch (e) {
             console.error(e);
-            m.reply('Terjadi kesalahan saat menghubungi server DeepImage AI.');
+            m.reply('Terjadi kesalahan saat menghubungi server DeepImage AI. ❌');
             await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } });
         }
     }
 };
+        
