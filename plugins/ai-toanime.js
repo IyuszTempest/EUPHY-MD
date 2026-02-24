@@ -39,7 +39,7 @@ module.exports = {
             await conn.sendMessage(m.chat, { react: { text: '🪄', key: m.key } });
 
             // Panggil API IyuszTempest
-            const apiEndpoint = `https://iyusztempest.my.id/api/ai?feature=f2anime&apikey=yusz123&query=${encodeURIComponent(url)}`;
+            const apiEndpoint = `https://iyusztempest.my.id/api/ai?feature=f2anime&apikey=${global.apiyus}&query=${encodeURIComponent(url)}`;
             const { data } = await axios.get(apiEndpoint);
             
             // Validasi hasil sesuai struktur JSON API-mu
