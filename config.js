@@ -34,6 +34,15 @@ global.adReply = {
     source: 'https://github.com/IyuszTempest'
 };
 
+global.social = {
+    linkedin: 'https://linkedin.com/in/nataliusaja', // Sesuaikan linkmu
+    instagram: 'https://instagram.com/iyusztempest',
+    youtube: 'https://youtube.com/@iyusztempest',
+    website: 'https://iyusztempest.my.id',
+    github: 'https://github.com/iyusztempest'
+}
+
+
 //Jangan Diubah
 global.fkontak = {
     key: { 
