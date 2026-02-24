@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎭 Euphylia Magenta V2.0
+# 🎭 Euphylia Magenta Script
 <img src="https://i.ibb.co/YF9vK9NK/IMG-20260218-WA0085.jpg" width="280" style="border-radius: 50%; box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);" alt="Euphylia Magenta">
 
 **Modern WhatsApp Bot Engine with Hybrid AI & High-Efficiency Tools**
