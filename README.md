@@ -1,59 +1,37 @@
 <div align="center">
 
-# ✨ Euphylia Magenta V1 ✨
-<img src="https://i.ibb.co/YF9vK9NK/IMG-20260218-WA0085.jpg" width="250" alt="Euphylia Magenta">
+# 🎭 Euphylia Magenta V2.0
+<img src="https://i.ibb.co/YF9vK9NK/IMG-20260218-WA0085.jpg" width="280" style="border-radius: 50%; box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);" alt="Euphylia Magenta">
 
-**Bot WhatsApp Multi-platform dengan Teknologi AI & Fitur Lengkap**
-*Base Script & API by Botcahx*
+**Modern WhatsApp Bot Engine with Hybrid AI & High-Efficiency Tools**
+*Specialized for Information Systems Student Productivity*
 
-[![Node.js Version](https://img.shields.io/badge/Node.js-20+-green.svg?style=for-the-badge&logo=nodedotjs)](https://nodejs.org)
-[![Types](https://img.shields.io/badge/Type-CJS_Plugins-orange.svg?style=for-the-badge&logo=javascript)](#)
-[![Library](https://img.shields.io/badge/Library-Baileys_Official-blue.svg?style=for-the-badge)](#)
+[![Node.js](https://img.shields.io/badge/Node.js-20+-68a063?style=for-the-badge&logo=nodedotjs)](https://nodejs.org)
+[![Library](https://img.shields.io/badge/Library-Baileys_Official-00a884?style=for-the-badge&logo=whatsapp)](#)
+[![Tech](https://img.shields.io/badge/AI-Nano_Banana-yellow?style=for-the-badge&logo=google-gemini)](#)
 
 </div>
 
 ---
 
 ## 🌸 Overview
-**Euphylia Magenta V1** (atau **Euphy**) adalah bot WhatsApp berbasis Node.js yang dikembangkan menggunakan **Base dari Botcahx**. Bot ini dirancang untuk stabilitas tinggi dengan kombinasi fitur scraper dan API yang canggih.
+**Euphylia Magenta** (Euphy) adalah bot WhatsApp berbasis Node.js yang dikembangkan dari **Base Botcahx** dan dioptimasi secara mendalam oleh **IyuszTempest**. Versi V2.0 ini fokus pada efisiensi penggunaan sumber daya (RAM Monitoring) dan integrasi **Dual-ID System (JID & LID)**.
 
-## 🚀 Fitur Utama
+## 🚀 Fitur Unggulan (V2.0 Update)
 
-- 🤖 **AI Terintegrasi:** Menggunakan API Gemini AI untuk obrolan interaktif dan deteksi gambar/video.
-- 🎵 **All-in-One Downloader:** Fitur unggulan dari **Botcahx** untuk unduh media Spotify, TikTok, IG, FB, dll.
-- 🖼️ **Image & Video Tools:** Alat pengolah stiker, remove background, dan multimedia lainnya.
-- ⚡ **Modern Engine:** Menggunakan **Baileys Latest** (Official) dengan sistem **Pairing Code**.
-- 🛠️ **Error System:** User bisa lapor bug via `.laporerror`, pesan akan diteruskan ke Owner.
-- 💎 **Custom API:** Sebagian fitur menggunakan **Euphy API by IyuszTempest**.
+* 🔄 **Auto-Reload Plugins:** Sistem deteksi file otomatis (`fs.watch`) yang memungkinkan update fitur tanpa perlu restart bot.
+* 🎞️ **Optimized Sticker:** Mesin pengolah stiker video dengan *Hard Compression* (< 1MB) untuk menjamin stabilitas pengiriman.
+* 📂 **REST API SENDIRI:** 100% Fitur terintegrasi langsung dengan REST API iyusztempest.my.id.
+* 🛡️ **Dual-ID Support:** Deteksi Owner otomatis untuk sistem WhatsApp terbaru yang menggunakan format **LID**.
 
 ---
 
-## ⚠️ Perhatian Sebelum Instalasi
+## 🛠️ Requirements & Installation
 
-> [!IMPORTANT]
-> - **Wajib** install `ffmpeg`, `imagemagick`, dan `webp` di VPS/Panel Anda.
-> - **Node.js 20+** diperlukan agar semua library berjalan mulus.
-> - Tidak disarankan untuk Termux karena keterbatasan resource library pendukung.
+> [!NOTE]
+> Proyek ini sekarang dioptimasi untuk dijalankan pada **Environment Laptop/PC** untuk performa FFmpeg yang maksimal.
 
----
-
-## 🔐 Konfigurasi & Credit API
-
-Silakan mendaftar di panel penyedia API berikut untuk mendapatkan fungsionalitas penuh:
-
-| Provider | Deskripsi | Link |
-| :--- | :--- | :--- |
-| **Botcahx API** | **Main Base & Features** | [Daftar di sini](https://api.botcahx.eu.org) |
-| **Gemini AI** | AI & Logic System | [Daftar di sini](https://ai.google.dev/) |
-| **Betabotz API** | Additional Plugins | [Daftar di sini](https://api.betabotz.eu.org) |
-
----
-
-<div align="center">
-
-### 🛡️ Credits & Thanks To:
-**Botcahx** (Base Script & Main API) | **IyuszTempest** (Developer & Euphy API)
-
-*Jangan lupa berikan Star ⭐ jika Kamu menyukai project ini!*
-
-</div>
+### Prasyarat Sistem
+- **Node.js:** v20 atau lebih tinggi
+- **FFmpeg:** Terinstall secara global (untuk proses stiker & converter)
+- **RAM:** Minimal 1GB (Disarankan, meskipun bot berjalan stabil di resource rendah)
