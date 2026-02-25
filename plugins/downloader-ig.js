@@ -9,7 +9,7 @@ module.exports = {
     category: 'download',
     noPrefix: true,
     call: async (conn, m, { text }) => {
-        if (!text) return m.reply('Mana link Instagram-nya, Yus? Contoh: .ig https://www.instagram.com/reels/xxxxx/ [cite: 2025-05-24]');
+        if (!text) return m.reply('Mana link Instagram-nya? Contoh: .ig https://www.instagram.com/reels/xxxxx/');
 
         // Validasi link Instagram sederhana
         if (!/instagram.com/.test(text)) return m.reply('Link-nya harus dari Instagram ya!');
