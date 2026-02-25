@@ -22,7 +22,7 @@ module.exports = {
             "Duh, jangan spam dong! Euphy kan butuh istirahat juga. Mending ketik *.menu* pelan-pelan aja. 🏮",
             "Kalo ada fitur yang error, laporin ke owner ya via *.report*. Jangan cuma dimarahin botnya, hiks. 🥺",
             "Mau bikin gambar jadi anime? Pake *.toanime* aja, simpel banget dan hasilnya estetik parah! 🪄",
-            "FUN FACTS! Bot ini jakan dengan sangat efisien bahkan di RAM 512MB, dijamin jarang delay. Kalo delay berarti ownernya lagi bokek, awokawok. 👑"
+            "FUN FACTS! Bot ini jakan dengan sangat efisien bahkan di RAM 512MB, dijamin jarang delay. Kalo delay berarti ownernya lagi bokek, awokawok. 👑",
             "Lagi apa tuh? Daripada bengong, mending cek *.jikanmoe* buat cari info anime season ini! 📺",
             "Eh, tau gak? Nama owner-ku itu Natalius, tapi panggil aja Bang Yus biar akrab. Awokawok. 👑",
             "Gak usah malu-malu, ketik *.menu* aja. Euphy gak bakal gigit kok, paling cuma bikin baper. 🌸",
@@ -30,7 +30,7 @@ module.exports = {
             "Butuh gambar estetik? Pake *.ailabs* atau *.deepimg* aja, hasilnya udah kayak buatan pro! 🎨",
             "Jangan lupa makan ya, jangan cuma scroll chat. Euphy aja udah dicharge, masa kamu belum? 🍱",
             "Euphy System lagi stabil nih, mumpung Lunes Host lagi gak rewel. Sikat fiturnya sekarang! 🚀",
-            "Wibu sejati itu ketik *.jjcosplay* sambil nungguin update waifu terbaru. Gass! 💃"
+            "Wibu sejati itu ketik *.jjcosplay* sambil nungguin update waifu terbaru. Gass! 💃",
             "Lagi dengerin musik ya? Cobain deh oprek audio kayak owner-ku, suaranya dijamin makin glerr! 🔊",
             "Eh, kamu tau gak? Ngoding itu seru lho, apalagi kalo gak ada error. Kayak Euphy nih, mulus parah! 💻",
             "Euphy hadir! 🎓 Kalo ada tugas kuliah yang numpuk, Euphy temenin sini sambil ngetik *.menu*.",
@@ -39,8 +39,8 @@ module.exports = {
             "Euphy lagi pengen makan seblak nih, tapi karena aku bot, ya cuma bisa makan RAM server aja. Awokawok. 🍜",
             "Jangan lupa bayar cicilan ya! 💸 Eh maksudnya, jangan lupa pake fitur bermanfaat di bot ini.",
             "Btw, kamu tim Elaina atau tim Megumin nih? Kalo Euphy sih tim yang penting kamu bahagia! 🌸",
-            "Server lagi mode gacor, gas pake fitur *.toanime* mumpung prosesnya kilat! 🪄"
-            "Dukung bot Euphy dengan membeli sewa, premium ada berdonasi seikhlasnya dengan mengetik *.donasi*, agar bot lebih terawat dan owner lebih semangat tentunya 😁",
+            "Server lagi mode gacor, gas pake fitur *.toanime* mumpung prosesnya kilat! 🪄",
+            "Dukung bot Euphy dengan membeli sewa, premium ada berdonasi seikhlasnya dengan mengetik *.donasi*, agar bot lebih terawat dan owner lebih semangat tentunya 😁"
 ];
 
         // Ambil satu pesan random dari daftar promosi
