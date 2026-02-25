@@ -132,12 +132,12 @@ async function startEuphy() {
                 // --- [ JADWAL PENGINGAT KHUSUS YUS ] ---
 
             // 1. Jam 9 Malam (21:00) - Pengingat Tidur
-            cron.schedule('0 48 7 * * *', () => {
+            cron.schedule('0 0 21 * * *', () => {
                 broadcastGrup(`╭━━〔 ⛩️ *𝙽𝙸𝙶𝙷𝚃𝚈 𝚁𝙴𝙼𝙸𝙽𝙳𝙴𝚁* ⛩️ 〕━━┓\n┃ 🏮 Sudah jam 9 malam!\n┃ 💤 Waktunya istirahat biar besok\n┃ ✨ Badan-nya tetep seger.\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n_Lanjut besok lagi ya... ✨_`);
             }, { timezone: "Asia/Jakarta" });
 
             // 2. Jam 6 Pagi (06:00) - Pengingat Produktivitas
-            cron.schedule('0 43 7 * * *', () => {
+            cron.schedule('0 0 6 * * *', () => {
                 broadcastGrup(`╭━━〔 ⛩️ *𝙼𝙾𝚁𝙽𝙸𝙽𝙶 𝚂𝙿𝙸𝚁𝙸𝚃* ⛩️ 〕━━┓\n┃ 🌅 Bangun! Sudah pagi woy.\n┃ 🚀 Ayo yang semangat kak!!\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n_The world is waiting for your magic... ✨_`);
             }, { timezone: "Asia/Jakarta" });
 
