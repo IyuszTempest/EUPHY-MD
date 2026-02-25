@@ -109,6 +109,54 @@ async function startEuphy() {
         }
     });
 
+        // --- [ 7. GROUP PARTICIPANTS UPDATE (Welcome/Left) ] ---
+    conn.ev.on('group-participants.update', async (anu) => {
+        try {
+            let metadata = await conn.groupMetadata(anu.id);
+            let participants = anu.participants;
+            for (let num of participants) {
+                // Ambil Foto Profil User
+                let ppuser;
+                try {
+                    ppuser = await conn.profilePictureUrl(num, 'image');
+                } catch {
+                    ppuser = 'https://telegra.ph/file/241d7169c1d1a96515ff2.jpg'; // Foto default anime [cite: 2025-05-24]
+                }
+
+                if (anu.action == 'add') {
+                    // Pesan Welcome
+                    let welcome = `╭━━〔 ⛩️ *𝚆𝙴𝙻𝙲𝙾𝙼𝙴* ⛩️ 〕━━┓\n`
+                                + `┃ ✨ Selamat datang @${num.split("@")[0]}!\n`
+                                + `┃ 🏮 Di grup: *${metadata.subject}*\n`
+                                + `┗━━━━━━━━━━━━━━━━━━━━┛\n\n`
+                                + `Semoga betah ya di sini! Jangan lupa baca deskripsi grup ya.`;
+                    
+                    await conn.sendMessage(anu.id, { 
+                        image: { url: ppuser }, 
+                        caption: welcome, 
+                        mentions: [num] 
+                    });
+                } else if (anu.action == 'remove') {
+                    // Pesan Goodbye
+                    let goodbye = `╭━━〔 ⛩️ *𝙶𝙾𝙾𝙳𝙱𝚈𝙴* ⛩️ 〕━━┓\n`
+                                + `┃ 🏮 Sayonara @${num.split("@")[0]}...\n`
+                                + `┃ ✨ Telah keluar dari grup ini.\n`
+                                + `┗━━━━━━━━━━━━━━━━━━━━┛\n\n`
+                                + `Semoga kamu senang di Isekai!`;
+                                
+                    await conn.sendMessage(anu.id, { 
+                        image: { url: ppuser }, 
+                        caption: goodbye, 
+                        mentions: [num] 
+                    });
+                }
+            }
+        } catch (err) {
+            console.log(chalk.red(`[ GROUP UPDATE ERROR ] ${err.message}`));
+        }
+    }); // <--- Penutup ev.on
+    
+
     const cron = require('node-cron');
 
             // Fungsi Broadcast ke semua grup
@@ -136,7 +184,12 @@ async function startEuphy() {
                 broadcastGrup(`╭━━〔 ⛩️ *𝙽𝙸𝙶𝙷𝚃𝚈 𝚁𝙴𝙼𝙸𝙽𝙳𝙴𝚁* ⛩️ 〕━━┓\n┃ 🏮 Sudah jam 9 malam!\n┃ 💤 Waktunya istirahat biar besok\n┃ ✨ Badan-nya tetep seger.\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n_Lanjut besok lagi ya... ✨_`);
             }, { timezone: "Asia/Jakarta" });
 
-            // 2. Jam 6 Pagi (06:00) - Pengingat Produktivitas
+            // 2. Jam 12 Siang (12:00) - Pengingat Produktivitas
+            cron.schedule('0 0 12 * * *', () => {
+                broadcastGrup(`╭━━〔 ⛩️ *SELAMAT SIANG* ⛩️ 〕━━┓\n┃ 🍱 Udah siang aja nih, jangan lupa beristirahat sebentar.\n┃ 🎖️ Kamu hari ini sudah hebat!!\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n_Tetap semangat demi masa depan yang cerah..✨_`);
+            }, { timezone: "Asia/Jakarta" });
+
+            // 3. Jam 6 Pagi (06:00) - Pengingat Produktivitas
             cron.schedule('0 0 6 * * *', () => {
                 broadcastGrup(`╭━━〔 ⛩️ *𝙼𝙾𝚁𝙽𝙸𝙽𝙶 𝚂𝙿𝙸𝚁𝙸𝚃* ⛩️ 〕━━┓\n┃ 🌅 Bangun! Sudah pagi woy.\n┃ 🚀 Ayo yang semangat kak!!\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n_The world is waiting for your magic... ✨_`);
             }, { timezone: "Asia/Jakarta" });
