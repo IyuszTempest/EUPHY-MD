@@ -247,22 +247,24 @@ cron.schedule('0 * * * *', async () => {
 
             // --- [ AUTO VIEW & REACT STATUS ] ---
             if (m.key.remoteJid === 'status@broadcast') {
-                await conn.readMessages([m.key]); // Lihat Status
+                // JANGAN react kalau itu status dari nomor bot sendiri
+                if (m.key.fromMe) return; 
+
+                await conn.readMessages([m.key]);
                 
-                // Ambil JID asli pengirim status (handle LID/JID)
                 let participant = m.key.participant || m.participant || m.key.remoteJid;
                 
-                // Beri reaksi emoji random
                 const emojis = ['🏮', '✨', '🗿', '🌸', '🔥'];
                 const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
                 
                 await conn.sendMessage('status@broadcast', {
                     react: { text: randomEmoji, key: m.key }
-                }, { statusJidList: [participant] }); // Gunakan participant yang sudah diproses
+                }, { statusJidList: [participant] });
                 
                 console.log(chalk.green(`[ STORY ] View & React: ${m.pushName || 'Seseorang'}`));
-                return; // Selesai untuk status, tidak lanjut ke handler
+                return;
             }
+
 
             // --- [ HANDLER UTAMA ] ---
             // Jalankan handler utama untuk perintah bot lainnya
