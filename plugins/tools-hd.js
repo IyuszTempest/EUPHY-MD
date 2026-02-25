@@ -34,7 +34,7 @@ module.exports = {
             // 3. Kirim hasilnya langsung sebagai gambar
             await conn.sendMessage(m.chat, { 
                 image: response.data, 
-                caption: `✨ *Success!* Gambar sudah di-upscale x4! [cite: 2025-05-24]` 
+                caption: `✨ *Success!* Gambar sudah di-upscale x4!` 
             }, { quoted: m });
 
         } catch (e) {
