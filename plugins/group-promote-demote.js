@@ -21,7 +21,7 @@ module.exports = {
         }
 
         // Jika target tidak ditemukan, ingatkan user daripada bikin error
-        if (!users) return m.reply(`Tag atau reply orang yang mau di ${command}, Yus! [cite: 2025-05-24]`);
+        if (!users) return m.reply(`Tag atau reply orang yang mau di ${command}`);
 
         try {
             if (command === 'promote') {
