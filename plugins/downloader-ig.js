@@ -6,7 +6,7 @@ const axios = require('axios');
 
 module.exports = {
     command: ['ig', 'instagram'],
-    category: 'download',
+    category: 'downloader',
     noPrefix: true,
     call: async (conn, m, { text }) => {
         if (!text) return m.reply('Mana link Instagram-nya? Contoh: .ig https://www.instagram.com/reels/xxxxx/');
