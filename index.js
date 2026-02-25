@@ -109,24 +109,110 @@ async function startEuphy() {
         }
     });
 
-    conn.ev.on("creds.update", saveCreds);
+    const cron = require('node-cron');
 
+            // Fungsi Broadcast ke semua grup
+            const broadcastGrup = async (teks) => {
+                let groups = Object.keys(await conn.groupFetchAllParticipating());
+                for (let id of groups) {
+                    await conn.sendMessage(id, { 
+                        text: teks,
+                        contextInfo: {
+                            externalAdReply: {
+                                title: "𝙴𝚄𝙿𝙷𝚈 𝙰𝚄𝚃𝙾-𝚁𝙴𝙼𝙸𝙽𝙳𝙴𝚁",
+                                body: "Sistem Pengingat Otomatis",
+                                thumbnailUrl: global.imgall,
+                                sourceUrl: global.idch,
+                                mediaType: 1
+                            }
+                        }
+                    });
+                }
+            };
+                // --- [ JADWAL PENGINGAT KHUSUS YUS ] ---
+
+            // 1. Jam 9 Malam (21:00) - Pengingat Tidur
+            cron.schedule('0 48 7 * * *', () => {
+                broadcastGrup(`╭━━〔 ⛩️ *𝙽𝙸𝙶𝙷𝚃𝚈 𝚁𝙴𝙼𝙸𝙽𝙳𝙴𝚁* ⛩️ 〕━━┓\n┃ 🏮 Sudah jam 9 malam!\n┃ 💤 Waktunya istirahat biar besok\n┃ ✨ Badan-nya tetep seger.\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n_Lanjut besok lagi ya... ✨_`);
+            }, { timezone: "Asia/Jakarta" });
+
+            // 2. Jam 6 Pagi (06:00) - Pengingat Produktivitas
+            cron.schedule('0 43 7 * * *', () => {
+                broadcastGrup(`╭━━〔 ⛩️ *𝙼𝙾𝚁𝙽𝙸𝙽𝙶 𝚂𝙿𝙸𝚁𝙸𝚃* ⛩️ 〕━━┓\n┃ 🌅 Bangun! Sudah pagi woy.\n┃ 🚀 Ayo yang semangat kak!!\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n_The world is waiting for your magic... ✨_`);
+            }, { timezone: "Asia/Jakarta" });
+
+// --- [ SISTEM AUTO-OUT SEWA ] ---
+// Cek setiap hari jam 00:00
+cron.schedule('0 0 0 * * *', async () => {
+    let now = Date.now();
+    let chats = global.db.data.chats;
+    for (let jid in chats) {
+        if (chats[jid].expired && now > chats[jid].expired) {
+            let caption = `╭━━〔 ⛩️ *𝚂𝙴𝚆𝙰 𝙴𝚇𝙿𝙸𝚁𝙴𝙳* ⛩️ 〕━━┓\n┃ 🏮 Masa sewa grup ini telah habis!\n┃ 🚀 Saatnya Euphy pamit undur diri.\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n_Hubungi Owner untuk perpanjang!_`;
+            await conn.sendMessage(jid, { text: caption });
+            await conn.groupLeave(jid); // Otomatis keluar grup
+            chats[jid].expired = 0; // Reset data expired
+        }
+    }
+}, { timezone: "Asia/Jakarta" });
+
+    // --- [ SISTEM AUTO-CLEAN PREMIUM ] ---
+// Cek setiap jam untuk membersihkan user premium yang sudah expired
+cron.schedule('0 * * * *', async () => {
+    let now = Date.now();
+    let users = global.db.data.users;
+    let count = 0;
+
+    for (let jid in users) {
+        let user = users[jid];
+        // Cek jika user premium dan punya waktu expired yang sudah lewat
+        if (user.premium && user.premiumTime > 0 && now >= user.premiumTime) {
+            user.premium = false;
+            user.premiumTime = 0;
+            count++;
+            
+            // Kirim notifikasi ke user via Private Chat
+            try {
+                await conn.sendMessage(jid, { 
+                    text: `*─── [ PREMIUM EXPIRED ] ───*\n\nMasa premium kamu sudah habis! 🌸\nTerima kasih sudah berlangganan. Hubungi owner untuk perpanjang ya!` 
+                });
+            } catch (e) {
+                console.log(`Gagal kirim notif expired ke ${jid}`);
+            }
+        }
+    }
+    if (count > 0) console.log(chalk.yellow(`[ SYSTEM ] Berhasil membersihkan ${count} user premium expired.`));
+}, { timezone: "Asia/Jakarta" });
+
+    
+    conn.ev.on("creds.update", saveCreds);
     // --- [ 6. MESSAGE HANDLER ] ---
     conn.ev.on("messages.upsert", async (chatUpdate) => {
         try {
+            // --- [ AUTO VIEW & REACT STATUS ] ---
+            let m = chatUpdate.messages[0]
+            if (m.key.remoteJid === 'status@broadcast') {
+                await conn.readMessages([m.key]) // Lihat Status
+                
+                // Beri reaksi emoji random
+                const emojis = ['🏮', '✨', '🗿', '🌸', '🔥']
+                const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)]
+                
+                await conn.sendMessage('status@broadcast', {
+                    react: { text: randomEmoji, key: m.key }
+                }, { statusJidList: [m.key.participant] })
+                
+                console.log(chalk.green(`[ STORY ] View & React: ${m.pushName || 'Seseorang'}`))
+            }
+
+            // --- [ MAIN HANDLER ] ---
             const { handler } = require('./handler');
-            // Menjalankan handler dengan data yang sudah diproses smsg
             await handler.call(conn, chatUpdate);
         } catch (e) {
             console.error(chalk.red(`[ HANDLER ERROR ] ${e.message}`));
         }
     });
 
-    // Auto-save database setiap 30 detik
-    setInterval(() => {
-        fs.writeFileSync(databasePath, JSON.stringify(global.db.data, null, 2));
-    }, 30000);
-}
 
 startEuphy();
     
