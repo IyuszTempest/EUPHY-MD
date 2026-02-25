@@ -57,13 +57,8 @@ module.exports = {
                 let findOtherId = Object.keys(global.db.data.users).find(k => k.includes(idOnly) && global.db.data.users[k].premium);
                 if (findOtherId) user = global.db.data.users[findOtherId];
             }
-
-            // Logic Premium Expired
-            if (user.premium && user.premiumTime > 0 && Date.now() >= user.premiumTime) {
-                user.premium = false;
-                user.premiumTime = 0;
-                await this.reply(m.chat, `*─── [ PREMIUM EXPIRED ] ───*\n\nMasa premium kamu sudah habis, @${m.sender.split('@')[0]}! 🌸`, null, { mentions: [m.sender] });
-            }
+            
+            
 
             // --- [ 4. AFK DETECTOR (FIXED) ] ---
             let jidTag = m.mentionedJid || [];
@@ -158,4 +153,5 @@ module.exports = {
     }
 };
 
+// ... (Plugin Reload System Tetap Sama)
                 
