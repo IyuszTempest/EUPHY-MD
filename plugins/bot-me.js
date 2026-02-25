@@ -3,7 +3,7 @@
  */
 
 module.exports = {
-    command: ['me', 'profil', 'profile'],
+    command: ['me'],
     category: 'main',
     noPrefix: true,
     call: async (conn, m, { text }) => {
