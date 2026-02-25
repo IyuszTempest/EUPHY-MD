@@ -35,7 +35,7 @@ module.exports = {
 
         } catch (e) {
             console.error(e);
-            m.reply(`Error: ${e.message}. Cek koneksi server Lunes Host kamu!`);
+            m.reply(`Error: ${e.message}. Cek koneksi server kamu!`);
         }
     }
 };
