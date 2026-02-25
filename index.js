@@ -241,30 +241,39 @@ cron.schedule('0 * * * *', async () => {
     conn.ev.on("creds.update", saveCreds);
     // --- [ 6. MESSAGE HANDLER ] ---
     conn.ev.on("messages.upsert", async (chatUpdate) => {
-        try {
-            // --- [ AUTO VIEW & REACT STATUS ] ---
-            let m = chatUpdate.messages[0]
-            if (m.key.remoteJid === 'status@broadcast') {
-                await conn.readMessages([m.key]) // Lihat Status
-                
-                // Beri reaksi emoji random
-                const emojis = ['🏮', '✨', '🗿', '🌸', '🔥']
-                const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)]
-                
-                await conn.sendMessage('status@broadcast', {
-                    react: { text: randomEmoji, key: m.key }
-                }, { statusJidList: [m.key.participant] })
-                
-                console.log(chalk.green(`[ STORY ] View & React: ${m.pushName || 'Seseorang'}`))
-            }
+            try {
+                let m = chatUpdate.messages[0];
+                if (!m || !m.message) return;
 
-            // --- [ MAIN HANDLER ] ---
-            const { handler } = require('./handler');
-            await handler.call(conn, chatUpdate);
-        } catch (e) {
-            console.error(chalk.red(`[ HANDLER ERROR ] ${e.message}`));
-        }
-    });
+                // --- [ AUTO VIEW & REACT STATUS ] ---
+                if (m.key.remoteJid === 'status@broadcast') {
+                    await conn.readMessages([m.key]); // Lihat Status
+                    
+                    // Ambil JID asli pengirim status (handle LID/JID)
+                    let participant = m.key.participant || m.participant || m.key.remoteJid;
+                    
+                    // Beri reaksi emoji random
+                    const emojis = ['🏮', '✨', '🗿', '🌸', '🔥'];
+                    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+                    
+                    await conn.sendMessage('status@broadcast', {
+                        react: { text: randomEmoji, key: m.key }
+                    }, { statusJidList: [participant] }); // Gunakan participant yang sudah diproses
+                    
+                    console.log(chalk.green(`[ STORY ] View & React: ${m.pushName || 'Seseorang'}`));
+                    return; // Selesai untuk status, tidak lanjut ke handler
+                }
+
+                // --- [ HANDLER UTAMA ] ---
+                // Jalankan handler utama untuk perintah bot lainnya
+                const { handler } = require('./handler');
+                await handler.call(conn, chatUpdate);
+
+            } catch (e) {
+                // Mencatat error agar tidak membuat bot mati di Lunes Host
+                console.log(chalk.red(`[ ERROR HANDLER ] ${e.message}`));
+            }
+        }); // <--- Ini penutup yang benar untuk messages.upsert
 
 
 startEuphy();
