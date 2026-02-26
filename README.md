@@ -6,7 +6,7 @@
 **Modern WhatsApp Bot Engine with Hybrid AI & High-Efficiency Tools**
 *Specialized for Information Systems Student Productivity*
 
-[![Node.js](https://img.shields.io/badge/Node.js-20+-68a063?style=for-the-badge&logo=nodedotjs)](https://nodejs.org)
+[![Node.js](https://img.shields.io/badge/Node.js-22+-68a063?style=for-the-badge&logo=nodedotjs)](https://nodejs.org)
 [![Library](https://img.shields.io/badge/Library-Baileys_Official-00a884?style=for-the-badge&logo=whatsapp)](#)
 [![Tech](https://img.shields.io/badge/AI-Nano_Banana-yellow?style=for-the-badge&logo=google-gemini)](#)
 
