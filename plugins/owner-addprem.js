@@ -27,7 +27,7 @@ module.exports = {
 
         // 3. Hitung Durasi (Ganti 1000 jadi 86400000 kalau sudah selesai tes 15 detik)
         let duration = args[1] && !isNaN(args[1]) ? parseInt(args[1]) : 30;
-        let expired = Date.now() + (duration * 86400000); // Masih mode TEST DETIK
+        let expired = Date.now() + (duration * 86400000);
         let tglExpired = new Date(expired).toLocaleString('id-ID');
 
         // 4. Update Database
@@ -39,7 +39,7 @@ module.exports = {
             // A. Balas di tempat perintah diketik
             let cap = `*─── [ PREMIUM ADDED ] ───*\n\n`;
             cap += `👤 *User:* @${who.split('@')[0]}\n`;
-            cap += `⏳ *Durasi:* ${duration} Detik\n`;
+            cap += `⏳ *Durasi:* ${duration} Hari\n`;
             cap += `📅 *Expired:* ${tglExpired}\n\n`;
             cap += `Berhasil diaktifkan! ✨`;
             await conn.reply(m.chat, cap, m, { mentions: [who] });
