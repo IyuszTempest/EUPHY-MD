@@ -29,8 +29,8 @@
 ## 🛠️ Requirements & Installation
 
 > [!NOTE]
-> Proyek ini sekarang dioptimasi untuk dijalankan pada **Environment Laptop/PC** untuk performa FFmpeg yang maksimal.
-> Gunakan **npm install --legacy-peer-deps --production** untuk menginstall modul.
+> - Proyek ini sekarang dioptimasi untuk dijalankan pada **Environment Laptop/PC** untuk performa FFmpeg yang maksimal.
+> - Gunakan **npm install --legacy-peer-deps --production** untuk menginstall modul.
 
 ### Prasyarat Sistem
 - **Node.js:** wajib node 22 agar stabil
