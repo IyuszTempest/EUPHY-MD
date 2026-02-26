@@ -109,6 +109,34 @@ async function startEuphy() {
         }
     });
 
+    // --- [ AUTO BACKUP DATABASE ] ---
+setInterval(async () => {
+    try {
+        const fs = require('fs');
+        const path = './database.json'; // Memastikan file database ada
+        
+        if (fs.existsSync(path)) {
+            // Cek lidowner dulu, kalau gak ada baru pakai owner biasa
+            let targetJid = (global.lidowner && global.lidowner[0]) 
+                ? global.lidowner[0][0] 
+                : global.owner[0][0].replace(/[^0-9]/g, '') + '@s.whatsapp.net';
+            
+            await conn.sendMessage(targetJid, {
+                document: fs.readFileSync(path),
+                mimetype: 'application/json',
+                fileName: `backup_db_${Date.now()}.json`,
+                caption: `🏮 *AUTO BACKUP DATABASE (LID)* 🏮\n\nData kamu aman!`
+            });
+            
+            console.log(chalk.green(`[ SYSTEM ] Backup database terkirim ke LID: ${targetJid}`));
+        }
+    } catch (e) {
+        // Biar bot di Lunes Host gak crash kalau gagal kirim
+        console.error(chalk.red(`[ ERROR BACKUP ] ${e.message}`));
+    }
+}, 1000 * 60 * 60); // Tetap 1 jam sekali biar RAM 512MB gak sesak
+
+    
         // --- [ 7. GROUP PARTICIPANTS UPDATE (Welcome/Left) ] ---
     conn.ev.on('group-participants.update', async (anu) => {
         try {
@@ -280,3 +308,4 @@ cron.schedule('0 * * * *', async () => {
 } // <--- Tambahkan satu kurung ini untuk menutup fungsi startEuphy() kamu!
 
 startEuphy();
+                
