@@ -52,7 +52,7 @@ module.exports = {
             }
 
             // Sinkronisasi JID ke LID untuk Premium
-            if (!user.premium) {
+            if (!user?.premium) {
                 let idOnly = m.sender.split('@')[0];
                 let findOtherId = Object.keys(global.db.data.users).find(k => k.includes(idOnly) && global.db.data.users[k].premium);
                 if (findOtherId) user = global.db.data.users[findOtherId];
@@ -69,7 +69,7 @@ module.exports = {
                 }
             });
 
-            if (user.afk > -1) {
+            if (user?.afk > -1) {
                 user.afk = -1;
                 user.afkReason = '';
                 m.reply(`Selamat datang kembali @${m.sender.split('@')[0]}! ✨`);
@@ -154,4 +154,5 @@ module.exports = {
 };
 
 // ... (Plugin Reload System Tetap Sama)
-                
+
+                    
