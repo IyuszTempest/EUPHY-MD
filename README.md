@@ -4,7 +4,6 @@
 <img src="https://i.ibb.co/YF9vK9NK/IMG-20260218-WA0085.jpg" width="280" style="border-radius: 50%; box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);" alt="Euphylia Magenta">
 
 **Modern WhatsApp Bot Engine with Hybrid AI & High-Efficiency Tools**
-*Specialized for Information Systems Student Productivity*
 
 [![Node.js](https://img.shields.io/badge/Node.js-22+-68a063?style=for-the-badge&logo=nodedotjs)](https://nodejs.org)
 [![Library](https://img.shields.io/badge/Library-Baileys_Official-00a884?style=for-the-badge&logo=whatsapp)](#)
