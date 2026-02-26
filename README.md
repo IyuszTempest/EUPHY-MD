@@ -21,7 +21,7 @@
 
 * 🔄 **Auto-Reload Plugins:** Sistem deteksi file otomatis (`fs.watch`) yang memungkinkan update fitur tanpa perlu restart bot.
 * 🎞️ **Optimized Sticker:** Mesin pengolah stiker video dengan *Hard Compression* (< 1MB) untuk menjamin stabilitas pengiriman.
-* 📂 **REST API SENDIRI:** 100% Fitur terintegrasi langsung dengan REST API iyusztempest.my.id.
+* 📂 **REST API:** 100% Fitur terintegrasi langsung dengan REST API.
 * 🛡️ **Dual-ID Support:** Deteksi Owner otomatis untuk sistem WhatsApp terbaru yang menggunakan format **LID**.
 
 ---
@@ -30,8 +30,9 @@
 
 > [!NOTE]
 > Proyek ini sekarang dioptimasi untuk dijalankan pada **Environment Laptop/PC** untuk performa FFmpeg yang maksimal.
+> Gunakan **npm install --legacy-peer-deps --production** untuk menginstall modul.
 
 ### Prasyarat Sistem
-- **Node.js:** v20 atau lebih tinggi
+- **Node.js:** wajib node 22 agar stabil
 - **FFmpeg:** Terinstall secara global (untuk proses stiker & converter)
 - **RAM:** Minimal 1GB (Disarankan, meskipun bot berjalan stabil di resource rendah)
