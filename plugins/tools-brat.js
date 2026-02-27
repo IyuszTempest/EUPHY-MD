@@ -1,38 +1,36 @@
 /**
  * Euphy-Bot - Brat Generator (Meme Sticker)
- * Powerred by Euphylia Magenta System ✨
+ * Powered by Euphylia Magenta System ✨
  */
 
 const axios = require('axios');
-const { sticker } = require('../lib/sticker'); // Pastikan kamu punya lib sticker
+const { sticker } = require('../lib/sticker'); // Pastikan file ini ada di folder lib
 
 module.exports = {
     command: ['brat'],
     category: 'tools',
     noPrefix: true,
     call: async (conn, m, { text, usedPrefix, command }) => {
-        // Pesan jika tidak ada teks [cite: 2025-05-24]
-        if (!text) return m.reply(`Ketik teksnya, Yus! Contoh: *${usedPrefix + command} Euphylia Magenta Gacor*`);
+        if (!text) return m.reply(`Ketik teksnya! Contoh: *${usedPrefix + command} Euphylia Magenta*`);
 
         try {
-            // Memberikan reaksi biar Euphylia Magenta terlihat responsif
             await conn.sendMessage(m.chat, { react: { text: '✨', key: m.key } });
 
-            // Endpoint Brat dari hasil tes curl kamu
             const apiUrl = `https://api.siputzx.my.id/api/m/brat?text=${encodeURIComponent(text)}`;
             
-            // Mengambil data gambar (buffer)
+            // Ambil gambar dari API
             const response = await axios.get(apiUrl, { responseType: 'arraybuffer' });
             const buffer = Buffer.from(response.data, 'utf-8');
 
-            // Konversi menjadi stiker khas Euphylia Magenta
-            let stiker = await sticker(buffer, false, 'Euphylia Magenta', 'By Yus');
-            
+            // Proses jadi stiker pakai library sticker.js kamu
+            let stiker = await sticker(buffer, false, 'Euphylia Magenta', 'by IyuszTempest');
+
             if (stiker) {
-                await conn.sendFile(m.chat, stiker, 'brat.webp', '', m);
+                // Kirim sebagai stiker beneran
+                await conn.sendMessage(m.chat, { sticker: stiker }, { quoted: m });
             } else {
-                // Fallback jika konversi stiker gagal, kirim sebagai gambar
-                await conn.sendMessage(m.chat, { image: buffer, caption: 'Nih hasil Brat-nya, Yus! ✨' }, { quoted: m });
+                // Kalau gagal jadi stiker, balik ke gambar lagi biar gak zonk
+                await conn.sendMessage(m.chat, { image: buffer, caption: 'Gagal jadi stiker, kirim gambar aja ya!' }, { quoted: m });
             }
 
         } catch (e) {
