@@ -6,7 +6,7 @@
 const axios = require('axios');
 
 module.exports = {
-    command: ['pinsearch'],
+    command: ['pin'],
     category: 'downloader',
     noPrefix: true,
     call: async (conn, m, { text, usedPrefix, command }) => {
