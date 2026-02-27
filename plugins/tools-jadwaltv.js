@@ -8,6 +8,7 @@ const axios = require('axios');
 module.exports = {
     command: ['jadwaltv'],
     category: 'tools',
+    noPrefix: true,
     call: async (conn, m, { text, usedPrefix, command }) => {
         if (!text) return m.reply(`Sebutkan channel TV-nya, Yus!\nContoh: *${usedPrefix + command} gtv*`);
 
