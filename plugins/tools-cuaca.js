@@ -10,7 +10,7 @@ module.exports = {
     category: 'tools',
     noPrefix: true,
     call: async (conn, m, { text, usedPrefix, command }) => {
-        if (!text) return m.reply(`Masukan nama kota, Yus!\nContoh: *${usedPrefix + command} Pontianak*`);
+        if (!text) return m.reply(`Masukan nama kota!\nContoh: *${usedPrefix + command} Pontianak*`);
 
         try {
             // Memanggil API dengan parameter 'q' sesuai hasil tes curl kamu
