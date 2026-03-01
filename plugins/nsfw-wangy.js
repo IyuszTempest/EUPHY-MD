@@ -7,7 +7,7 @@ const axios = require('axios');
 module.exports = {
     command: ['wangy'],
     category: 'nsfw',
-    noPrefix: false, 
+    noPrefix: true, 
     premium: true,
     call: async (conn, m, { usedPrefix, command }) => {
         await conn.sendMessage(m.chat, { react: { text: '🥵', key: m.key } });
