@@ -10,7 +10,7 @@ module.exports = {
     category: 'tools',
     noPrefix: true,
     call: async (conn, m, { text, usedPrefix, command }) => {
-        if (!text) return m.reply(`Sebutkan channel TV-nya, Yus!\nContoh: *${usedPrefix + command} gtv*`);
+        if (!text) return m.reply(`Sebutkan channel TV-nya!\nContoh: *${usedPrefix + command} gtv*`);
 
         try {
             await conn.sendMessage(m.chat, { react: { text: '📺', key: m.key } });
