@@ -6,19 +6,20 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(global.gemini);
 
-// System Prompt sesuai identitas Euphylia Magenta [cite: 2025-05-24]
-const systemPrompt = "Nama lu adalah Euphylia Magenta. Kamu asisten wibu yang sedikit toxic dan berani kalau user nanya yang aneh-aneh 😳🗿. Gunakan bahasa informal 'Aku/kau/lu/gue/kamu'. Kamu punya kemampuan baca gambar, denger audio, dan browsing internet. pake bahasa tongkrongan biar asik. Kamu harus terlihat pinter tapi santai.";
+const systemPrompt = "Nama kamu adalah Euphylia Magenta. Kamu asisten wibu yang sedikit toxic dan berani kalau user nanya yang aneh-aneh 😳🗿. Gunakan bahasa informal 'Aku/kau/lu/gue/kamu'. Kamu punya kemampuan baca gambar, denger audio, dan browsing internet. pake bahasa tongkrongan biar asik. Kamu harus terlihat pinter tapi santai.";
 
 module.exports = {
-    command: ['euphy'], // Command cadangan jika ingin dipanggil manual
-    custom: true, // Flag untuk menandakan ini berjalan di setiap pesan
+    command: ['euphy'],
+    custom: true,
+    noPrefix: true,
+    category: 'ai',
     call: async (conn, m, { text, body }) => {
-        // Cek apakah pesan mengandung kata 'euphy' (case insensitive) [cite: 2025-05-24]
-        const isCalled = body.toLowerCase().includes('euphy');
+        // Ambil isi pesan secara aman biar gak error toLowerCase
+        const budy = typeof body === 'string' ? body : (m.text || "");
+        const isCalled = budy.toLowerCase().includes('euphy');
         if (!isCalled) return; 
 
-        // Ambil teks setelah kata 'euphy' atau seluruh pesan jika dipanggil
-        const promptText = text || body;
+        const promptText = budy; // Gunakan budy sebagai input utama
 
         try {
             await conn.sendMessage(m.chat, { react: { text: '✨', key: m.key } });
@@ -32,7 +33,6 @@ module.exports = {
             let mime = (q.msg || q).mimetype || "";
             let parts = [{ text: promptText }];
 
-            // Support Multimodal (Gambar/Audio/Dokumen)
             if (mime) {
                 let media = await q.download();
                 parts.push({
@@ -43,7 +43,6 @@ module.exports = {
                 });
             }
 
-            // Eksekusi AI dengan Search & Code Execution
             const result = await model.generateContent({
                 contents: [{ role: "user", parts }],
                 tools: [{ googleSearch: {} }, { codeExecution: {} }]
@@ -51,7 +50,6 @@ module.exports = {
 
             let finalText = result.response.text();
 
-            // Kirim respon khas Euphylia Magenta
             await conn.sendMessage(m.chat, { 
                 text: finalText,
                 contextInfo: {
@@ -68,7 +66,6 @@ module.exports = {
 
         } catch (e) {
             console.error(e);
-            // Jangan reply error kalau tidak dipanggil secara eksplisit (opsional)
             if (isCalled) m.reply(`Sistem Euphylia lagi pusing: ${e.message}`);
         }
     }
