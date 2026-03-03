@@ -1,3 +1,8 @@
+/**
+ * Euphy-Bot - TikTok DL (Hybrid Audio Extraction) ✨
+ * Fitur: Auto-Convert MP4 to MP3 if Music URL is Missing
+ */
+
 const fetch = require('node-fetch');
 
 module.exports = {
@@ -5,7 +10,8 @@ module.exports = {
     category: 'downloader',
     noPrefix: true,
     call: async (conn, m, { args, usedPrefix, command }) => {
-        if (!args[0]) return m.reply(`*Contoh:* ${usedPrefix + command} https://vt.tiktok.com/xxxx/`);
+        const isUrl = args[0] && args[0].match(/tiktok.com/gi);
+        if (!isUrl) return; // Silent return biar gak ganggu chat biasa
 
         try {
             await conn.sendMessage(m.chat, { react: { text: "⏳", key: m.key } });
@@ -16,32 +22,33 @@ module.exports = {
             const response = await fetch(url);
             const res = await response.json();
 
-            if (res.status !== "success") throw "Gagal mengambil data dari server.";
+            if (res.status !== "success") throw "Gagal ambil data dari API";
 
             const { title, author, video, music } = res.result;
 
-            // 1. Kirim Video (Tetap Cepat)
+            // 1. KIRIM VIDEO (Tetap kirim duluan)
             if (video) {
                 await conn.sendMessage(m.chat, { 
                     video: { url: video }, 
-                    caption: `*─── [ TIKTOK VIDEO ] ───*\n\n📝 *Title:* ${title || 'No Title'}\n👤 *Author:* ${author || 'Unknown'}` 
+                    caption: `╭━━〔 ⛩️ *𝚃𝙸𝙺𝚃𝙾𝙺 𝙳𝙻* ⛩️ 〕━━┓\n┃ 📝 *Title:* ${title || 'No Title'}\n┃ 👤 *Author:* ${author || 'Unknown'}\n┗━━━━━━━━━━━━━━━━━━━━┛` 
                 }, { quoted: m });
             }
 
-            // 2. Kirim Audio High-Speed (Metode URL Stream)
-            if (music) {
+            // 2. LOGIKA AUDIO (HYBRID SYSTEM)
+            let audioSource = music || video; // Pakai musik kalau ada, kalau gak ada hajar videonya
+
+            if (audioSource) {
                 await conn.sendMessage(m.chat, { react: { text: "🎶", key: m.key } });
 
-                // Kita pakai URL langsung ke Baileys agar server Lunes Host gak capek nulis file
                 await conn.sendMessage(m.chat, { 
-                    audio: { url: music }, 
-                    mimetype: 'audio/mpeg',
-                    fileName: `${title || 'tiktok'}.mp3`,
-                    ptt: false, // Set true kalau mau jadi Voice Note
+                    audio: { url: audioSource }, 
+                    mimetype: 'audio/mp4', // Baileys otomatis convert ke ogg/mp3 lewat ffmpeg internal
+                    fileName: `${title || 'tiktok_audio'}.mp3`,
+                    ptt: false,
                     contextInfo: {
                         externalAdReply: {
-                            title: 'TikTok Audio Success 🎶',
-                            body: author || 'Euphy System',
+                            title: music ? '𝚃𝙸𝙺𝚃𝙾𝙺 𝙼𝚄𝚂𝙸𝙲 🎶' : '𝚃𝙸𝙺𝚃𝙾𝙺 𝙰𝚄𝙳𝙸𝙾 (𝙴𝚇𝚃𝚁𝙰𝙲𝚃) 🎙️',
+                            body: `Milik: ${author || 'Euphy System'}`,
                             thumbnailUrl: global.imgall,
                             sourceUrl: args[0],
                             mediaType: 1,
@@ -55,8 +62,7 @@ module.exports = {
 
         } catch (e) {
             console.error(e);
-            await conn.sendMessage(m.chat, { react: { text: "❌", key: m.key } });
-            m.reply(`❌ *Error:* ${e.message || e}`);
+            m.reply(`❌ *Sistem Euphy Error:* ${e.message || e}`);
         }
     }
 };
