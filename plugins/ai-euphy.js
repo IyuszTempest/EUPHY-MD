@@ -41,7 +41,7 @@ module.exports = {
                     externalAdReply: {
                         title: '𝙴𝚄𝙿𝙷𝚈𝙻𝙸𝙰 𝙼𝙰𝙶𝙴𝙽𝚃𝙰 (𝙶𝙿𝚃-𝟺)',
                         body: 'Listening to you... ✨',
-                        thumbnailUrl: 'https://files.catbox.moe/ssc8vq.jpg',
+                        thumbnailUrl: global.imgall,
                         sourceUrl: 'https://github.com/IyuszTempest',
                         mediaType: 1,
                         renderLargerThumbnail: true
