@@ -48,14 +48,27 @@ const question = (text) => {
 
 // --- [ 3. DATABASE SYSTEM ] ---
 const databasePath = './database.json';
+// Inisialisasi awal agar tidak undefined [cite: 2026-01-09]
 global.db = { data: { users: {}, chats: {}, settings: {} } };
+
 if (fs.existsSync(databasePath)) {
     try {
         global.db.data = JSON.parse(fs.readFileSync(databasePath, 'utf8'));
+        console.log(chalk.green('[ SUCCESS ] Database loaded!'));
     } catch (e) {
         console.log(chalk.red('[ ERROR ] Database korup, memuat data kosong.'));
+        fs.writeFileSync(databasePath, JSON.stringify(global.db.data, null, 2));
     }
+} else {
+    // WAJIB: Bikin file fisik kalau belum ada biar Premium gak default 30 hari terus
+    fs.writeFileSync(databasePath, JSON.stringify(global.db.data, null, 2));
+    console.log(chalk.yellow('[ SYSTEM ] Database baru berhasil dibuat!'));
 }
+
+// AUTO SAVE TIAP 30 DETIK (Biar data Sewa/Premium aman di Lunes Host)
+setInterval(() => {
+    fs.writeFileSync(databasePath, JSON.stringify(global.db.data, null, 2));
+}, 30 * 1000);
 
 async function startEuphy() {
     const { state, saveCreds } = await useMultiFileAuthState("session");
