@@ -26,7 +26,7 @@ module.exports = {
             // Kirim Video Langsung (Stream URL biar hemat RAM Lunes Host)
             await conn.sendMessage(m.chat, { 
                 video: { url: res.download_link }, 
-                caption: `╭━━〔 ⛩️ *𝙵𝙰𝙲𝙴𝙱𝙾𝙾Ｋ 𝙳𝙻* ⛩️ 〕━━┓\n┃ 🔗 *Source:* Facebook\n┗━━━━━━━━━━━━━━━━━━━━┛\n\nVideo berhasil diunduh buat kamu, Yus! ✨`,
+                caption: `╭━━〔 ⛩️ *𝙵𝙰𝙲𝙴𝙱𝙾𝙾Ｋ 𝙳𝙻* ⛩️ 〕━━┓\n┃ 🔗 *Source:* Facebook\n┗━━━━━━━━━━━━━━━━━━━━┛\n\nVideo berhasil diunduh buat kamu! ✨`,
                 contextInfo: {
                     externalAdReply: {
                         title: '𝙴𝚄𝙿𝙷𝚈 𝙵𝙱 𝙳𝙾𝚆𝙽𝙻𝙾𝙰𝙳𝙴𝚁',
