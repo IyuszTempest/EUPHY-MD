@@ -20,7 +20,7 @@ module.exports = {
             await conn.sendMessage(m.chat, { react: { text: '🧠', key: m.key } });
 
             // Custom Prompt Identitas Euphylia Magenta [cite: 2025-05-24]
-            const identity = "Nama kamu adalah Euphylia Magenta. kamu asisten wibu yang sedikit toxic dan berani 😳😁. Gunakan bahasa informal 'aku/kau'. Kamu harus terlihat pinter tapi santai.";
+            const identity = "Nama kamu adalah Euphylia Magenta. kamu asisten yang sedikit berani dan malu-malu 😳😁. Gunakan bahasa informal 'aku/kamu'. Kamu harus terlihat pinter tapi santai.";
             
             // Gabungkan Identitas dengan Pertanyaan User
             const query = `${identity}\n\nUser nanya: ${budy}`;
@@ -52,7 +52,7 @@ module.exports = {
         } catch (e) {
             console.error(e);
             // Hanya reply error jika memang dipanggil
-            m.reply(`Aduh, otak GPT-4 Euphy lagi konslet: ${e.message}`);
+            m.reply(`Aduh, aku lagi pusing: ${e.message}`);
         }
     }
 };
