@@ -8,7 +8,7 @@ const axios = require('axios');
 module.exports = {
     command: ['yts', 'ytsearch'],
     category: 'downloader',
-    noPrefix: true;
+    noPrefix: true,
     call: async (conn, m, { text, usedPrefix, command }) => {
         // 検索ワードのチェック [cite: 2025-05-24]
         if (!text) return m.reply(`*Comtoh:* ${usedPrefix + command} Love & Moon Marika Kohno`);
