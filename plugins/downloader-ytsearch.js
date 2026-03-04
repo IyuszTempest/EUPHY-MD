@@ -1,46 +1,65 @@
-/** * Euphy-Bot - YouTube Search
- * Fitur: Mencari lagu/video YouTube menggunakan API IyuszTempest
+/**
+ * Euphy-Bot - YouTube Search ✨
+ * API: ZiaUlhaq
  */
 
 const axios = require('axios');
 
 module.exports = {
-    command: ['ytsearch'],
-    category: 'download',
-    noPrefix: true,
-    call: async (conn, m, { text }) => {
-        if (!text) return m.reply('Mau cari lagu apa? Contoh: .yts onnanoko ni naritai [cite: 2025-05-24]');
+    command: ['yts', 'ytsearch'],
+    category: 'downloader',
+    noPrefix: true;
+    call: async (conn, m, { text, usedPrefix, command }) => {
+        // 検索ワードのチェック [cite: 2025-05-24]
+        if (!text) return m.reply(`*Comtoh:* ${usedPrefix + command} Love & Moon Marika Kohno`);
 
         try {
             await conn.sendMessage(m.chat, { react: { text: "🔍", key: m.key } });
+
+            // ZiaUlhaq API へのリクエスト [cite: 2026-03-01]
+            const apiUrl = `https://api.ziaul.my.id/api/search/youtubesearch?query=${encodeURIComponent(text)}`;
+            const response = await axios.get(apiUrl, {
+                headers: { 'accept': '*/*' }
+            });
+
+            const res = response.data;
+            if (!res.status || !res.data || res.data.length === 0) throw "動画が見つからなかったよ、ユス。";
+
+            // 検索結果の整形 (最大 5 件に制限して RAM を節約)
+            let capt = `╭━━〔 ⛩️ *𝚈𝙾𝚄𝚃𝚄𝙱𝙴 𝚂𝙴𝙰𝚁𝙲𝙷* ⛩️ 〕━━┓\n┃ 🔍 *Query:* ${text}\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n`;
             
-            // Memanggil API milik Yus
-            const apiResp = await axios.get(`https://iyusztempest.my.id/api/download?feature=ytsearch&query=${encodeURIComponent(text)}&apikey=$[global.apiyus]`);
-            const results = apiResp.data.result;
+            const results = res.data.slice(0, 5); 
+            results.forEach((v, i) => {
+                capt += `*${i + 1}. ${v.title}*\n`;
+                capt += `  🎬 *Author:* ${v.author}\n`;
+                capt += `  ⏱️ *Duration:* ${v.duration}\n`;
+                capt += `  👁️ *Views:* ${v.views || 'N/A'}\n`;
+                capt += `  🔗 *URL:* ${v.url}\n\n`;
+            });
 
-            if (!results || results.length === 0) return m.reply('Aduh, lagunya nggak ketemu. Coba judul lain!');
+            capt += `*Euphylia Magenta* で音楽を楽しもう！ ✨`;
 
-            let teks = `╭━━〔 ⛩️ *𝚈𝚃-𝚂𝙴𝙰𝚁𝙲𝙷* ⛩️ 〕━━┓\n┃ ✨ Hasil pencarian untuk: *${text}*\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n`;
-
-            // Mengambil 5 hasil teratas agar tidak kepanjangan (Limit RAM 512MB)
-            for (let i = 0; i < 5; i++) {
-                let v = results[i];
-                if (!v) break;
-                teks += `*${i + 1}. ${v.title}*\n`
-                      + `🏮 *Durasi:* ${v.duration}\n`
-                      + `👁️ *Views:* ${v.views.toLocaleString()}\n`
-                      + `🔗 *Link:* ${v.url}\n\n`;
-            }
-
-            // Mengirim pesan dengan gambar dari hasil pertama
+            // 最初の動画のサムネイル付きで結果を送信
             await conn.sendMessage(m.chat, { 
-                image: { url: results[0].thumbnail }, 
-                caption: teks 
+                text: capt,
+                contextInfo: {
+                    externalAdReply: {
+                        title: '𝚈𝚃 𝚂𝙴𝙰𝚁𝙲𝙷 𝚁𝙴𝚂𝚄𝙻𝚃𝚂',
+                        body: `Found ${res.data.length} videos!`,
+                        thumbnailUrl: global.imgall,
+                        sourceUrl: results[0].url,
+                        mediaType: 1,
+                        renderLargerThumbnail: true
+                    }
+                }
             }, { quoted: m });
+
+            await conn.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
 
         } catch (e) {
             console.error(e);
-            m.reply(`Error nih: ${e.message}. Pastikan API kamu aktif ya!`);
+            m.reply(`❌ *Error:* ${e.message || e}`);
         }
     }
 };
+    
