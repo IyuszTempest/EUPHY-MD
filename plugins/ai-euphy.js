@@ -31,7 +31,7 @@ module.exports = {
                 headers: { 'accept': '*/*' }
             });
 
-            if (!response.data.status) throw "API lagi error, Yus.";
+            if (!response.data.status) throw "API lagi error";
 
             const result = response.data.response;
 
