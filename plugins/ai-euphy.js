@@ -6,15 +6,16 @@
 const axios = require('axios');
 
 module.exports = {
-    command: ['euphy'], // Command cadangan
+    command: ['ai'], // Command cadangan
     custom: true, // Berjalan di setiap pesan
     noPrefix: true,
+    category: 'ai',
     call: async (conn, m, { text, body }) => {
         // Ambil pesan secara aman
         const budy = typeof body === 'string' ? body : (m.text || "");
         
         // Hanya terpanggil jika ada kata 'euphy' [cite: 2025-05-24]
-        if (!budy.toLowerCase().includes('euphy')) return;
+        if (!budy.toLowerCase().includes('ai')) return;
 
         try {
             await conn.sendMessage(m.chat, { react: { text: '🧠', key: m.key } });
