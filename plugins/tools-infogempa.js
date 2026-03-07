@@ -7,7 +7,7 @@ const axios = require('axios');
 
 module.exports = {
     command: ['gempa'],
-    category: 'info',
+    category: 'tools',
     noPrefix: true,
     call: async (conn, m, { usedPrefix, command }) => {
         try {
