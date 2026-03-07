@@ -1,6 +1,6 @@
 /**
- * Euphy-Bot - YouTube Video Play (Search & DL) ✨
- * API: Vreden
+ * Euphy-Bot - YouTube Play (Search & Stable Download) ✨
+ * Optimized for Lunes Host 512MB RAM
  */
 
 const axios = require('axios');
@@ -8,38 +8,45 @@ const axios = require('axios');
 module.exports = {
     command: ['playvid'],
     category: 'downloader',
-    noPrefix: true,
+    noPrefix: true, // プレフィックスなしで動作
     call: async (conn, m, { text, usedPrefix, command }) => {
-        // 検索ワードのチェック [cite: 2025-05-24]
-        if (!text) return m.reply(`*例:* ${usedPrefix + command} ray of light hanatan`);
+        if (!text) return m.reply(`*例:* ${command} ray of light hanatan`);
 
         try {
-            await conn.sendMessage(m.chat, { react: { text: "🎬", key: m.key } });
+            await conn.sendMessage(m.chat, { react: { text: "🔍", key: m.key } });
 
-            // Vreden API へのリクエスト [cite: 2026-03-07]
-            const apiUrl = `https://api.vreden.my.id/api/v1/download/play/video?query=${encodeURIComponent(text)}`;
-            const response = await axios.get(apiUrl);
-            const res = response.data;
-
-            if (!res.status || !res.result.metadata) throw "Aku tidak menemukan informasi video apa pun.";
-
-            const meta = res.result.metadata;
+            // 1. まずは検索してメタデータとURLを取得 [cite: 2026-03-07]
+            const searchApi = `https://api.vreden.my.id/api/v1/download/play/video?query=${encodeURIComponent(text)}`;
+            const searchRes = await axios.get(searchApi);
             
-            // エラーハンドリング: ダウンロードリンクが死んでいる場合 [cite: 2026-03-07]
-            if (!res.result.download || !res.result.download.url) {
-                return m.reply(`⚠️ *API Error:* ${res.result.download.message || 'Terjadi kesalahan konversi.'}\n\nでも大丈夫、ユス！動画は見つかったよ：\n📌 *Title:* ${meta.title}\n🔗 *URL:* ${meta.url}\n\n代わりに \`.ytmp4 ${meta.url}\` Cobalah menggunakan！`);
+            if (!searchRes.data.status || !searchRes.data.result.metadata) throw "動画情報が見つからなかったよ。";
+            
+            const meta = searchRes.data.result.metadata;
+            const videoUrl = meta.url;
+
+            await conn.sendMessage(m.chat, { react: { text: "⏳", key: m.key } });
+
+            // 2. 専用ダウンロードエンドポイントを叩く (360p固定でRAM負荷軽減)
+            const dlApi = `https://api.vreden.my.id/api/v1/download/youtube/video?url=${encodeURIComponent(videoUrl)}&quality=360`;
+            const dlRes = await axios.get(dlApi);
+
+            // エラーハンドリング: ダウンロードリンクが取得できない場合 [cite: 2026-03-07]
+            if (!dlRes.data.status || !dlRes.data.result.download || !dlRes.data.result.download.url) {
+                return m.reply(`⚠️ *Download Error:* APIが混み合っているみたい。\n\n📌 *Title:* ${meta.title}\n🔗 *URL:* ${meta.url}\n\nこのURLをブラウザで開いてみてね、ユス！`);
             }
 
-            // 成功した場合はビデオを送信 (RAM 512MB 最適化)
+            const downloadUrl = dlRes.data.result.download.url;
+
+            // 3. ビデオを送信
             await conn.sendMessage(m.chat, { 
-                video: { url: res.result.download.url }, 
-                caption: `╭━━〔 ⛩️ *𝚈𝚃 𝚅𝙸𝙳𝙴𝙾 𝙿𝙻𝙰𝚈* ⛩️ 〕━━┓\n┃ 📝 *Title:* ${meta.title}\n┃ 🎬 *Author:* ${meta.author.name}\n┃ ⏱️ *Duration:* ${meta.timestamp}\n┗━━━━━━━━━━━━━━━━━━━━┛\n\nEuphylia Magenta がお届けしたよ、ユス！ ✨`,
+                video: { url: downloadUrl }, 
+                caption: `╭━━〔 ⛩️ *𝚈𝚃 𝚅𝙸𝙳𝙴𝙾 𝙿𝙻𝙰𝚈* ⛩️ 〕━━┓\n┃ 📝 *Title:* ${meta.title}\n┃ 🎬 *Author:* ${meta.author.name}\n┃ ⏱️ *Duration:* ${meta.timestamp}\n┗━━━━━━━━━━━━━━━━━━━━┛\n\nEuphylia Magenta ✨`,
                 contextInfo: {
                     externalAdReply: {
                         title: '🎥 𝙽𝙾𝚆 𝙿𝙻𝙰𝚈𝙸𝙽𝙶',
                         body: meta.title,
                         thumbnailUrl: meta.thumbnail,
-                        sourceUrl: meta.url,
+                        sourceUrl: videoUrl,
                         mediaType: 1,
                         renderLargerThumbnail: true
                     }
@@ -50,8 +57,8 @@ module.exports = {
 
         } catch (e) {
             console.error(e);
-            m.reply(`❌ *Euphy Error:* ${e.message || e}`);
+            m.reply(`❌ *Euphy Error:* ${e.message || "Error"}`);
         }
     }
 };
-                                                                        
+            
