@@ -45,7 +45,7 @@ module.exports = {
             await conn.reply(m.chat, cap, m, { mentions: [who] });
 
             // B. Kirim PC ke USER
-            let userMsg = `Selamat! Status kamu sekarang adalah *PREMIUM*. 🎉\n\n*Durasi:* ${duration} Detik\n*Expired:* ${tglExpired}\n\nTerima kasih sudah berlangganan! 🌸`;
+            let userMsg = `Selamat! Status kamu sekarang adalah *PREMIUM*. 🎉\n\n*Durasi:* ${duration} Hari\n*Expired:* ${tglExpired}\n\nTerima kasih sudah berlangganan! 🌸`;
             await conn.sendMessage(who, { text: userMsg });
 
             // C. Kirim PC ke YOU (Owner)
