@@ -5,6 +5,7 @@
 module.exports = {
     command: ['addsewa'],
     category: 'owner',
+    noPrefix: true,
     call: async (conn, m, { text }) => {
         // Cek apakah yang manggil owner/lidowner
         const isOwner = [...global.owner.map(v => v[0]), ...(global.lidowner || [])].some(number => m.sender.includes(number.replace(/[^0-9]/g, '')));
