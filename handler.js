@@ -1,5 +1,5 @@
 /**
- * Euphy-Bot - Handler V3.2 (LID Adaptive & Media Fix)
+ * Euphy-Bot - Handler V3.3
  * Fitur: Auto-Clean Premium, Dual ID Sync, & Hard-Fix Admin Detection
  */
 
@@ -74,24 +74,38 @@ module.exports = {
                 user.afkReason = '';
                 m.reply(`Selamat datang kembali @${m.sender.split('@')[0]}! ✨`);
             }
-
-            // --- [ 5. LOGIC OWNER & PLUGIN BEFORE ] ---
+            
+                        // --- [ 5. LOGIC OWNER & ADMIN DETECTOR ] ---
             const ownerList = Array.isArray(global.owner) ? global.owner : [global.owner];
             const cleanOwners = ownerList.map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net');
             const isOwner = m.fromMe || (m.sender === global.lidowner) || cleanOwners.includes(m.sender);
 
+            // Kita ambil data admin di sini supaya plugin.before tidak error
+            const groupMetadata = m.isGroup ? await this.groupMetadata(m.chat).catch(_ => ({})) : {};
+            const participants = m.isGroup ? (groupMetadata.participants || []) : [];
+            const botJid = this.user.id.split(':')[0] + '@s.whatsapp.net';
+
+            const userInGroup = m.isGroup ? participants.find(u => u.id === m.sender) : {};
+            const botInGroup = m.isGroup ? participants.find(u => 
+                areJidsSameUser(u.id, botJid) || (this.user.lid && areJidsSameUser(u.id, this.user.lid))
+            ) : {};
+
+            const isAdmin = userInGroup?.admin?.includes('admin') || false;
+            const isBotAdmin = botInGroup?.admin?.includes('admin') || false;
+
+            // --- [ SEKARANG PANGGIL PLUGIN BEFORE ] ---
             for (let name in global.plugins) {
                 let plugin = global.plugins[name];
                 if (!plugin || plugin.disabled) continue;
                 if (typeof plugin.before === 'function') {
-                    if (await plugin.before.call(this, m, { conn: this, isOwner, isStatus, fkontak })) continue;
+                    // isAdmin dan isBotAdmin sudah didefinisikan di atas, jadi AMAN
+                    if (await plugin.before.call(this, m, { 
+                        conn: this, isOwner, isStatus, fkontak, isAdmin, isBotAdmin 
+                    })) continue;
                 }
             }
 
-            if (isStatus) return; 
-
             // --- [ 6. COMMAND PARSING (MEDIA CAPTION FIX) ] ---
-            // Mengambil teks dari berbagai tipe pesan agar caption tetap terbaca sebagai perintah
             let body = (m.mtype === 'conversation' ? m.message.conversation : 
                         m.mtype === 'imageMessage' ? m.message.imageMessage.caption : 
                         m.mtype === 'videoMessage' ? m.message.videoMessage.caption : 
@@ -104,19 +118,10 @@ module.exports = {
             let [command, ...args] = noPrefix.split` `.filter(v => v);
             command = (command || '').toLowerCase();
 
-            // --- [ 7. ADMIN DETECTOR (LID ADAPTIVE) ] ---
-            const groupMetadata = m.isGroup ? await this.groupMetadata(m.chat).catch(_ => ({})) : {};
-            const participants = m.isGroup ? (groupMetadata.participants || []) : [];
-            const botJid = this.user.id.split(':')[0] + '@s.whatsapp.net';
-            
-            // Mencari bot & user dengan membandingkan JID dan LID
-            const userInGroup = m.isGroup ? participants.find(u => u.id === m.sender) : {};
-            const botInGroup = m.isGroup ? participants.find(u => 
-                areJidsSameUser(u.id, botJid) || (this.user.lid && areJidsSameUser(u.id, this.user.lid))
-            ) : {};
-            
-            const isAdmin = userInGroup?.admin?.includes('admin') || false;
-            const isBotAdmin = botInGroup?.admin?.includes('admin') || false;
+            // --- [ 7. HAPUS DEKLARASI ULANG DI SINI ] ---
+            // Bagian const userInGroup, isAdmin, dll yang tadinya ada di sini SUDAH DIHAPUS 
+            // karena sudah dipindah ke atas Langkah 5.
+
 
             // --- [ 8. EXECUTE COMMAND ] ---
             for (let name in global.plugins) {
@@ -155,4 +160,5 @@ module.exports = {
 
 // ... (Plugin Reload System Tetap Sama)
 
-                    
+
+                                                              
