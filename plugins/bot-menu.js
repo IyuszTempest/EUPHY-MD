@@ -12,9 +12,11 @@ const allTags = {
     'ai': '🤖 `‹ MENU AI ›`',
     'premium': '💎 `‹ MENU PREMIUM ›`',
     'downloader': '📥 `‹ MENU DOWNLOADER ›`',
-    'fun': '🎮 `‹ MENU FUN ›`',
-    'group': '👥 `‹ MENU GC ›`',   
-    'nsfw': '🔞 `‹ MENU NSFW ›`',    
+    'fun': '😁 `‹ MENU FUN ›`',
+    'group': '👥 `‹ MENU GC ›`',
+    'game': '🎮 `‹ MENU GAMING ›`', 
+    'nsfw': '😳 `‹ MENU NSFW ›`',
+    'economic': '🏦 `‹ MENU ECONOMIES ›`', 
     'tools': '🛠️ `‹ MENU TOOLS ›`',
     'owner': '👑 `‹ MENU OWNER ›`'
 };
