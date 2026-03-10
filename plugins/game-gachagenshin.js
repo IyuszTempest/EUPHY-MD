@@ -112,25 +112,25 @@ module.exports = {
     category: 'game',
     noPrefix: true,
     call: async (conn, m, { usedPrefix, command }) => {
-        // Logika Peluang (Probability)
         const rate = Math.random() * 100;
         let hasil;
         let rarity;
 
-        if (rate <= 0.6) { // Rate 5 Star asli Genshin itu 0.6%
+        if (rate <= 0.6) { 
             rarity = '⭐⭐⭐⭐⭐ (BINTANG 5!)';
             hasil = items.fiveStar[Math.floor(Math.random() * items.fiveStar.length)];
-        } else if (rate <= 5.1) { // Rate 4 Star
+        } else if (rate <= 5.1) { 
             rarity = '⭐⭐⭐⭐ (BINTANG 4)';
             hasil = items.fourStar[Math.floor(Math.random() * items.fourStar.length)];
         } else {
             rarity = '⭐⭐⭐ (Ampas)';
-            hasil = { name: items.threeStar[Math.floor(Math.random() * items.threeStar.length)], type: 'Weapon' };
+            // FIX: Langsung ambil dari array
+            hasil = items.threeStar[Math.floor(Math.random() * items.threeStar.length)];
         }
 
         let teks = `*✨ GENSHIN IMPACT ✨*\n\n`;
         teks += `*🌟 Rarity:* ${rarity}\n`;
-        teks += `*🎁 Hadiah:* ${hasil.name}\n`;
+        teks += `*🎁 Hadiah:* ${hasil.name}\n`; // Sekarang bakal muncul nama itemnya, bukan [object]
         if (hasil.type) teks += `*📂 Tipe:* ${hasil.type}\n`;
         if (hasil.element) teks += `*🔮 Elemen:* ${hasil.element}\n\n`;
         
@@ -143,4 +143,3 @@ module.exports = {
         m.reply(teks);
     }
 };
-          
