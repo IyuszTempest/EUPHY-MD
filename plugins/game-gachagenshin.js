@@ -128,7 +128,7 @@ module.exports = {
             hasil = { name: items.threeStar[Math.floor(Math.random() * items.threeStar.length)], type: 'Weapon' };
         }
 
-        let teks = `*✨ GENSHIN WISH ✨*\n\n`;
+        let teks = `*✨ GENSHIN IMPACT ✨*\n\n`;
         teks += `*🌟 Rarity:* ${rarity}\n`;
         teks += `*🎁 Hadiah:* ${hasil.name}\n`;
         if (hasil.type) teks += `*📂 Tipe:* ${hasil.type}\n`;
