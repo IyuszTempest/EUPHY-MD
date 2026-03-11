@@ -44,15 +44,21 @@ module.exports = {
     category: 'game',
     noPrefix: true,
     call: async (conn, m, { usedPrefix, command }) => {
+        // --- [ LOGIKA HOKI ACAK ] ---
+        // Menentukan rate Bintang 5 secara acak antara 1% - 15% setiap klik [cite: 2026-01-09]
+        const hokiHariIni = (Math.random() * 14 + 1); 
+        
         const rate = Math.random() * 100;
         let hasil;
         let rarity;
 
-        if (rate <= 0.6) { // Rate Bintang 5 HSR = 0.6%
-            rarity = '⭐⭐⭐⭐⭐ (5-STAR!)';
+        if (rate <= hokiHariIni) { 
+            // Rate Bintang 5 dinamis sesuai hokiHariIni
+            rarity = `⭐⭐⭐⭐⭐ (5-STAR! - Rate: ${hokiHariIni.toFixed(1)}%)`;
             hasil = hsrItems.fiveStar[Math.floor(Math.random() * hsrItems.fiveStar.length)];
-        } else if (rate <= 5.7) { // Rate Bintang 4
-            rarity = '⭐⭐⭐⭐';
+        } else if (rate <= (hokiHariIni + 15)) { 
+            // Rate Bintang 4 juga dilonggarkan
+            rarity = '⭐⭐⭐⭐ (4-STAR)';
             hasil = hsrItems.fourStar[Math.floor(Math.random() * hsrItems.fourStar.length)];
         } else {
             rarity = '⭐⭐⭐';
@@ -62,12 +68,12 @@ module.exports = {
         let teks = `*✨ STELLAR WARP SIMULATOR ✨*\n\n`;
         teks += `*🌟 Rarity:* ${rarity}\n`;
         teks += `*🎁 Name:* ${hasil.name}\n`;
-        teks += `*📂 Type:* ${hasil.type}\n`;
+        teks += `*📂 Type:* ${hasil.type || 'Light Cone'}\n`; // Fallback jika type kosong
         if (hasil.path) teks += `*🛤️ Path:* ${hasil.path}\n`;
         if (hasil.element) teks += `*🔮 Element:* ${hasil.element}\n\n`;
         
-        if (rate <= 0.6) {
-            teks += `*KABOOM!* Tiket emas berbuah manis! Hoki parah kamu! 🎉🔥`;
+        if (rate <= hokiHariIni) {
+            teks += `*KABOOM!* Tiket emas berbuah manis! Hoki kamu lagi gacor di angka ${hokiHariIni.toFixed(1)}%! 🎉🔥`;
         } else {
             teks += `_Pom-Pom cuma bisa kasih ini, sabar ya Trailblazer!_`;
         }
