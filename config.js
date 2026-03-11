@@ -26,8 +26,8 @@ global.namech = '🧧✨ Go to Euphy information'; // Nama Saluran kamu
 
 // --- [ Settings Tampilan & Media ] ---
 global.wm = '© Euphylia Magenta';
-global.imgall = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXHFJP9VXUiUz_U1QVB_9ZLyYDGQ5flkJXBFTOoSaDOaIgkv5X3I8nyxo&s=10';
-global.qris = 
+global.imgall = 'https://cdn.rafled.com/anime-icons/images/671ffdc4d51f91f0f3be809b6a38bb78597c77f539737c8e22efcd633f9c48ec.jpg';
+global.qris = 'https://i.postimg.cc/50yLyRSb/1773194117754.png';
 global.adReply = {
     title: 'Euphylia Magenta',
     body: 'By IyuszTempest',
