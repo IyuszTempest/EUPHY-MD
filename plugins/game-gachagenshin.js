@@ -112,30 +112,36 @@ module.exports = {
     category: 'game',
     noPrefix: true,
     call: async (conn, m, { usedPrefix, command }) => {
+        // --- [ LOGIKA HOKI ACAK TEYVAT ] ---
+        // Menentukan rate Bintang 5 secara acak antara 7% - 15% biar wangi
+        const hokiTeyvat = (Math.random() * 8 + 7); 
+        
         const rate = Math.random() * 100;
         let hasil;
         let rarity;
 
-        if (rate <= 0.6) { 
-            rarity = '⭐⭐⭐⭐⭐ (BINTANG 5!)';
+        if (rate <= hokiTeyvat) { 
+            // Rate Bintang 5 dinamis biar cepet dapet Archon
+            rarity = `⭐⭐⭐⭐⭐ (BINTANG 5! - Rate: ${hokiTeyvat.toFixed(1)}%)`;
             hasil = items.fiveStar[Math.floor(Math.random() * items.fiveStar.length)];
-        } else if (rate <= 5.1) { 
+        } else if (rate <= (hokiTeyvat + 20)) { 
+            // Rate Bintang 4 juga kita longgarkan
             rarity = '⭐⭐⭐⭐ (BINTANG 4)';
             hasil = items.fourStar[Math.floor(Math.random() * items.fourStar.length)];
         } else {
             rarity = '⭐⭐⭐ (Ampas)';
-            // FIX: Langsung ambil dari array
+            // Langsung ambil objek agar tidak [object Object]
             hasil = items.threeStar[Math.floor(Math.random() * items.threeStar.length)];
         }
 
         let teks = `*✨ GENSHIN IMPACT ✨*\n\n`;
         teks += `*🌟 Rarity:* ${rarity}\n`;
-        teks += `*🎁 Hadiah:* ${hasil.name}\n`; // Sekarang bakal muncul nama itemnya, bukan [object]
+        teks += `*🎁 Hadiah:* ${hasil.name}\n`;
         if (hasil.type) teks += `*📂 Tipe:* ${hasil.type}\n`;
         if (hasil.element) teks += `*🔮 Elemen:* ${hasil.element}\n\n`;
         
-        if (rate <= 0.6) {
-            teks += `*WANGY WANGY!* Kamu hoki banget hari ini! 😭✨`;
+        if (rate <= hokiTeyvat) {
+            teks += `*WANGY WANGY!* Hoki kamu lagi gacor di angka ${hokiTeyvat.toFixed(1)}%! 😭✨`;
         } else {
             teks += `_Coba lagi, mungkin belum saatnya dapet archon._`;
         }
@@ -143,3 +149,4 @@ module.exports = {
         m.reply(teks);
     }
 };
+         
