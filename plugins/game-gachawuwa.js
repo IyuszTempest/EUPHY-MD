@@ -39,15 +39,21 @@ module.exports = {
     category: 'game',
     noPrefix: true,
     call: async (conn, m, { usedPrefix, command }) => {
+        // --- [ LOGIKA HOKI ACAK ROVER ] ---
+        // Menentukan rate Bintang 5 secara acak antara 6% - 18% setiap sesi
+        const hokiRover = (Math.random() * 12 + 6); 
+        
         const rate = Math.random() * 100;
         let hasil;
         let rarity;
 
-        if (rate <= 0.8) { // Rate Bintang 5 WuWa = 0.8%
-            rarity = '⭐⭐⭐⭐⭐ (5-STAR!)';
+        if (rate <= hokiRover) { 
+            // Rate Bintang 5 dinamis biar koleksi Resonator makin banyak
+            rarity = `⭐⭐⭐⭐⭐ (5-STAR! - Rate: ${hokiRover.toFixed(1)}%)`;
             hasil = wuwaItems.fiveStar[Math.floor(Math.random() * wuwaItems.fiveStar.length)];
-        } else if (rate <= 6.0) { // Rate Bintang 4
-            rarity = '⭐⭐⭐⭐';
+        } else if (rate <= (hokiRover + 20)) { 
+            // Rate Bintang 4 juga dilonggarkan biar makin asik
+            rarity = '⭐⭐⭐⭐ (4-STAR)';
             hasil = wuwaItems.fourStar[Math.floor(Math.random() * wuwaItems.fourStar.length)];
         } else {
             rarity = '⭐⭐⭐';
@@ -61,8 +67,8 @@ module.exports = {
         if (hasil.element) teks += `*🔮 Element:* ${hasil.element}\n`;
         if (hasil.weapon) teks += `*⚔️ Weapon:* ${hasil.weapon}\n\n`;
         
-        if (rate <= 0.8) {
-            teks += `*GOLDEN SHINE!* Rover, kamu beruntung banget dapet Bintang 5! 🎉✨`;
+        if (rate <= hokiRover) {
+            teks += `*GOLDEN SHINE!* Rover, kamu dapet Bintang 5 dengan hoki ${hokiRover.toFixed(1)}%! 🎉✨`;
         } else {
             teks += `_Cuma dapet ampas, jangan nyerah ya Rover!_`;
         }
@@ -70,3 +76,4 @@ module.exports = {
         m.reply(teks);
     }
 };
+                           
