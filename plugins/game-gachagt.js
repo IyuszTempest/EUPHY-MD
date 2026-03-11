@@ -37,14 +37,20 @@ module.exports = {
     category: 'game',
     noPrefix: true,
     call: async (conn, m, { usedPrefix, command }) => {
+        // --- [ LOGIKA HOKI ACAK KANTERBURY ] ---
+        // Menentukan rate Bintang 3 secara acak antara 8% - 20% setiap tarikan
+        const hokiGuardian = (Math.random() * 12 + 8); 
+        
         const rate = Math.random() * 100;
         let hasil;
         let rarity;
 
-        if (rate <= 2.75) { // Rate Hero Bintang 3 GT = 2.75%
-            rarity = '⚪ (BINTANG 3 - WHITE BOX!)';
+        if (rate <= hokiGuardian) { 
+            // Rate White Box dinamis biar member grup makin seneng [cite: 2026-01-09]
+            rarity = `⚪ (BINTANG 3 - WHITE BOX! - Rate: ${hokiGuardian.toFixed(1)}%)`;
             hasil = gtItems.threeStar[Math.floor(Math.random() * gtItems.threeStar.length)];
-        } else if (rate <= 19.0) { // Rate Bintang 2
+        } else if (rate <= (hokiGuardian + 25)) { 
+            // Rate Bintang 2 juga ikut dilonggarkan
             rarity = '🟡 (BINTANG 2)';
             hasil = gtItems.twoStar[Math.floor(Math.random() * gtItems.twoStar.length)];
         } else {
@@ -59,8 +65,8 @@ module.exports = {
         if (hasil.class) teks += `*⚔️ Class:* ${hasil.class}\n`;
         if (hasil.hero) teks += `*🔥 Owner:* ${hasil.hero}\n\n`;
         
-        if (rate <= 2.75) {
-            teks += `*WHITE BOX!* Selamat, kamu dapat hero/senjata legendaris! 🎉✨`;
+        if (rate <= hokiGuardian) {
+            teks += `*WHITE BOX!* Selamat, kamu dapat hero/senjata legendaris dengan hoki ${hokiGuardian.toFixed(1)}%! 🎉✨`;
         } else {
             teks += `_Jangan sedih, kumpulkan mileage dulu!_`;
         }
