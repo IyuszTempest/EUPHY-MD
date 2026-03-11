@@ -27,6 +27,7 @@ global.namech = '🧧✨ Go to Euphy information'; // Nama Saluran kamu
 // --- [ Settings Tampilan & Media ] ---
 global.wm = '© Euphylia Magenta';
 global.imgall = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXHFJP9VXUiUz_U1QVB_9ZLyYDGQ5flkJXBFTOoSaDOaIgkv5X3I8nyxo&s=10';
+global.qris = 
 global.adReply = {
     title: 'Euphylia Magenta',
     body: 'By IyuszTempest',
