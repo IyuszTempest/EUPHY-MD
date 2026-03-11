@@ -49,14 +49,20 @@ module.exports = {
     category: 'game',
     noPrefix: true,
     call: async (conn, m, { usedPrefix, command }) => {
+        // --- [ LOGIKA HOKI ACAK SENSEI ] ---
+        // Menentukan rate Bintang 3 secara acak antara 5% - 20% setiap rekrutmen
+        const hokiSensei = (Math.random() * 15 + 5); 
+        
         const rate = Math.random() * 100;
         let hasil;
         let rarity;
 
-        if (rate <= 3.0) { // Rate Bintang 3 di BA itu 3%
-            rarity = '⭐⭐⭐ (RARE!)';
+        if (rate <= hokiSensei) { 
+            // Rate Bintang 3 dinamis biar gak dapet biru terus
+            rarity = `⭐⭐⭐ (RARE! - Rate: ${hokiSensei.toFixed(1)}%)`;
             hasil = students.threeStar[Math.floor(Math.random() * students.threeStar.length)];
-        } else if (rate <= 21.5) { // Rate Bintang 2
+        } else if (rate <= (hokiSensei + 25)) { 
+            // Rate Bintang 2 juga ikut dilonggarkan
             rarity = '⭐⭐';
             hasil = students.twoStar[Math.floor(Math.random() * students.twoStar.length)];
         } else {
@@ -70,8 +76,8 @@ module.exports = {
         if (hasil.school) teks += `*🏫 School:* ${hasil.school}\n`;
         if (hasil.role) teks += `*⚔️ Role:* ${hasil.role}\n\n`;
         
-        if (rate <= 3.0) {
-            teks += `*ARONA PRANK IS REAL!* Kamu dapat Bintang 3! 🎉✨`;
+        if (rate <= hokiSensei) {
+            teks += `*ARONA PRANK IS REAL!* Kamu dapet Bintang 3 dengan hoki ${hokiSensei.toFixed(1)}%! 🎉✨`;
         } else {
             teks += `_Biru lagi, biru lagi... Semangat ya Sensei!_`;
         }
@@ -79,3 +85,4 @@ module.exports = {
         m.reply(teks);
     }
 };
+        
