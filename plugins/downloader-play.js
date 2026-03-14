@@ -1,61 +1,51 @@
 /**
- * Euphy-Bot - YouTube Play Downloader
- * Updated to ZiaUlhaq API ✨
+ * Euphy-Bot - YouTube Play Downloader ✨
+ * Menggunakan API Junzz (Stable Download)
  */
 
 const axios = require('axios');
-const yts = require('yt-search'); // Pastikan sudah install library ini: npm install yt-search
+const yts = require('yt-search');
 
 module.exports = {
     command: ['play'],
     category: 'downloader',
     noPrefix: true,
     call: async (conn, m, { text, usedPrefix, command }) => {
-        if (!text) return m.reply(`Masukkan judul lagunya, Contoh: *${usedPrefix + command} Kawaikute Gomen*`);
-
-        await conn.sendMessage(m.chat, { react: { text: "🔍", key: m.key } });
+        if (!text) return m.reply(`Masukkan judul lagunya! Contoh: *${usedPrefix + command} DJ Desa All Night*`);
 
         try {
-            // 1. Cari video di YouTube berdasarkan text/judul
+            await conn.sendMessage(m.chat, { react: { text: "🔍", key: m.key } });
+
+            // 1. Cari video di YouTube
             const search = await yts(text);
             const video = search.videos[0];
-            if (!video) return m.reply("Aduh, lagunya nggak ketemu nih... Coba judul lain?");
+            if (!video) return m.reply("Aduh, lagunya nggak ketemu nih...");
 
-            const videoUrl = video.url;
+            // Bersihkan URL supaya API Junzz lebih mudah prosesnya
+            const videoUrl = `https://www.youtube.com/watch?v=${video.videoId}`;
 
-            // 2. Tembak ke API ZiaUlhaq buat dapetin link download MP3
-            const apiUrl = `https://api.ziaul.my.id/api/downloader/ytmp3?url=${encodeURIComponent(videoUrl)}`;
-            const { data } = await axios.get(apiUrl, {
-                headers: { 'accept': '*/*' }
-            });
+            await conn.sendMessage(m.chat, { react: { text: "🎧", key: m.key } });
 
-            if (!data.status || !data.result) throw new Error("Gagal convert ke MP3 via API.");
+            // 2. Request ke API Junzz
+            const apiUrl = `https://www.api-junzz.web.id/download/ytmp3?url=${encodeURIComponent(videoUrl)}`;
+            const { data } = await axios.get(apiUrl);
 
-            const { title, duration, downloadUrl, thumbnail } = data.result;
+            if (!data.status || !data.result) {
+                throw new Error("Server API sedang bermasalah atau konversi gagal.");
+            }
 
-            // 3. Susun Caption biar estetik ala bot gaul
-            let caption = `╭━━〔 🎵 *𝙴𝚄𝙿𝙷𝚈 𝙿𝙻𝙰𝚈* 〕━━┓\n`;
-            caption += `┃ 📌 *𝚃𝚒𝚝𝚕𝚎:* ${title}\n`;
-            caption += `┃ ⏳ *𝙳𝚞𝚛𝚊𝚝𝚒𝚘𝚗:* ${duration}\n`;
-            caption += `┃ 🔗 *𝚂𝚘𝚞𝚛𝚌𝚎:* YouTube\n`;
-            caption += `┗━━━━━━━━━━━━━━━━━━━━┛\n\n`;
-            caption += `_Sabar ya, audionya lagi meluncur..._ 🚀`;
+            const res = data.result;
 
+            // 3. Kirim Audio
             await conn.sendMessage(m.chat, { 
-                image: { url: thumbnail || video.thumbnail }, 
-                caption: caption 
-            }, { quoted: m });
-
-            // 4. Kirim Audio
-            await conn.sendMessage(m.chat, {
-                audio: { url: downloadUrl },
+                audio: { url: res.download_url }, 
                 mimetype: 'audio/mpeg',
-                fileName: `${title}.mp3`,
+                fileName: `${res.title}.mp3`,
                 contextInfo: {
                     externalAdReply: {
-                        title: "EUPHY MUSIC PLAYER",
-                        body: `Playing: ${title}`,
-                        thumbnailUrl: thumbnail || video.thumbnail,
+                        title: '𝚈𝙾𝚄𝚃𝚄𝙱𝙴 𝙼𝚄𝚂𝙸𝙲 𝚂𝚄𝙲𝙲𝙴𝚂𝚂',
+                        body: `Judul: ${res.title}\nKualitas: ${res.quality}`,
+                        thumbnailUrl: video.thumbnail, // Pakai thumbnail dari hasil search
                         sourceUrl: videoUrl,
                         mediaType: 1,
                         renderLargerThumbnail: true
@@ -66,10 +56,9 @@ module.exports = {
             await conn.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
 
         } catch (e) {
-            console.error("Error Play:", e);
+            console.error("Error Play Junzz:", e);
             await conn.sendMessage(m.chat, { react: { text: "❌", key: m.key } });
-            m.reply(`Yah error... ❌\n*Pesan:* ${e.message || "API ZiaUlhaq lagi sibuk kali ya?"}`);
+            m.reply(`❌ *Terjadi Kesalahan:* ${e.message || "Gagal memproses lagu."}`);
         }
     }
 };
-                
