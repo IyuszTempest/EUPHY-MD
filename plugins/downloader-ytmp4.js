@@ -1,6 +1,6 @@
 /**
- * Euphy-Bot - YouTube Video & Audio Downloader ✨
- * Optimized for Lunes Host
+ * Euphy-Bot - YouTube MP4 Downloader
+ * Menggunakan API ZiaUlhaq
  */
 
 const axios = require('axios');
@@ -10,62 +10,55 @@ module.exports = {
     category: 'downloader',
     noPrefix: true,
     call: async (conn, m, { args, usedPrefix, command }) => {
-        if (!args[0]) return m.reply(`*Contoh:* ${usedPrefix + command} https://youtu.be/HWjCStB6k4o`);
+        // Cek apakah ada URL yang dimasukkan
+        if (!args[0]) return m.reply(`*Contoh:* ${usedPrefix + command} https://youtu.be/0ronVoomulM`);
 
-        const isVideo = command === 'ytmp4' || command === 'ytdl';
-        const type = isVideo ? 'video' : 'mp3';
-        
         try {
             await conn.sendMessage(m.chat, { react: { text: "📥", key: m.key } });
 
-            // Request ke API Downloader Vreden [cite: 2026-03-07]
-            const apiUrl = `https://api.vreden.my.id/api/v1/download/youtube/${type}?url=${encodeURIComponent(args[0])}${isVideo ? '&quality=360' : ''}`;
-            const response = await axios.get(apiUrl);
-            const res = response.data;
+            // Request ke API Downloader ZiaUlhaq
+            const apiUrl = `https://api.ziaul.my.id/api/downloader/ytmp4?url=${encodeURIComponent(args[0])}`;
+            const { data } = await axios.get(apiUrl, {
+                headers: { 'accept': '*/*' }
+            });
 
-            if (!res.status || !res.result.download || !res.result.download.url) {
-                throw res.result.download?.message || "Terjadi kesalahan saat konversi.";
+            // Validasi response API
+            if (!data.status || !data.result) {
+                throw new Error("Gagal mengambil data video dari server.");
             }
 
-            const { metadata, download } = res.result;
+            const { title, quality, duration, downloadUrl, thumbnail, videoUrl } = data.result;
 
+            // Susun caption informasi video
             let capt = `╭━━〔 ⛩️ *𝚈𝙾𝚄𝚃𝚄𝙱𝙴 𝙳𝙻* ⛩️ 〕━━┓\n`;
-            capt += `┃ 📝 *Title:* ${metadata.title}\n`;
-            capt += `┃ 🎬 *Author:* ${metadata.author.name}\n`;
-            capt += `┃ ⏱️ *Duration:* ${metadata.timestamp}\n`;
+            capt += `┃ 📝 *Judul:* ${title}\n`;
+            capt += `┃ ⚙️ *Kualitas:* ${quality}\n`;
+            capt += `┃ ⏱️ *Durasi:* ${duration}\n`;
             capt += `┗━━━━━━━━━━━━━━━━━━━━┛\n\n`;
-            capt += `*Euphylia Magenta* - Siap unduh! ✨`;
+            capt += `*Euphylia Magenta* - Berhasil diunduh! ✨`;
 
-            if (isVideo) {
-                // Kirim Video
-                await conn.sendMessage(m.chat, { 
-                    video: { url: download.url }, 
-                    caption: capt,
-                    contextInfo: {
-                        externalAdReply: {
-                            title: '𝚈𝚃 𝚅𝙸𝙳𝙴𝙾 𝙳𝙾𝚆𝙽𝙻𝙾𝙰𝙳',
-                            body: metadata.title,
-                            thumbnailUrl: metadata.thumbnail,
-                            sourceUrl: args[0],
-                            mediaType: 1
-                        }
+            // Mengirim Video ke WhatsApp
+            await conn.sendMessage(m.chat, { 
+                video: { url: downloadUrl }, 
+                caption: capt,
+                contextInfo: {
+                    externalAdReply: {
+                        title: '𝚈𝚃 𝚅𝙸𝙳𝙴𝙾 𝙳𝙾𝚆𝙽𝙻𝙾𝙰𝙳',
+                        body: title,
+                        thumbnailUrl: thumbnail,
+                        sourceUrl: videoUrl || args[0],
+                        mediaType: 1,
+                        renderLargerThumbnail: true
                     }
-                }, { quoted: m });
-            } else {
-                // Kirim Audio [cite: 2026-03-07]
-                await conn.sendMessage(m.chat, { 
-                    audio: { url: download.url }, 
-                    mimetype: 'audio/mpeg',
-                    fileName: `${metadata.title}.mp3`
-                }, { quoted: m });
-            }
+                }
+            }, { quoted: m });
 
             await conn.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
 
         } catch (e) {
-            console.error(e);
-            m.reply(`❌ *Euphy Error:* ${e.message || "Gagal mengambil data, coba lagi nanti ya!"}`);
+            console.error("Error ytmp4:", e);
+            await conn.sendMessage(m.chat, { react: { text: "❌", key: m.key } });
+            m.reply(`❌ *Terjadi Kesalahan:* ${e.message || "Gagal memproses permintaan, silakan coba lagi nanti."}`);
         }
     }
 };
-                            
