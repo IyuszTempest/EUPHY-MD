@@ -11,7 +11,7 @@ module.exports = {
     category: 'downloader',
     noPrefix: true,
     call: async (conn, m, { text, usedPrefix, command }) => {
-        if (!text) return m.reply(`Masukkan judul lagunya, Yus! Contoh: *${usedPrefix + command} Kawaikute Gomen*`);
+        if (!text) return m.reply(`Masukkan judul lagunya, Contoh: *${usedPrefix + command} Kawaikute Gomen*`);
 
         await conn.sendMessage(m.chat, { react: { text: "🔍", key: m.key } });
 
@@ -29,7 +29,7 @@ module.exports = {
                 headers: { 'accept': '*/*' }
             });
 
-            if (!data.status || !data.result) throw new Error("Gagal convert ke MP3 via ZiaUlhaq API.");
+            if (!data.status || !data.result) throw new Error("Gagal convert ke MP3 via API.");
 
             const { title, duration, downloadUrl, thumbnail } = data.result;
 
@@ -39,7 +39,7 @@ module.exports = {
             caption += `┃ ⏳ *𝙳𝚞𝚛𝚊𝚝𝚒𝚘𝚗:* ${duration}\n`;
             caption += `┃ 🔗 *𝚂𝚘𝚞𝚛𝚌𝚎:* YouTube\n`;
             caption += `┗━━━━━━━━━━━━━━━━━━━━┛\n\n`;
-            caption += `_Sabar ya Yus, audionya lagi meluncur..._ 🚀`;
+            caption += `_Sabar ya, audionya lagi meluncur..._ 🚀`;
 
             await conn.sendMessage(m.chat, { 
                 image: { url: thumbnail || video.thumbnail }, 
