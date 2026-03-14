@@ -43,8 +43,8 @@ module.exports = {
                 fileName: `${res.title}.mp3`,
                 contextInfo: {
                     externalAdReply: {
-                        title: '𝚈𝙾𝚄𝚃𝚄𝙱𝙴 𝙼𝚄𝚂𝙸𝙲 𝚂𝚄𝙲𝙲𝙴𝚂𝚂',
-                        body: `Judul: ${res.title}\nKualitas: ${res.quality}`,
+                        title: `${res.title}`,
+                        body: '𝚈𝙾𝚄𝚃𝚄𝙱𝙴 𝙼𝚄𝚂𝙸𝙲 𝚂𝚄𝙲𝙲𝙴𝚂𝚂',
                         thumbnailUrl: video.thumbnail, // Pakai thumbnail dari hasil search
                         sourceUrl: videoUrl,
                         mediaType: 1,
@@ -56,7 +56,7 @@ module.exports = {
             await conn.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
 
         } catch (e) {
-            console.error("Error Play Junzz:", e);
+            console.error("Error Play:", e);
             await conn.sendMessage(m.chat, { react: { text: "❌", key: m.key } });
             m.reply(`❌ *Terjadi Kesalahan:* ${e.message || "Gagal memproses lagu."}`);
         }
