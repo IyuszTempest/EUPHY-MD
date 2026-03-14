@@ -1,60 +1,75 @@
 /**
  * Euphy-Bot - YouTube Play Downloader
- * Integrated with Iyusz API (iyusztempest.my.id)
+ * Updated to ZiaUlhaq API ✨
  */
 
 const axios = require('axios');
+const yts = require('yt-search'); // Pastikan sudah install library ini: npm install yt-search
 
 module.exports = {
     command: ['play'],
     category: 'downloader',
     noPrefix: true,
     call: async (conn, m, { text, usedPrefix, command }) => {
-        if (!text) return m.reply(`Masukkan judul lagunya! Contoh: *${usedPrefix + command} kawaikute gomen*`);
+        if (!text) return m.reply(`Masukkan judul lagunya, Yus! Contoh: *${usedPrefix + command} Kawaikute Gomen*`);
 
-        await conn.sendMessage(m.chat, { react: { text: "🎵", key: m.key } });
+        await conn.sendMessage(m.chat, { react: { text: "🔍", key: m.key } });
 
         try {
-            // URL API sesuai format yang kamu berikan
-            const apiUrl = `https://iyusztempest.my.id/api/download?feature=play&query=${encodeURIComponent(text)}&apikey=${global.apiyus}`;
-            
-            const response = await axios.get(apiUrl);
-            const res = response.data;
+            // 1. Cari video di YouTube berdasarkan text/judul
+            const search = await yts(text);
+            const video = search.videos[0];
+            if (!video) return m.reply("Aduh, lagunya nggak ketemu nih... Coba judul lain?");
 
-            if (res.status !== "success") return m.reply("Gagal mengambil lagu. Pastikan API kamu sedang aktif!");
+            const videoUrl = video.url;
 
-            const { title, videoId, download_url } = res.result;
+            // 2. Tembak ke API ZiaUlhaq buat dapetin link download MP3
+            const apiUrl = `https://api.ziaul.my.id/api/downloader/ytmp3?url=${encodeURIComponent(videoUrl)}`;
+            const { data } = await axios.get(apiUrl, {
+                headers: { 'accept': '*/*' }
+            });
 
-            let caption = `╭━━〔 🎵 *𝚈𝚃 𝙿𝙻𝙰𝚈* 〕━━┓\n`;
+            if (!data.status || !data.result) throw new Error("Gagal convert ke MP3 via ZiaUlhaq API.");
+
+            const { title, duration, downloadUrl, thumbnail } = data.result;
+
+            // 3. Susun Caption biar estetik ala bot gaul
+            let caption = `╭━━〔 🎵 *𝙴𝚄𝙿𝙷𝚈 𝙿𝙻𝙰𝚈* 〕━━┓\n`;
             caption += `┃ 📌 *𝚃𝚒𝚝𝚕𝚎:* ${title}\n`;
-            caption += `┃ 🆔 *𝚅𝚒𝚍𝚎𝚘 𝙸𝙳:* ${videoId}\n`;
-            caption += `┃ 🔗 *𝙰𝙿𝙸:* iyusztempest.my.id\n`;
+            caption += `┃ ⏳ *𝙳𝚞𝚛𝚊𝚝𝚒𝚘𝚗:* ${duration}\n`;
+            caption += `┃ 🔗 *𝚂𝚘𝚞𝚛𝚌𝚎:* YouTube\n`;
             caption += `┗━━━━━━━━━━━━━━━━━━━━┛\n\n`;
-            caption += `_Sedang mengirim audio, mohon tunggu..._`;
+            caption += `_Sabar ya Yus, audionya lagi meluncur..._ 🚀`;
 
-            // Kirim info lagu terlebih dahulu
-            await m.reply(caption);
+            await conn.sendMessage(m.chat, { 
+                image: { url: thumbnail || video.thumbnail }, 
+                caption: caption 
+            }, { quoted: m });
 
-            // Kirim file audio ke WhatsApp
-            return await conn.sendMessage(m.chat, {
-                audio: { url: download_url },
+            // 4. Kirim Audio
+            await conn.sendMessage(m.chat, {
+                audio: { url: downloadUrl },
                 mimetype: 'audio/mpeg',
                 fileName: `${title}.mp3`,
                 contextInfo: {
                     externalAdReply: {
                         title: "EUPHY MUSIC PLAYER",
-                        body: title,
-                        thumbnailUrl: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
-                        sourceUrl: download_url,
+                        body: `Playing: ${title}`,
+                        thumbnailUrl: thumbnail || video.thumbnail,
+                        sourceUrl: videoUrl,
                         mediaType: 1,
                         renderLargerThumbnail: true
                     }
                 }
             }, { quoted: m });
 
+            await conn.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
+
         } catch (e) {
-            console.error(e);
-            return m.reply(`Terjadi kesalahan pada sistem API! ❌\n\n*Error:* ${e.message}`);
+            console.error("Error Play:", e);
+            await conn.sendMessage(m.chat, { react: { text: "❌", key: m.key } });
+            m.reply(`Yah error... ❌\n*Pesan:* ${e.message || "API ZiaUlhaq lagi sibuk kali ya?"}`);
         }
     }
 };
+                
