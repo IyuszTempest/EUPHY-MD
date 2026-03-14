@@ -1,6 +1,7 @@
+
 /**
  * Euphy-Bot - YouTube MP3 Downloader ✨
- * API: ZiaUlhaq
+ * Menggunakan API Junzz (Stable Download)
  */
 
 const axios = require('axios');
@@ -10,33 +11,36 @@ module.exports = {
     category: 'downloader',
     noPrefix: true,
     call: async (conn, m, { args, usedPrefix, command }) => {
-        // URLのチェック [cite: 2025-05-24]
-        if (!args[0]) return m.reply(`*Contoh:* ${usedPrefix + command} https://www.youtube.com/watch?v=1aQGYPhp8uA`);
+        // Cek apakah ada URL yang dimasukkan
+        if (!args[0]) return m.reply(`*Contoh:* ${usedPrefix + command} https://www.youtube.com/watch?v=HWjCStB6k4o`);
+
+        // Validasi simpel link YouTube
+        if (!/youtube\.com|youtu\.be/i.test(args[0])) return m.reply("❌ Masukkan link YouTube yang valid!");
 
         try {
             await conn.sendMessage(m.chat, { react: { text: "🎧", key: m.key } });
 
-            // ZiaUlhaq API へのリクエスト [cite: 2026-03-01]
-            const apiUrl = `https://api.ziaul.my.id/api/downloader/ytmp3?url=${encodeURIComponent(args[0])}`;
-            const response = await axios.get(apiUrl, {
-                headers: { 'accept': '*/*' }
-            });
+            // Request ke API Junzz
+            const apiUrl = `https://www.api-junzz.web.id/download/ytmp3?url=${encodeURIComponent(args[0])}`;
+            const { data } = await axios.get(apiUrl);
 
-            const res = response.data;
-            if (!res.status || !res.result) throw "Gagal mendapatkan videonya";
+            if (!data.status || !data.result) {
+                throw new Error("Gagal mengambil data dari server API.");
+            }
 
-            const { title, quality, duration, downloadUrl, thumbnail } = res.result;
+            const res = data.result;
 
-            // 音声ファイルの送信 (URL ストリーミング方式で RAM 節約)
+            // Kirim Audio
             await conn.sendMessage(m.chat, { 
-                audio: { url: downloadUrl }, 
+                audio: { url: res.download_url }, 
                 mimetype: 'audio/mpeg',
-                fileName: `${title}.mp3`,
+                fileName: `${res.title}.mp3`,
                 contextInfo: {
                     externalAdReply: {
                         title: '𝚈𝙾𝚄𝚃𝚄𝙱𝙴 𝙼𝚄𝚂𝙸𝙲 𝚂𝚄𝙲𝙲𝙴𝚂𝚂',
-                        body: `Title: ${title}\nDuration: ${duration}`,
-                        thumbnailUrl: thumbnail,
+                        body: `Judul: ${res.title}\nKualitas: ${res.quality}`,
+                        // Thumbnail default YT karena API Junzz tidak menyediakan thumbnail di result
+                        thumbnailUrl: `https://i.ytimg.com/vi/${args[0].split('v=')[1]?.split('&')[0] || args[0].split('/').pop().split('?')[0]}/hqdefault.jpg`,
                         sourceUrl: args[0],
                         mediaType: 1,
                         renderLargerThumbnail: true
@@ -47,8 +51,10 @@ module.exports = {
             await conn.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
 
         } catch (e) {
-            console.error(e);
-            m.reply(`❌ *Error:* ${e.message || e}`);
+            console.error("Error ytmp3 Junzz:", e);
+            await conn.sendMessage(m.chat, { react: { text: "❌", key: m.key } });
+            m.reply(`❌ *Terjadi Kesalahan:* ${e.message || "Gagal memproses permintaan."}`);
         }
     }
 };
+                                                                
