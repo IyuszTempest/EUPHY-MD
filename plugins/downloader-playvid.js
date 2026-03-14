@@ -1,51 +1,51 @@
 /**
- * Euphy-Bot - YouTube Play (Search & Stable Download) ✨
- * Optimized for Lunes Host 512MB RAM
+ * Euphy-Bot - YouTube Video Play Downloader ✨
+ * Optimized for Stability
  */
 
 const axios = require('axios');
+const yts = require('yt-search');
 
 module.exports = {
     command: ['playvid'],
     category: 'downloader',
-    noPrefix: true, // プレフィックスなしで動作
+    noPrefix: true,
     call: async (conn, m, { text, usedPrefix, command }) => {
-        if (!text) return m.reply(`*例:* ${command} ray of light hanatan`);
+        if (!text) return m.reply(`Masukkan judul video yang ingin dicari! Contoh: *${usedPrefix + command} hanatan ray of light*`);
 
         try {
             await conn.sendMessage(m.chat, { react: { text: "🔍", key: m.key } });
 
-            // 1. まずは検索してメタデータとURLを取得 [cite: 2026-03-07]
-            const searchApi = `https://api.vreden.my.id/api/v1/download/play/video?query=${encodeURIComponent(text)}`;
-            const searchRes = await axios.get(searchApi);
-            
-            if (!searchRes.data.status || !searchRes.data.result.metadata) throw "動画情報が見つからなかったよ。";
-            
-            const meta = searchRes.data.result.metadata;
-            const videoUrl = meta.url;
+            // 1. Mencari video menggunakan yt-search
+            const search = await yts(text);
+            const video = search.videos[0];
+            if (!video) return m.reply("Video tidak ditemukan. Coba kata kunci lain.");
+
+            const videoUrl = video.url;
 
             await conn.sendMessage(m.chat, { react: { text: "⏳", key: m.key } });
 
-            // 2. 専用ダウンロードエンドポイントを叩く (360p固定でRAM負荷軽減)
-            const dlApi = `https://api.vreden.my.id/api/v1/download/youtube/video?url=${encodeURIComponent(videoUrl)}&quality=360`;
-            const dlRes = await axios.get(dlApi);
+            // 2. Mengambil link download dari API Downloader
+            const apiUrl = `https://api.ziaul.my.id/api/downloader/ytmp4?url=${encodeURIComponent(videoUrl)}`;
+            const { data } = await axios.get(apiUrl, {
+                headers: { 'accept': '*/*' }
+            });
 
-            // エラーハンドリング: ダウンロードリンクが取得できない場合 [cite: 2026-03-07]
-            if (!dlRes.data.status || !dlRes.data.result.download || !dlRes.data.result.download.url) {
-                return m.reply(`⚠️ *Download Error:* APIが混み合っているみたい。\n\n📌 *Title:* ${meta.title}\n🔗 *URL:* ${meta.url}\n\nこのURLをブラウザで開いてみてね、ユス！`);
+            if (!data.status || !data.result || !data.result.downloadUrl) {
+                return m.reply(`⚠️ *Gagal mengambil video.* API mungkin sedang sibuk.\n\n📌 *Judul:* ${video.title}\n🔗 *Link:* ${video.url}`);
             }
 
-            const downloadUrl = dlRes.data.result.download.url;
+            const res = data.result;
 
-            // 3. ビデオを送信
+            // 3. Mengirim Video ke WhatsApp
             await conn.sendMessage(m.chat, { 
-                video: { url: downloadUrl }, 
-                caption: `╭━━〔 ⛩️ *𝚈𝚃 𝚅𝙸𝙳𝙴𝙾 𝙿𝙻𝙰𝚈* ⛩️ 〕━━┓\n┃ 📝 *Title:* ${meta.title}\n┃ 🎬 *Author:* ${meta.author.name}\n┃ ⏱️ *Duration:* ${meta.timestamp}\n┗━━━━━━━━━━━━━━━━━━━━┛\n\nEuphylia Magenta ✨`,
+                video: { url: res.downloadUrl }, 
+                caption: `╭━━〔 ⛩️ *𝚈𝚃 𝚅𝙸𝙳𝙴𝙾 𝙿𝙻𝙰𝚈* ⛩️ 〕━━┓\n┃ 📝 *Judul:* ${res.title}\n┃ ⏱️ *Durasi:* ${res.duration}\n┃ ⚙️ *Kualitas:* ${res.quality}\n┗━━━━━━━━━━━━━━━━━━━━┛\n\nEuphylia Magenta ✨`,
                 contextInfo: {
                     externalAdReply: {
-                        title: '🎥 𝙽𝙾𝚆 𝙿𝙻𝙰𝚈𝙸𝙽𝙶',
-                        body: meta.title,
-                        thumbnailUrl: meta.thumbnail,
+                        title: '🎥 𝚂𝙴𝙳𝙰𝙽𝙶 𝙳𝙸𝙿𝚄𝚃𝙰𝚁',
+                        body: res.title,
+                        thumbnailUrl: res.thumbnail || video.thumbnail,
                         sourceUrl: videoUrl,
                         mediaType: 1,
                         renderLargerThumbnail: true
@@ -57,8 +57,9 @@ module.exports = {
 
         } catch (e) {
             console.error(e);
-            m.reply(`❌ *Euphy Error:* ${e.message || "Error"}`);
+            await conn.sendMessage(m.chat, { react: { text: "❌", key: m.key } });
+            m.reply(`❌ *Terjadi Kesalahan:* ${e.message || "Sistem error"}`);
         }
     }
 };
-            
+    
