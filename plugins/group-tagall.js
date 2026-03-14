@@ -6,7 +6,7 @@
 module.exports = {
     command: ['tagall', 'everyone', 'semua'],
     category: 'group',
-    premium: true,
+    premium: false,
     noPrefix: false, 
     call: async (conn, m, { args, text, isOwner }) => {
         // Cek apakah pesan dikirim di grup
