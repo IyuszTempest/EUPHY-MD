@@ -122,33 +122,30 @@ async function startEuphy() {
         }
     });
 
-    // --- [ AUTO BACKUP DATABASE ] ---
+    // --- [ AUTO BACKUP DATABASE - FINAL STABLE ] ---
 setInterval(async () => {
     try {
         const fs = require('fs');
-        const path = './database.json'; // Memastikan file database ada
+        const path = './database.json';
         
         if (fs.existsSync(path)) {
-            // Cek lidowner dulu, kalau gak ada baru pakai owner biasa
-            let targetJid = (global.lidowner && global.lidowner[0]) 
-                ? global.lidowner[0][0] 
-                : global.owner[0][0].replace(/[^0-9]/g, '') + '@s.whatsapp.net';
-            
+            // Kita pakai JID yang sudah terbukti berhasil di tes tadi
+            let targetJid = '6282255810534@s.whatsapp.net'; 
+
             await conn.sendMessage(targetJid, {
                 document: fs.readFileSync(path),
                 mimetype: 'application/json',
-                fileName: `backup_db_${Date.now()}.json`,
-                caption: `🏮 *AUTO BACKUP DATABASE (LID)* 🏮\n\nData kamu aman!`
+                fileName: `database.json`,
+                caption: `🏮 *AUTO BACKUP DATABASE* 🏮\n\nData user aman terkirim otomatis!`
             });
             
-            console.log(chalk.green(`[ SYSTEM ] Backup database terkirim ke LID: ${targetJid}`));
+            console.log(`[ SYSTEM ] Auto backup sukses terkirim ke: ${targetJid}`);
         }
     } catch (e) {
-        // Biar bot di Lunes Host gak crash kalau gagal kirim
-        console.error(chalk.red(`[ ERROR BACKUP ] ${e.message}`));
+        console.log(`[ ERROR BACKUP ] Gagal kirim backup otomatis: ${e.message}`);
     }
-}, 1000 * 60 * 60); // Tetap 1 jam sekali biar RAM 512MB gak sesak
-
+}, 1000 * 60 * 60); // Eksekusi setiap 1 jam
+    
     
         // --- [ 7. GROUP PARTICIPANTS UPDATE (Welcome/Left) ] ---
     conn.ev.on('group-participants.update', async (anu) => {
@@ -222,17 +219,17 @@ setInterval(async () => {
 
             // 1. Jam 9 Malam (21:00) - Pengingat Tidur
             cron.schedule('0 0 21 * * *', () => {
-                broadcastGrup(`╭━━〔 ⛩️ *𝙽𝙸𝙶𝙷𝚃𝚈 𝚁𝙴𝙼𝙸𝙽𝙳𝙴𝚁* ⛩️ 〕━━┓\n┃ 🏮 Sudah jam 9 malam!\n┃ 💤 Waktunya istirahat biar besok\n┃ ✨ Badan-nya tetep seger.\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n_Lanjut besok lagi ya... ✨_`);
+                broadcastGrup(`╭━━〔 ⛩️ *𝙽𝙸𝙶𝙷𝚃𝚈 𝚁𝙴𝙼𝙸𝙽𝙳𝙴𝚁* ⛩️ 〕━━┓\n┃ 🏮 Udah jam 9 malam uy!\n┃ 💤 Waktunya turu biar besok\n┃ ✨ Badan-nya tetep seger.\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n_Lanjut besok lagi ya... ✨_`);
             }, { timezone: "Asia/Jakarta" });
 
             // 2. Jam 12 Siang (12:00) - Pengingat Produktivitas
             cron.schedule('0 0 12 * * *', () => {
-                broadcastGrup(`╭━━〔 ⛩️ *SELAMAT SIANG* ⛩️ 〕━━┓\n┃ 🍱 Udah siang aja nih, jangan lupa beristirahat sebentar.\n┃ 🎖️ Kamu hari ini sudah hebat!!\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n_Tetap semangat demi masa depan yang cerah..✨_`);
+                broadcastGrup(`╭━━〔 ⛩️ *SELAMAT SIANG* ⛩️ 〕━━┓\n┃ 😼 Udah siang aja nih, jangan lupa rehat sejenak\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n_Tetap semangat demi masa depan yang cerah..✨_`);
             }, { timezone: "Asia/Jakarta" });
 
             // 3. Jam 6 Pagi (06:00) - Pengingat Produktivitas
             cron.schedule('0 0 6 * * *', () => {
-                broadcastGrup(`╭━━〔 ⛩️ *𝙼𝙾𝚁𝙽𝙸𝙽𝙶 𝚂𝙿𝙸𝚁𝙸𝚃* ⛩️ 〕━━┓\n┃ 🌅 Bangun! Sudah pagi woy.\n┃ 🚀 Ayo yang semangat kak!!\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n_The world is waiting for your magic... ✨_`);
+                broadcastGrup(`╭━━〔 ⛩️ *𝙼𝙾𝚁𝙽𝙸𝙽𝙶 𝚂𝙿𝙸𝚁𝙸𝚃* ⛩️ 〕━━┓\n┃ 😡 Bangun woy, udah pagi nih.\n┃ 🚀 Ayo yang semangat dong!!\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n_The world is waiting for your magic... ✨_`);
             }, { timezone: "Asia/Jakarta" });
 
 // --- [ SISTEM AUTO-OUT SEWA ] ---
