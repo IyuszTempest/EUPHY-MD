@@ -1,58 +1,58 @@
 /**
  * Euphy-Bot - Facebook Downloader ✨
- * API: Vreden
+ * Scraper: fdown.net
  */
 
-const axios = require('axios');
+const cloudscraper = require('cloudscraper');
+
+// Fungsi pembersih URL
+function clean(url) {
+    return url?.replace(/&amp;/g, '&') || null;
+}
 
 module.exports = {
     command: ['fb', 'facebook'],
     category: 'downloader',
     noPrefix: true,
     call: async (conn, m, { args, usedPrefix, command }) => {
-        if (!args[0]) return m.reply(`*Contoh:* ${usedPrefix + command} https://www.facebook.com/share/r/16sXMhKi6e/`);
+        if (!args[0]) return m.reply(`*Contoh:* ${usedPrefix + command} https://www.facebook.com/share/r/1Cbddc8AD6/`);
 
         try {
-            await conn.sendMessage(m.chat, { react: { text: "📥", key: m.key } });
+            await conn.sendMessage(m.chat, { react: { text: "⏳", key: m.key } });
 
-            // Request ke API FB Downloader [cite: 2026-03-07]
-            const apiUrl = `https://api.vreden.my.id/api/v1/download/facebook?url=${encodeURIComponent(args[0])}`;
-            const response = await axios.get(apiUrl);
-            const res = response.data;
+            // Proses Scrape ke FDown
+            const res = await cloudscraper.post({
+                uri: 'https://www.fdown.net/download.php',
+                formData: { URLz: args[0] },
+                headers: {
+                    'Origin': 'https://www.fdown.net',
+                    'Referer': 'https://www.fdown.net/',
+                    'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Mobile Safari/537.36 EdgA/145.0.0.0',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8'
+                }
+            });
 
-            if (!res.status || !res.result.download) throw "Gagal mengambil video, pastikan link publik ya!";
+            let sdlink = clean(res.match(/id="sdlink" href="([^"]+)"/)?.[1]);
+            let hdlink = clean(res.match(/id="hdlink" href="([^"]+)"/)?.[1]);
 
-            const { title, durasi, thumbnail, download } = res.result;
-            const videoUrl = download.hd || download.sd; // Prioritas HD kalau ada
+            // Ambil link HD kalau ada, kalau nggak ada pakai SD
+            let finalVideo = hdlink || sdlink;
 
-            let capt = `╭━━〔 ⛩️ *𝙵𝙰𝙲𝙴𝙱𝙾𝙾𝙺 𝙳𝙻* ⛩️ 〕━━┓\n`;
-            capt += `┃ 📝 *Title:* ${title}\n`;
-            capt += `┃ ⏱️ *Durasi:* ${durasi}\n`;
-            capt += `┃ 📽️ *Quality:* ${download.hd ? 'HD' : 'SD'}\n`;
-            capt += `┗━━━━━━━━━━━━━━━━━━━━┛\n\n`;
-            capt += `*Euphylia Magenta* ✨`;
+            if (!finalVideo) throw new Error("Gagal mendapatkan link download. Pastikan video publik!");
 
             // Kirim Video
             await conn.sendMessage(m.chat, { 
-                video: { url: videoUrl }, 
-                caption: capt,
-                contextInfo: {
-                    externalAdReply: {
-                        title: '𝙵𝙰𝙲𝙴𝙱𝙾𝙾𝙺 𝚅𝙸𝙳𝙴𝙾 𝙳𝙾𝚆𝙽𝙻𝙾𝙰𝙳',
-                        body: title,
-                        thumbnailUrl: thumbnail,
-                        sourceUrl: args[0],
-                        mediaType: 1,
-                        renderLargerThumbnail: true
-                    }
-                }
+                video: { url: finalVideo }, 
+                caption: `✅ *FACEBOOK DOWNLOAD SUCCESS*\n\nQuality: ${hdlink ? 'HD' : 'SD'}`,
+                fileName: `fb_download.mp4`
             }, { quoted: m });
 
             await conn.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
 
         } catch (e) {
             console.error(e);
-            m.reply(`❌ *Euphy Error:* ${e.message || "Lagi limit atau link salah."}`);
+            await conn.sendMessage(m.chat, { react: { text: "❌", key: m.key } });
+            m.reply(`❌ *Error:* ${e.message || "Terjadi kesalahan saat mendownload video."}`);
         }
     }
 };
