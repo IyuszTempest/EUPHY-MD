@@ -99,6 +99,26 @@ async function startEuphy() {
         }
     }
 
+     // AUTO RELOAD PLUGINS (WATCHER)
+    fs.watch(pluginsFolder, (event, filename) => {
+        if (filename && filename.endsWith('.js')) {
+            const filePath = path.join(pluginsFolder, filename);
+            if (fs.existsSync(filePath)) {
+                try {
+                    // Hapus cache agar file terbaca ulang
+                    delete require.cache[require.resolve(filePath)];
+                    global.plugins[filename] = require(filePath);
+                    console.log(chalk.green(`  [ WATCHER ] Plugin Updated: ${filename}`));
+                } catch (e) {
+                    console.log(chalk.red(`  [ WATCHER ERROR ] Gagal muat ${filename}: ${e.message}`));
+                }
+            } else {
+                delete global.plugins[filename];
+                console.log(chalk.yellow(`  [ WATCHER ] Plugin Deleted: ${filename}`));
+            }
+        }
+    });
+
     // --- [ 5. PAIRING SYSTEM ] ---
     if (!conn.authState.creds.registered) {
         console.log(chalk.yellow("[!] Masukkan nomor WhatsApp (628xxx):"));
