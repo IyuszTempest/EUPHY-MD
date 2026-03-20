@@ -12,12 +12,18 @@ const path = require('path');
 module.exports = {
     async handler(chatUpdate) {
         if (!chatUpdate) return;
-        let m = chatUpdate.messages[chatUpdate.messages.length - 1];
+        // AMBIL PESAN PERTAMA DARI ARRAY
+        let m = chatUpdate.messages[0]; 
         if (!m) return;
         
         try {
-            if (global.db.data == null) await global.loadDatabase();
-            m = smsg(this, m);
+            // Pastikan database terload sebelum smsg dipanggil
+            if (!global.db || !global.db.data) {
+                global.db = { data: { users: {}, chats: {}, settings: {} } };
+            }
+            
+            // Inisialisasi smsg (PENTING!)
+            m = smsg(this, m); 
 
             // --- [ 1. SMART DETECTION (JID & LID) ] ---
             m.isGroup = m.chat.endsWith('@g.us');
