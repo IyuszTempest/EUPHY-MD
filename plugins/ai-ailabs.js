@@ -7,7 +7,7 @@ const axios = require('axios');
 module.exports = {
     command: ['ailabs', 'aiimg'],
     category: 'ai',
-    premium: true,
+    premium: false,
     noPrefix: true, // Disarankan pakai prefix biar rapi
     call: async (conn, m, { text, command, usedPrefix }) => {
         // Cek input prompt
