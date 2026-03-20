@@ -4,9 +4,10 @@
  */
 
 module.exports = {
-    command: ['listprem', 'premiumlist'],
-    category: 'info',
+    command: ['listprem'],
+    category: 'owner',
     noPrefix: true,
+    owner: true,
     call: async (conn, m, { usedPrefix }) => {
         let users = global.db?.data?.users || {}
         
