@@ -8,7 +8,7 @@ module.exports = {
     command: ['deepimg'],
     category: 'ai',
     noPrefix: true, // Diubah ke false agar lebih rapi dengan usedPrefix
-    premium: true,
+    premium: false,
     call: async (conn, m, { text, command, usedPrefix }) => {
         // Pisahkan gaya dan prompt
         // Penggunaan: .deepimg anime|loli cute atau .deepimg realistic|futuristic car
