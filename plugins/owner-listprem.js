@@ -1,70 +1,78 @@
 /**
- * Euphy-Bot - List Premium (LID & JID Edition)
- * Menampilkan daftar user premium dengan deteksi ganda
+ * Euphy-Bot - List Premium (Nama & Nomor Detect)
+ * Menampilkan nama user atau nomor jika LID digunakan
  */
 
 module.exports = {
-    command: ['listprem'],
+    command: ['listprem', 'premiumlist'],
     category: 'info',
     noPrefix: true,
     call: async (conn, m, { usedPrefix }) => {
-        // Ambil database dengan Optional Chaining agar tidak crash
         let users = global.db?.data?.users || {}
         
-        // Filter user yang punya status premium atau premiumTime aktif
         let premiumUsers = Object.entries(users).filter(([id, user]) => {
-            const isPrem = user?.premium === true || user?.premium === 'true';
-            const hasTime = (typeof user?.premiumTime === 'number' && user.premiumTime > Date.now());
-            const isPermanent = user?.premiumTime === 0 || user?.premiumTime === -1;
-            return isPrem || hasTime || isPermanent;
+            return user?.premium === true; 
         })
 
-        // Jika kosong, kita coba cek juga di daftar global.owner atau global.lidowner
         if (premiumUsers.length === 0) {
-            return m.reply(`Belum ada user premium yang terdaftar di database. 🥲\n\n_Coba ketik .addprem @user 30 dulu ya!`)
+            return m.reply(`Belum ada user premium yang terdaftar. 🥲`)
         }
 
-        let txt = `*─── [ PREMIUM USER LIST ] ───*\n\n`
-        txt += `Total: *${premiumUsers.length}* User ✨\n\n`
+        // Urutkan: Permanen di atas
+        premiumUsers.sort((a, b) => {
+            if (a[1].premiumTime <= 0) return -1;
+            if (b[1].premiumTime <= 0) return 1;
+            return a[1].premiumTime - b[1].premiumTime;
+        })
+
+        let txt = `╭━━〔 ⛩️ *𝙿𝚁𝙴𝙼𝙸𝚄𝙼 𝚄𝚂𝙴𝚁𝚂* ⛩️ 〕━━┓\n`
+        txt += `┃ ✨ Total: *${premiumUsers.length}* User aktif\n`
+        txt += `┗━━━━━━━━━━━━━━━━━━━━┛\n\n`
 
         premiumUsers.forEach(([id, user], i) => {
-            // Safety check data
-            let pTime = typeof user?.premiumTime === 'number' ? user.premiumTime : 0;
-            let sisaWaktu = pTime - Date.now();
-            let status = "";
-
-            if (pTime === 0 || pTime === -1) {
-                status = "Seumur Hidup / Permanen";
-            } else if (sisaWaktu <= 0) {
-                status = "Expired (Menunggu Reset)";
-            } else {
+            let pTime = user.premiumTime;
+            let status = pTime <= 0 ? "Permanen" : "";
+            
+            if (pTime > 0) {
+                let sisaWaktu = pTime - Date.now();
                 let hari = Math.floor(sisaWaktu / 86400000);
                 let jam = Math.floor((sisaWaktu % 86400000) / 3600000);
-                let menit = Math.floor((sisaWaktu % 3600000) / 60000);
-                let detik = Math.floor((sisaWaktu % 60000) / 1000);
-                
                 if (hari > 0) status += `${hari}h `;
-                if (jam > 0) status += `${jam}j `;
-                if (menit > 0) status += `${menit}m `;
-                status += `${detik}s`;
+                status += `${jam}j`;
             }
 
-            // Deteksi apakah ID tersebut adalah LID atau JID
-            let displayName = id.includes('@lid') ? `LID: ${id.split('@')[0]}` : `@${id.split('@')[0]}`;
+            // --- [ LOGIKA DETEKSI IDENTITAS ] ---
+            let name = user.name || 'User';
+            let identity = "";
+
+            if (id.endsWith('@lid')) {
+                // Jika LID, tampilkan Nama + LID (biar tahu ini siapa)
+                identity = `👤 *${name}*\n   🆔 LID: ${id.split('@')[0]}`;
+            } else {
+                // Jika JID biasa, tampilkan Nama + Tag Nomor
+                identity = `👤 *${name}* (@${id.split('@')[0]})`;
+            }
             
-            txt += `${i + 1}. ${displayName}\n`;
+            txt += `${i + 1}. ${identity}\n`;
             txt += `   ⏳ Sisa: *${status}*\n`;
-            txt += `   📅 Exp: ${pTime > 0 ? new Date(pTime).toLocaleDateString('id-ID') : 'Infinity'}\n\n`;
+            txt += `   📅 Exp: _${pTime <= 0 ? 'Infinity' : new Date(pTime).toLocaleDateString('id-ID')}_\n${i === premiumUsers.length - 1 ? '' : '────────────────────'}\n`;
         });
 
-        txt += `_Bot running on Node ${process.version} @ Lunes Host_`
+        txt += `\n_IyuszTempest • Node ${process.version}_`
 
-        // Kirim dengan mention yang mendukung LID/JID
-        conn.reply(m.chat, txt, m, { 
+        conn.sendMessage(m.chat, { 
+            text: txt,
             contextInfo: {
-                mentionedJid: premiumUsers.map(([id]) => id),
-                // Tambahkan fkontak kalau kamu punya fiturnya di handler
+                // Tag nomor jika bukan LID agar muncul link profilnya
+                mentionedJid: premiumUsers.map(([id]) => id).filter(v => !v.endsWith('@lid')),
+                externalAdReply: {
+                    title: "𝙴𝚄𝙿𝙷𝚈 𝙿𝚁𝙴𝙼𝙸𝚄𝙼 𝚂𝚈𝚂𝚃𝙴𝙼",
+                    body: `Verified Premium Users`,
+                    thumbnailUrl: global.imgall,
+                    sourceUrl: global.idch,
+                    mediaType: 1
+                }
             }
-        })
+        }, { quoted: m })
     }
-    }
+}
