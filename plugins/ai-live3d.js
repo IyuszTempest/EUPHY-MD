@@ -8,7 +8,7 @@ module.exports = {
     command: ['live3d'],
     category: 'ai',
     noPrefix: true, // Disarankan pakai prefix agar tidak bentrok dengan chat biasa
-    premium: true,
+    premium: false,
     call: async (conn, m, { text, command, usedPrefix }) => {
         // Cek input prompt dari user
         if (!text) return m.reply(`Mau buat gambar anime 3D apa? 🌸\nContoh: *${usedPrefix + command} anime cute girls*`);
