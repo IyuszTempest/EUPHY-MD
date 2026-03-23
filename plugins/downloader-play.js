@@ -1,52 +1,46 @@
 /**
  * Euphy-Bot - YouTube Play Downloader ✨
- * Menggunakan API Junzz (Stable Download)
+ * Menggunakan API Ziaul (Query Direct Download)
  */
 
 const axios = require('axios');
-const yts = require('yt-search');
 
 module.exports = {
     command: ['play'],
     category: 'downloader',
     noPrefix: true,
     call: async (conn, m, { text, usedPrefix, command }) => {
-        if (!text) return m.reply(`Masukkan judul lagunya! Contoh: *${usedPrefix + command} DJ Desa All Night*`);
+        if (!text) return m.reply(`Ayo mau dengerin lagu apa hari ini? ✨\nContoh: *${usedPrefix + command} Kawaikute Gomen*`);
 
         try {
+            // Reaksi lagi nyari biar gaul
             await conn.sendMessage(m.chat, { react: { text: "🔍", key: m.key } });
 
-            // 1. Cari video di YouTube
-            const search = await yts(text);
-            const video = search.videos[0];
-            if (!video) return m.reply("Aduh, lagunya nggak ketemu nih...");
-
-            // Bersihkan URL supaya API Junzz lebih mudah prosesnya
-            const videoUrl = `https://www.youtube.com/watch?v=${video.videoId}`;
-
-            await conn.sendMessage(m.chat, { react: { text: "🎧", key: m.key } });
-
-            // 2. Request ke API Junzz
-            const apiUrl = `https://www.api-junzz.web.id/download/ytmp3?url=${encodeURIComponent(videoUrl)}`;
-            const { data } = await axios.get(apiUrl);
+            // Request ke API Ziaul menggunakan query langsung
+            const apiUrl = `https://api.ziaul.my.id/api/downloader/ytplaymp3?query=${encodeURIComponent(text)}`;
+            const { data } = await axios.get(apiUrl, {
+                headers: { 'accept': '*/*' }
+            });
 
             if (!data.status || !data.result) {
-                throw new Error("Server API sedang bermasalah atau konversi gagal.");
+                throw new Error("Aduh, servernya lagi mogok atau lagunya nggak ketemu...");
             }
 
             const res = data.result;
 
-            // 3. Kirim Audio
+            await conn.sendMessage(m.chat, { react: { text: "🎧", key: m.key } });
+
+            // Kirim Audio dengan tampilan keren
             await conn.sendMessage(m.chat, { 
-                audio: { url: res.download_url }, 
+                audio: { url: res.downloadUrl }, 
                 mimetype: 'audio/mpeg',
                 fileName: `${res.title}.mp3`,
                 contextInfo: {
                     externalAdReply: {
-                        title: `${res.title}`,
-                        body: '𝚈𝙾𝚄𝚃𝚄𝙱𝙴 𝙼𝚄𝚂𝙸𝙲 𝚂𝚄𝙲𝙲𝙴𝚂𝚂',
-                        thumbnailUrl: video.thumbnail, // Pakai thumbnail dari hasil search
-                        sourceUrl: videoUrl,
+                        title: res.title,
+                        body: `Duration: ${res.duration} | Quality: ${res.quality}`,
+                        thumbnailUrl: res.thumbnail,
+                        sourceUrl: res.videoUrl,
                         mediaType: 1,
                         renderLargerThumbnail: true
                     }
@@ -56,9 +50,9 @@ module.exports = {
             await conn.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
 
         } catch (e) {
-            console.error("Error Play:", e);
+            console.error("Error Play Ziaul:", e);
             await conn.sendMessage(m.chat, { react: { text: "❌", key: m.key } });
-            m.reply(`❌ *Terjadi Kesalahan:* ${e.message || "Gagal memproses lagu."}`);
+            m.reply(`❌ *Gagal nih:* ${e.message || "Ada masalah teknis, coba lagi nanti ya!"}`);
         }
     }
 };
