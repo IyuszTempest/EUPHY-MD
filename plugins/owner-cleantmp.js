@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 
 module.exports = {
-    command: ['cleartmp', 'clearsession', 'cleanup'],
+    command: ['cleartmp'],
     category: 'owner',
     owner: true, // Khusus Yus supaya aman
     noPrefix: true,
