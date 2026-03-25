@@ -13,7 +13,7 @@ module.exports = {
         if (!user) return m.reply("Daftar dulu di database!");
 
         // --- INISIALISASI DATA MBG ---
-        if (typeof user.mbg_budget === 'undefined') user.mbg_budget = 500000; 
+        if (typeof user.mbg_budget === 'undefined') user.mbg_budget = 50000000; 
         if (typeof user.mbg_reputation === 'undefined') user.mbg_reputation = 50; 
         if (typeof user.last_mbg === 'undefined') user.last_mbg = 0;
 
@@ -121,7 +121,7 @@ module.exports = {
         // --- 5. SUBSIDI ANGGARAN ---
         if (cmd === 'cekdana') {
             if (user.mbg_reputation >= 80) {
-                let subsidi = 150000;
+                let subsidi = 1500000;
                 user.mbg_budget += subsidi;
                 // Turunkan sedikit reputasi biar gak spam subsidi terus
                 user.mbg_reputation -= 10; 
