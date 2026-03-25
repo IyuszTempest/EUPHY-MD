@@ -13,7 +13,7 @@ module.exports = {
     noPrefix: true,
     call: async (conn, m, { usedPrefix, command, text }) => {
         let user = global.db.data.users[m.sender];
-        if (!user) return m.reply("Daftar dulu di database, Proxy!");
+        if (!user) return m.reply("Daftar dulu kak!");
 
         // --- INISIALISASI DATA ---
         if (typeof user.sawit === 'undefined') user.sawit = 0; // Jumlah pohon
@@ -27,7 +27,7 @@ module.exports = {
             let helpText = `╭━━〔 🚜 *𝙿𝚄𝚂𝙰𝚃 𝙸𝙽𝙵𝙾 𝚂𝙰𝚆𝙸𝚃* 🚜 〕━━┓\n`;
             helpText += `┃\n`;
             helpText += `┃ 1️⃣ *Beli Bibit:* \n`;
-            helpText += `┃ \`${usedPrefix}tanamsawit\` (Rp5.000/phn)\n`;
+            helpText += `┃ \`${usedPrefix}tanamsawit\` (Rp4.999/phn)\n`;
             helpText += `┃\n`;
             helpText += `┃ 2️⃣ *Egrek/Panen:* \n`;
             helpText += `┃ \`${usedPrefix}panen\` (1 jam sekali)\n`;
@@ -39,7 +39,7 @@ module.exports = {
             helpText += `┃ \`${usedPrefix}sawit\` \n`;
             helpText += `┃\n`;
             helpText += `┗━━━━━━━━━━━━━━━━━━━━┛\n`;
-            helpText += `_Semangat kerjanya, Proxy!_ 🪓`;
+            helpText += `_Semangat kerjanya, demi negara!_ 🪓`;
             return m.reply(helpText);
         }
 
@@ -73,7 +73,7 @@ module.exports = {
             let cooldown = 3600000; // 1 Jam
             if (new Date() - user.last_panen < cooldown) {
                 let sisa = cooldown - (new Date() - user.last_panen);
-                return m.reply(`⏳ Belum brondol, Proxy! Tunggu *${Math.ceil(sisa / 60000)} menit* lagi.`);
+                return m.reply(`⏳ Belum brondol! Tunggu *${Math.ceil(sisa / 60000)} menit* lagi.`);
             }
 
             let hasil = 0;
@@ -113,7 +113,7 @@ module.exports = {
             nota += `💹 *Harga:* Rp${hargaPerKg}/Kg\n`;
             nota += `💰 *Cair:* Rp${totalDuit.toLocaleString()}\n\n`;
             nota += `━━━━━━━━━━━━━━━━━━━━\n`;
-            nota += `_Duit masuk! Hati-hati di jalan, Juragan!_ 💸`;
+            nota += `_Duit cair! Hati-hati di jalan, Juragan!_ 💸`;
 
             return conn.sendMessage(m.chat, { text: nota, edit: key });
         }
