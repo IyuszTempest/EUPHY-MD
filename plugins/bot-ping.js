@@ -31,19 +31,19 @@ module.exports = {
         const uptime = clockString(process.uptime() * 1000);
         const serverLoc = "Indonesia 🇮🇩 / Singapore 🇸🇬"; 
 
-        let pingMsg = `╭━━━━〔 ⛩️ *𝚂𝚈𝚂𝚃𝙴𝙼 𝚂𝚃𝙰𝚃𝚄𝚂* ⛩️ 〕━━━━┓\n`
+        let pingMsg = `╭━〔 ⛩️ *𝚂𝚈𝚂𝚃𝙴𝙼 𝚂𝚃𝙰𝚃𝚄𝚂* ⛩️ 〕┓\n`
                     + `┃ 🚀 *Latensi:* ${latensi} ms\n`
                     + `┃ ⌚ *Uptime:* ${uptime}\n`
                     + `┃ 📟 *RAM:* ${ramTerpakai} MB / ${ramTotal} GB\n`
                     + `┃ 🍃 *Free:* ${freeRam} MB (Available)\n`
-                    + `┣━━━━━━━━━━━━━━━━━━━━━━┛\n`
+                    + `┣━━━━━━━━━━━━━━━━━┛\n`
                     + `┃ 💻 *𝚂𝙴𝚁𝚅𝙴𝚁 𝙸𝙽𝙵𝙾*\n`
                     + `┃ ⚙️ *CPU:* ${cpuModel}\n`
                     + `┃ 🧩 *Cores:* ${cpuCores} Threads\n`
                     + `┃ 🖥️ *OS:* ${platform} (${os.arch()})\n`
                     + `┃ 📍 *Loc:* ${serverLoc}\n`
                     + `┃ 📂 *Plugins:* ${Object.keys(global.plugins || {}).length} Active\n`
-                    + `┗━━━━━━━━━━━━━━━━━━━━━━┛\n\n`
+                    + `┗━━━━━━━━━━━━━━━━━┛\n\n`
                     + `_Euphy System is running smoothly... ✨_`;
 
         // Mengirim dengan reaksi biar keren
