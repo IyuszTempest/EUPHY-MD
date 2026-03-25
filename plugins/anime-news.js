@@ -23,7 +23,7 @@ module.exports = {
             if (!res.status || !res.data.articles) throw "Gagal ambil berita anime.";
 
             // Ambil 6 berita terbaru biar rapi
-            let capt = `╭━━〔 ⛩️ *𝙰𝙽𝙸𝙼𝙴 𝙽𝙴𝚆𝚂 𝚄𝙿𝙳𝙰𝚃𝙴* ⛩️ 〕━━┓\n┃ 🌸 *Info Hari Ini*\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n`;
+            let capt = `╭━━〔 ⛩️ *𝙰𝙽𝙸𝙼𝙴 𝙽𝙴𝚆𝚂 𝚄𝙿𝙳𝙰𝚃𝙴* ⛩️ 〕━━┓\n┃ 🌸 *Info Hari Ini*\n┗━━━━━━━━━━━━━━━━━━┛\n\n`;
             
             const articles = res.data.articles.slice(0, 6);
             articles.forEach((v, i) => {
