@@ -7,6 +7,7 @@ module.exports = {
     command: ['genemas', 'latih', 'cekgenerasi', 'wisuda', 'helpgemas'],
     category: 'game',
     premium: false,
+    noPrefix: true,
     call: async (conn, m, { usedPrefix, command, text }) => {
         let user = global.db.data.users[m.sender];
         
