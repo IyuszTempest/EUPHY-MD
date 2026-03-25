@@ -10,7 +10,7 @@ module.exports = {
     command: ['sawit', 'tanamsawit', 'panen', 'jualsawit', 'helpsawit', 'sawithelp'],
     category: 'game',
     premium: false,
-    noPrefix: false,
+    noPrefix: true,
     call: async (conn, m, { usedPrefix, command, text }) => {
         let user = global.db.data.users[m.sender];
         if (!user) return m.reply("Daftar dulu di database, Proxy!");
