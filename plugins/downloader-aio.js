@@ -13,7 +13,7 @@ module.exports = {
     premium: false,
     noPrefix: true,
     call: async (conn, m, { usedPrefix, command, text }) => {
-        if (!text) return m.reply(`Mana link-nya?\n\n*Contoh:*\n${usedPrefix + command} https://vt.tiktok.com/xxxx/`);
+        if (!text) return m.reply(`Mana link-nya?\n\n*Note*: Support Tiktok, Instagram, YouTube`);
 
         // Daftar domain yang didukung (TikTok, IG, YouTube)
         const isUrl = text.match(/(https?:\/\/(?:www\.|vm\.|vt\.|v\.|reels\.)?(?:tiktok\.com|instagram\.com|youtube\.com|youtu\.be)\/[^\s]+)/gi);
