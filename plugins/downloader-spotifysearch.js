@@ -1,6 +1,7 @@
 /**
- * Euphy-Bot - Spotify Search ✨
- * API: Vreden
+ * Spotify Search Plugin 🟢🎵
+ * Powered by Furinn API System ✨
+ * Format: Unified Plugin System
  */
 
 const axios = require('axios');
@@ -8,55 +9,50 @@ const axios = require('axios');
 module.exports = {
     command: ['spotifysearch'],
     category: 'downloader',
+    premium: false,
     noPrefix: true,
-    call: async (conn, m, { text, usedPrefix, command }) => {
-        if (!text) return m.reply(`*Contoh:* ${usedPrefix + command} vivarium ado`);
+    call: async (conn, m, { usedPrefix, command, text }) => {
+        if (!text) return m.reply(`Mau cari lagu apa di Spotify?\n\n*Contoh:*\n${usedPrefix + command} Vivarium Ado`);
+
+        await conn.sendMessage(m.chat, { react: { text: '🟢', key: m.key } });
 
         try {
-            await conn.sendMessage(m.chat, { react: { text: "🎧", key: m.key } });
+            // Nembak API Spotify Furinn dengan limit 5 sesuai JSON kamu
+            const apiUrl = `https://apii.furinn.my.id/api/search/spotify?query=${encodeURIComponent(text)}&limit=5`;
+            const { data } = await axios.get(apiUrl);
 
-            // Request ke API Spotify Vreden [cite: 2026-03-07]
-            const apiUrl = `https://api.vreden.my.id/api/v1/search/spotify?query=${encodeURIComponent(text)}&limit=5`;
-            const response = await axios.get(apiUrl);
-            const res = response.data;
+            if (!data.status || !data.result || data.result.tracks.length === 0) {
+                return m.reply('❌ Lagu ga ditemukan di Spotify. Coba judul lain!');
+            }
 
-            if (!res.status || !res.result.search_data) throw "Lagu nggak ketemu.";
+            const tracks = data.result.tracks;
+            let caption = `╭━━〔 🟢 *𝚂𝙿𝙾𝚃𝙸𝙵𝚈 𝚂𝙴𝙰𝚁𝙲𝙷* 〕━━┓\n`;
+            caption += `┃ 🔍 *Query:* ${text}\n`;
+            caption += `┃\n`;
 
-            let capt = `╭━━〔 ⛩️ *𝚂𝙿𝙾𝚃𝙸𝙵𝚈 𝚂𝙴𝙰𝚁𝙲𝙷* ⛩️ 〕━━┓\n┃ 🎧 *Query:* ${res.result.query}\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n`;
-            
-            const results = res.result.search_data;
-            results.forEach((v, i) => {
-                capt += `*${i + 1}. ${v.title}*\n`;
-                capt += `👤 *Artist:* ${v.artist}\n`;
-                capt += `💿 *Album:* ${v.album}\n`;
-                capt += `⏱️ *Duration:* ${v.duration}\n`;
-                capt += `📅 *Release:* ${v.release_date}\n`;
-                capt += `🔗 \`${v.song_link}\`\n\n`;
+            tracks.forEach((track, i) => {
+                caption += `┃ *${i + 1}. ${track.title}*\n`;
+                caption += `┃    └ 🎤 *Artis:* ${track.artist}\n`;
+                caption += `┃    └ 💿 *Album:* ${track.album}\n`;
+                caption += `┃    └ 🕒 *Durasi:* ${track.duration}\n`;
+                caption += `┃    └ 🔗 [Buka di Spotify](${track.spotify_url})\n`;
+                caption += `┃\n`;
             });
 
-            capt += `📍 *Euphylia Magenta ✨*`;
+            caption += `┗━━━━━━━━━━━━━━━━━━┛\n`;
+            caption += `_Bantu bot Euphy agar bisa online 24 jam dengan .donasi ✨_`;
 
-            // Kirim dengan cover album hasil pertama
+            // Kirim pesan dengan thumbnail dari lagu pertama biar estetik
             await conn.sendMessage(m.chat, { 
-                text: capt,
-                contextInfo: {
-                    externalAdReply: {
-                        title: '𝚂𝙿𝙾𝚃𝙸𝙵𝚈 𝙼𝚄𝚂𝙸𝙲 𝚄𝙿𝙳𝙰𝚃𝙴',
-                        body: `Ditemukan lagu ${results[0].title}!`,
-                        thumbnailUrl: results[0].cover_img,
-                        sourceUrl: results[0].song_link,
-                        mediaType: 1,
-                        renderLargerThumbnail: true
-                    }
-                }
+                image: { url: tracks[0].image }, 
+                caption: caption 
             }, { quoted: m });
 
-            await conn.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
+            await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
 
         } catch (e) {
             console.error(e);
-            m.reply(`❌ *Euphy Error:* ${e.message || "API lagi sibuk."}`);
+            m.reply(`⚠️ Terjadi kesalahan: ${e.message}\nCoba lagi beberapa saat lagi.`);
         }
     }
 };
-                  
