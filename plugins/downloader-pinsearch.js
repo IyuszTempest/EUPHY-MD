@@ -1,6 +1,7 @@
 /**
- * Euphy-Bot - Pinterest Search
- * Powered by Euphylia Magenta System ✨
+ * Pinterest Carousel (Team-Furina) ⛩️🌸
+ * Powered by Furinn API System ✨
+ * Mode: Carousel (Album)
  */
 
 const axios = require('axios');
@@ -9,29 +10,36 @@ module.exports = {
     command: ['pin'],
     category: 'downloader',
     noPrefix: true,
-    call: async (conn, m, { text, usedPrefix, command }) => {
-        if (!text) return m.reply(`Mau cari gambar apa di Pinterest? [cite: 2025-05-24]\nContoh: *${usedPrefix + command} anime wallpaper*`);
+    premium: false,
+    register: true,
+    call: async (conn, m, { usedPrefix, command, text }) => {
+        if (!text) return m.reply(`Mau cari gambar apa di Pinterest?\nContoh: *${usedPrefix + command} Euphylia kawai*`);
+
+        // Beri reaksi 'Tunggu' (Emoji Mata Bulat)
+        await conn.sendMessage(m.chat, { react: { text: '🙄', key: m.key } });
 
         try {
-            await conn.sendMessage(m.chat, { react: { text: '🔍', key: m.key } });
+            // Nembak API Furinn (Pinterest Search)
+            const apiUrl = `https://apii.furinn.my.id/api/search/pinterest?q=${encodeURIComponent(text)}`;
+            const { data } = await axios.get(apiUrl);
 
-            // Menggunakan API Ownblox yang baru kamu temukan
-            const response = await axios.get(`https://api.ownblox.my.id/api/pinterest?search=${encodeURIComponent(text)}`);
-            const res = response.data;
-
-            if (res.status !== 200 || !res.results.length) {
-                return m.reply("Gambar tidak ditemukan. Coba kata kunci lain!");
+            // Validasi data dari API
+            if (!data.status || !data.result || data.result.length === 0) {
+                return m.reply('❌ Gambar tidak ditemukan. Coba kata kunci lain!');
             }
 
-            // Kita ambil 3 gambar pertama biar tidak spam tapi tetap puas
-            const topResults = res.results.slice(0, 3);
-
-            for (let item of topResults) {
+            // Ambil 5 gambar terbaik untuk dikirim sebagai Carousel/Album
+            const results = data.result.slice(0, 5);
+            
+            // Pengiriman berturut-turut untuk menciptakan efek album
+            for (let item of results) {
                 let caption = `╭━━〔 ⛩️ *𝙿𝙸𝙽𝚃𝙴𝚁𝙴𝚂𝚃* ⛩️ 〕━━┓\n`;
-                caption += `┃ 👤 *By:* ${item.upload_by || 'Unknown'}\n`;
-                caption += `┃ 🏮 *Caption:* ${item.caption || 'No description'}\n`;
+                caption += `┃\n`;
+                caption += `┃ ✨ *Status:* Done\n`;
+                caption += `┃ 🏮 *Source:* Pinterest\n`;
+                caption += `┃\n`;
                 caption += `┗━━━━━━━━━━━━━━━━━━━━┛\n`;
-                caption += `_Pinterest Searching ✨_`;
+                caption += `_Pinterest Searching..._`;
 
                 await conn.sendMessage(m.chat, { 
                     image: { url: item.image }, 
@@ -39,9 +47,13 @@ module.exports = {
                 }, { quoted: m });
             }
 
+            // Beri reaksi 'Selesai' (Emoji Love)
+            await conn.sendMessage(m.chat, { react: { text: '💖', key: m.key } });
+
         } catch (e) {
             console.error(e);
-            m.reply(`Aduh, sistem Euphylia Magenta gagal nyari gambar: ${e.message}`);
+            // Menampilkan pesan error yang informatif
+            m.reply(`⚠️ Aduh, gagal nyari gambar: ${e.response ? e.response.status : e.message}\nCoba lagi nanti ya!`);
         }
     }
 };
