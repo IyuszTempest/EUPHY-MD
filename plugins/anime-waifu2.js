@@ -19,11 +19,11 @@ module.exports = {
 
             let caption = `╭━━〔 🎎 *𝚁𝙰𝙽𝙳𝙾𝙼 𝚆𝙰𝙸𝙵𝚄* 〕━━┓\n`;
             caption += `┃\n`;
-            caption += `┃ ✨ *Status:* Kawaii (Direct)\n`;
-            caption += `┃ 🏮 *Source:* Furinn API\n`;
+            caption += `┃ ✨ *Status:* Done\n`;
+            caption += `┃ 🏮 *Source:* Pinterest\n`;
             caption += `┃\n`;
             caption += `┗━━━━━━━━━━━━━━━━━━┛\n`;
-            caption += `_Nippon Digital Store ✨_`;
+            caption += `_Nih kak ✨_`;
 
             // Langsung kirim gambarnya
             await conn.sendMessage(m.chat, { 
@@ -36,7 +36,7 @@ module.exports = {
 
         } catch (e) {
             console.error(e);
-            m.reply(`⚠️ Gagal mengambil gambar: ${e.message}\nCoba cek koneksi bot ke API Furinn.`);
+            m.reply(`⚠️ Gagal mengambil gambar: ${e.message}.`);
         }
     }
 };
