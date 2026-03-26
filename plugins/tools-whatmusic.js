@@ -1,12 +1,11 @@
 /**
- * WhatMusic / Identify Music (Catbox Edition) 🔍🎵
+ * WhatMusic / Identify Music (Catbox Fixed) 🔍🎵
  * Powered by Furinn API System ✨
  * Format: Unified Plugin System
  */
 
 const axios = require('axios');
 const FormData = require('form-data');
-const { File } = require('megajs'); // Jika butuh, tapi kita pakai Catbox saja
 
 module.exports = {
     command: ['whatmusic'],
@@ -18,7 +17,7 @@ module.exports = {
         let mime = (q.msg || q).mimetype || '';
 
         // Validasi: Harus berupa audio atau video
-        if (!/audio|video/.test(mime)) return m.reply(`Kirim atau reply audio/video dengan caption *${usedPrefix + command}* untuk mencari judul lagu!`);
+        if (!/audio|video/.test(mime)) return m.reply(`Kirim atau reply audio/video dengan caption *${usedPrefix + command}* buat nyari judul lagunya!`);
 
         await conn.sendMessage(m.chat, { react: { text: '🔍', key: m.key } });
 
@@ -26,29 +25,33 @@ module.exports = {
             // 1. Download media dari WhatsApp
             let media = await q.download();
             
-            // 2. Upload ke Catbox (Agar dapet URL untuk API Furinn)
-            const formData = new FormData();
-            formData.append('reqtype', 'fileupload');
-            formData.append('fileToUpload', media, { filename: 'music_identify.mp3' });
+            // 2. Fungsi Upload ke Catbox (Inline biar gak error 'not a function')
+            const catboxUpload = async (buffer) => {
+                const formData = new FormData();
+                formData.append('reqtype', 'fileupload');
+                formData.append('fileToUpload', buffer, { filename: 'identify.mp3' });
+                
+                const response = await axios.post('https://catbox.moe/user/api.php', formData, {
+                    headers: { ...formData.getHeaders() }
+                });
+                return response.data; // Balikannya langsung URL string
+            };
 
-            const catboxResponse = await axios.post('https://catbox.moe/user/api.php', formData, {
-                headers: { ...formData.getHeaders() }
-            });
-
-            const urlMedia = catboxResponse.data; // Catbox langsung return link string
+            const urlMedia = await catboxUpload(media);
+            
             if (!urlMedia.includes('https://files.catbox.moe/')) {
-                throw new Error("Gagal mengupload file ke Catbox.");
+                throw new Error("Gagal dapet link dari Catbox.");
             }
 
-            // 3. Nembak API WhatMusic Furinn menggunakan URL Catbox
+            // 3. Nembak API WhatMusic Furinn pakai URL dari Catbox
             const apiUrl = `https://apii.furinn.my.id/api/search/whatmusic?url=${encodeURIComponent(urlMedia)}`;
             const { data } = await axios.get(apiUrl);
 
             if (!data.status || !data.result || data.result.length === 0) {
-                return m.reply('❌ Maaf, lagu ga berhasil dikenali. Pastikan audionya jelas dan bukan remix parah!');
+                return m.reply('❌ Waduh, lagunya gak ketemu. Pastikan suaranya jelas ya!');
             }
 
-            const res = data.result[0]; // Ambil hasil paling akurat (Top Result)
+            const res = data.result[0]; // Ambil hasil paling akurat
             
             let caption = `╭━━〔 🔍 *𝙼𝚄𝚂𝙸𝙲 𝙸𝙳𝙴𝙽𝚃𝙸𝙵𝙸𝙴𝚁* 〕━━┓\n`;
             caption += `┃\n`;
@@ -68,10 +71,10 @@ module.exports = {
                     else if (link.includes('deezer')) caption += `┃ 🟣 Deezer: ${link}\n`;
                 });
             } else {
-                caption += `┃ _Link streaming ga tersedia._\n`;
+                caption += `┃ _Link streaming gak tersedia._\n`;
             }
             
-            caption += `┗━━━━━━━━━━━━━━━━┛\n`;
+            caption += `┗━━━━━━━━━━━━━━━━━━┛\n`;
             caption += `_Semoga membantu ✨_`;
 
             await m.reply(caption);
@@ -79,8 +82,7 @@ module.exports = {
 
         } catch (e) {
             console.error(e);
-            m.reply(`⚠️ Terjadi kesalahan: ${e.message}\nPastikan bot kamu sudah terinstal package 'form-data' dan 'axios'.`);
+            m.reply(`⚠️ Terjadi kesalahan: ${e.message}\nCoba cek log terminal kamu.`);
         }
     }
 };
-                        
