@@ -19,8 +19,7 @@ module.exports = {
 
             let caption = `╭━━〔 🎎 *𝚁𝙰𝙽𝙳𝙾𝙼 𝚆𝙰𝙸𝙵𝚄* 〕━━┓\n`;
             caption += `┃\n`;
-            caption += `┃ ✨ *Status:* Done\n`;
-            caption += `┃ 🏮 *Source:* Pinterest\n`;
+            caption += `┃ ✨ Ini adalah istri owner\n`;
             caption += `┃\n`;
             caption += `┗━━━━━━━━━━━━━━━━━━┛\n`;
             caption += `_Nih kak ✨_`;
