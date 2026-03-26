@@ -21,7 +21,7 @@ module.exports = {
             caption += `┃\n`;
             caption += `┃ ✨ Ini adalah istri owner\n`;
             caption += `┃\n`;
-            caption += `┗━━━━━━━━━━━━━━━━━━┛\n`;
+            caption += `┗━━━━━━━━━━━━━━━━━┛\n`;
             caption += `_Nih kak ✨_`;
 
             // Langsung kirim gambarnya
