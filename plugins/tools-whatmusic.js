@@ -1,12 +1,12 @@
 /**
- * WhatMusic / Identify Music Plugin 🔍🎵
+ * WhatMusic / Identify Music (Catbox Edition) 🔍🎵
  * Powered by Furinn API System ✨
  * Format: Unified Plugin System
  */
 
 const axios = require('axios');
-const fs = require('fs');
-const { exec } = require('child_process');
+const FormData = require('form-data');
+const { File } = require('megajs'); // Jika butuh, tapi kita pakai Catbox saja
 
 module.exports = {
     command: ['whatmusic'],
@@ -23,44 +23,53 @@ module.exports = {
         await conn.sendMessage(m.chat, { react: { text: '🔍', key: m.key } });
 
         try {
-            // Download media ke temporary file
+            // 1. Download media dari WhatsApp
             let media = await q.download();
-            let fileName = `./tmp/${m.sender}_${Date.now()}.mp3`;
-            fs.writeFileSync(fileName, media);
+            
+            // 2. Upload ke Catbox (Agar dapet URL untuk API Furinn)
+            const formData = new FormData();
+            formData.append('reqtype', 'fileupload');
+            formData.append('fileToUpload', media, { filename: 'music_identify.mp3' });
 
-            // Upload ke file hosting sementara (misal: Pomf.lain/Telegra.ph) untuk dapat URL
-            // Di sini kita asumsikan butuh URL sesuai spek API kamu
-            // Note: Kamu bisa pakai upload helper yang ada di bot-mu
-            let { uploadFile } = require('../lib/uploadFile'); 
-            let stats = await uploadFile(media);
-            let urlMedia = stats.url;
+            const catboxResponse = await axios.post('https://catbox.moe/user/api.php', formData, {
+                headers: { ...formData.getHeaders() }
+            });
 
-            // Nembak API WhatMusic Furinn
+            const urlMedia = catboxResponse.data; // Catbox langsung return link string
+            if (!urlMedia.includes('https://files.catbox.moe/')) {
+                throw new Error("Gagal mengupload file ke Catbox.");
+            }
+
+            // 3. Nembak API WhatMusic Furinn menggunakan URL Catbox
             const apiUrl = `https://apii.furinn.my.id/api/search/whatmusic?url=${encodeURIComponent(urlMedia)}`;
             const { data } = await axios.get(apiUrl);
 
             if (!data.status || !data.result || data.result.length === 0) {
-                return m.reply('❌ Maaf, lagu ga berhasil dikenali. Pastikan audionya jelas!');
+                return m.reply('❌ Maaf, lagu ga berhasil dikenali. Pastikan audionya jelas dan bukan remix parah!');
             }
 
-            const res = data.result[0]; // Ambil hasil dengan skor tertinggi
+            const res = data.result[0]; // Ambil hasil paling akurat (Top Result)
             
             let caption = `╭━━〔 🔍 *𝙼𝚄𝚂𝙸𝙲 𝙸𝙳𝙴𝙽𝚃𝙸𝙵𝙸𝙴𝚁* 〕━━┓\n`;
             caption += `┃\n`;
             caption += `┃ 🎼 *Judul:* ${res.title}\n`;
             caption += `┃ 🎤 *Artis:* ${res.artist}\n`;
-            caption += `┃ 📈 *Score:* ${res.score}%\n`;
+            caption += `┃ 📈 *Akurasi:* ${res.score}%\n`;
             caption += `┃ 📅 *Rilis:* ${res.release}\n`;
             caption += `┃ 🕒 *Durasi:* ${res.duration}\n`;
             caption += `┃\n`;
             caption += `┣━━〔 🔗 *𝚂𝚃𝚁𝙴𝙰𝙼𝙸𝙽𝙶* 〕━━┓\n`;
             
-            // Loop link streaming yang ada
-            res.urls.forEach((link, i) => {
-                if (link.includes('spotify')) caption += `┃ 🟢 [Spotify](${link})\n`;
-                else if (link.includes('youtu')) caption += `┃ 🔴 [YouTube](${link})\n`;
-                else if (link.includes('deezer')) caption += `┃ 🟣 [Deezer](${link})\n`;
-            });
+            // Link streaming
+            if (res.urls && res.urls.length > 0) {
+                res.urls.forEach((link) => {
+                    if (link.includes('spotify')) caption += `┃ 🟢 Spotify: ${link}\n`;
+                    else if (link.includes('youtu')) caption += `┃ 🔴 YouTube: ${link}\n`;
+                    else if (link.includes('deezer')) caption += `┃ 🟣 Deezer: ${link}\n`;
+                });
+            } else {
+                caption += `┃ _Link streaming ga tersedia._\n`;
+            }
             
             caption += `┗━━━━━━━━━━━━━━━━┛\n`;
             caption += `_Semoga membantu ✨_`;
@@ -68,13 +77,10 @@ module.exports = {
             await m.reply(caption);
             await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
 
-            // Hapus file sampah
-            fs.unlinkSync(fileName);
-
         } catch (e) {
             console.error(e);
-            m.reply(`⚠️ Terjadi kesalahan: ${e.message}`);
+            m.reply(`⚠️ Terjadi kesalahan: ${e.message}\nPastikan bot kamu sudah terinstal package 'form-data' dan 'axios'.`);
         }
     }
 };
-              
+                        
