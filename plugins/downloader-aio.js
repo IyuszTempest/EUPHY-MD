@@ -1,65 +1,62 @@
 /**
- * All-in-One Downloader (TikTok, YT, IG) 📥
+ * All-in-One Downloader (Instant Mode) 📥
  * Powered by Zanixon API (ZTRdiamond)
  * Format: Unified Plugin System
+ * Mode: Kirim Video Saja (Tanpa Info/Caption)
  */
 
 const axios = require('axios');
 
 module.exports = {
-    command: ['dl', 'aio'],
+    command: ['dl', 'download', 'aio'],
     category: 'downloader',
     premium: false,
     noPrefix: true,
     call: async (conn, m, { usedPrefix, command, text }) => {
-        if (!text) return m.reply(`Mana link-nya?\n\n*Note: Support Tiktok, Instagram, YouTube`);
+        if (!text) return m.reply(`Mana link-nya?\n\n*Contoh:*\n${usedPrefix + command} https://vt.tiktok.com/xxxx/`);
 
-        // Daftar domain yang didukung oleh API ini
+        // Daftar domain yang didukung (TikTok, IG, YouTube)
         const isUrl = text.match(/(https?:\/\/(?:www\.|vm\.|vt\.|v\.|reels\.)?(?:tiktok\.com|instagram\.com|youtube\.com|youtu\.be)\/[^\s]+)/gi);
         if (!isUrl) return m.reply('❌ Link tidak didukung! Pastikan link dari TikTok, IG, atau YouTube.');
 
+        // Beri reaksi 'Proses' (Emoji Jam/Tunggu)
         await conn.sendMessage(m.chat, { react: { text: '⏳', key: m.key } });
 
         try {
+            // Nembak API AIO
             const apiUrl = `https://chocomilk.amira.us.kg/v1/download/aio?url=${encodeURIComponent(isUrl[0])}`;
             const { data } = await axios.get(apiUrl);
 
             if (!data.success || !data.data) {
-                return m.reply('❌ Gagal mengambil data. API sedang sibuk atau link tidak valid.');
+                return m.reply('❌ Gagal mengambil data. Link tidak valid atau server API sibuk.');
             }
 
             const res = data.data;
-            const source = res.source.toUpperCase();
             
-            // Cari media video dengan kualitas terbaik (HD atau mp4)
-            // Khusus TikTok kita cari yang no-watermark jika ada
+            // Logika pencarian media video (Cari kualitas terbaik/HD jika tersedia)
+            // Terutama untuk TikTok, kita utamakan yang No-Watermark.
             let videoData = res.medias.find(m => m.quality === 'hd_no_watermark' || m.quality === 'no_watermark') 
                          || res.medias.find(m => m.type === 'video');
 
-            if (!videoUrl && res.medias.length > 0) videoData = res.medias[0];
+            // Jika masih tidak ketemu di list medias, ambil yang pertama saja
+            if (!videoData && res.medias.length > 0) videoData = res.medias[0];
             const videoUrl = videoData?.url;
 
             if (!videoUrl) return m.reply('❌ Konten video tidak ditemukan.');
 
-            // Buat Caption Dinamis berdasarkan Source
-            let caption = `📥 *${source} DOWNLOADER* 📥\n\n`;
-            caption += `📝 *Title:* ${res.title || 'No Title'}\n`;
-            if (res.author) caption += `👤 *Author:* ${res.author}\n`;
-            if (res.duration) caption += `⏱️ *Durasi:* ${Math.floor(res.duration / 60)}m ${res.duration % 60}s\n`;
-            caption += `🔗 *Source:* ${res.source}\n\n`;
-            caption += `_Selesai! File sedang dikirim..._`;
-
-            // Kirim sesuai tipe (Video)
+            // --- INSTANT MODE: KIRIM VIDEO SAJA ---
+            // Caption dikosongkan agar respon bersih dan instan.
             await conn.sendMessage(m.chat, { 
                 video: { url: videoUrl }, 
-                caption: caption 
+                caption: '' // Tanpa caption info
             }, { quoted: m });
 
+            // Beri reaksi 'Selesai' (Emoji Centang)
             await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
 
         } catch (e) {
             console.error(e);
-            m.reply('❌ Terjadi kesalahan teknis. Pastikan server API online.');
+            m.reply('❌ Gagal mendownload. Pastikan link benar dan server API online.');
         }
     }
 };
