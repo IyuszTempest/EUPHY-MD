@@ -38,7 +38,7 @@ module.exports = {
                 caption += `┃ ✨ *Status:* Done\n`;
                 caption += `┃ 🏮 *Source:* Pinterest\n`;
                 caption += `┃\n`;
-                caption += `┗━━━━━━━━━━━━━━━━━━━━┛\n`;
+                caption += `┗━━━━━━━━━━━━━━━━━┛\n`;
                 caption += `_Pinterest Searching..._`;
 
                 await conn.sendMessage(m.chat, { 
