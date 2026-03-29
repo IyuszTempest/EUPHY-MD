@@ -5,7 +5,7 @@
  */
 
 module.exports = {
-    command: ['judol'],
+    command: ['judol', 'judi'],
     category: 'game',
     noPrefix: true,
     call: async (conn, m, { usedPrefix, command, text }) => {
