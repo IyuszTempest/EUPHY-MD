@@ -37,7 +37,7 @@ module.exports = {
         res += `┃ 📱 *Saldo DANA:* Rp${user.dana_balance.toLocaleString()}\n`;
         res += `┃\n`;
         res += `┣━━━━━━━━━━━━━━━━━━━━┛\n`;
-        res += `┃ _Gunakan buat modal Sawit atau MBG!_\n`;
+        res += `┃ _Gunakan buat modal Sawit atau Padi!_\n`;
         res += `┗━━━━━━━━━━━━━━━━━━━━┛`;
 
         await conn.sendMessage(m.chat, { react: { text: '💸', key: m.key } });
