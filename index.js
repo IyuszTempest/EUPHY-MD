@@ -166,55 +166,67 @@ setInterval(async () => {
     }
 }, 1000 * 60 * 60); // Eksekusi setiap 1 jam
     
-    
-        // --- [ 7. GROUP PARTICIPANTS UPDATE (Welcome/Left) ] ---
+        // --- [ 7. GROUP PARTICIPANTS UPDATE (Welcome/Goodbye) - FIXED ] ---
+    // Update otomatis sesuai pengaturan di database (.setwelcome / .setbye)
     conn.ev.on('group-participants.update', async (anu) => {
         try {
+            let chat = global.db.data.chats[anu.id] || {};
+            if (!chat.welcome) return; // Jika fitur welcome di grup itu OFF, bot diam saja.
+
             let metadata = await conn.groupMetadata(anu.id);
             let participants = anu.participants;
+
             for (let num of participants) {
-                // Ambil Foto Profil User
+                // --- LOGIC FOTO PROFIL (PP) ---
                 let ppuser;
                 try {
+                    // Coba ambil PP dari WhatsApp
                     ppuser = await conn.profilePictureUrl(num, 'image');
                 } catch {
-                    ppuser = 'https://telegra.ph/file/241d7169c1d1a96515ff2.jpg'; // Foto default anime [cite: 2025-05-24]
+                    // Jika gagal (User gak pakai PP/Privasi), pakai PP Anime Default
+                    ppuser = 'https://i.pinimg.com/originals/f1/b9/d7/f1b9d702bae9274340cb7e9534233d32.jpg'; 
                 }
 
+                // --- LOGIC ACTION: MEMBER BARU (ADD) ---
                 if (anu.action == 'add') {
-                    // Pesan Welcome
-                    let welcome = `╭━━〔 ⛩️ *𝚆𝙴𝙻𝙲𝙾𝙼𝙴* ⛩️ 〕━━┓\n`
-                                + `┃ ✨ Selamat datang @${num.split("@")[0]}!\n`
-                                + `┃ 🏮 Di grup: *${metadata.subject}*\n`
-                                + `┗━━━━━━━━━━━━━━━━━━━━┛\n\n`
-                                + `Semoga betah ya di sini! Jangan lupa baca deskripsi grup ya.`;
+                    // Ambil pesan dari database, kalau kosong pakai template default Euphy
+                    let teks = chat.sWelcome || `╭━━〔 ⛩️ *𝚆𝙴𝙻𝙲𝙾𝙼𝙴* ⛩️ 〕━━┓\n┃ ✨ Selamat datang kak @user!\n┃ 🏮 Di grup: *@group*\n┗━━━━━━━━━━━━━━━┛`;
+                    
+                    // Ganti Placeholder agar interaktif
+                    let welcomeText = teks
+                        .replace('@user', `@${num.split("@")[0]}`) // Tag orangnya
+                        .replace('@group', metadata.subject)       // Nama grup
+                        .replace('@desc', metadata.desc?.toString() || 'Tidak ada deskripsi'); // Deskripsi grup
                     
                     await conn.sendMessage(anu.id, { 
                         image: { url: ppuser }, 
-                        caption: welcome, 
+                        caption: welcomeText, 
                         mentions: [num] 
                     });
+
+                // --- LOGIC ACTION: MEMBER KELUAR (REMOVE) ---
                 } else if (anu.action == 'remove') {
-                    // Pesan Goodbye
-                    let goodbye = `╭━━〔 ⛩️ *𝙶𝙾𝙾𝙳𝙱𝚈𝙴* ⛩️ 〕━━┓\n`
-                                + `┃ 🏮 Sayonara @${num.split("@")[0]}...\n`
-                                + `┃ ✨ Telah keluar dari grup ini.\n`
-                                + `┗━━━━━━━━━━━━━━━━━━━━┛\n\n`
-                                + `Semoga kamu senang di Isekai!`;
+                    // Ambil pesan goodbye dari database
+                    let bye = chat.sBye || `╭━━〔 ⛩️ *𝙶𝙾𝙾𝙳𝙱𝚈𝙴* ⛩️ 〕━━┓\n┃ 🏮 Sayonara @user...\n┃ ✨ Sampai jumpa lagi ya!\n┗━━━━━━━━━━━━━━━━┛`;
+                    
+                    let goodbyeText = bye
+                        .replace('@user', `@${num.split("@")[0]}`)
+                        .replace('@group', metadata.subject);
                                 
                     await conn.sendMessage(anu.id, { 
                         image: { url: ppuser }, 
-                        caption: goodbye, 
+                        caption: goodbyeText, 
                         mentions: [num] 
                     });
                 }
             }
         } catch (err) {
+            // Biar gak ganggu log, kita pakai chalk merah kalau ada error
             console.log(chalk.red(`[ GROUP UPDATE ERROR ] ${err.message}`));
         }
-    }); // <--- Penutup ev.on
+    });
     
-
+        
     const cron = require('node-cron');
 
             // Fungsi Broadcast ke semua grup
@@ -239,17 +251,17 @@ setInterval(async () => {
 
             // 1. Jam 9 Malam (21:00) - Pengingat Tidur
             cron.schedule('0 0 21 * * *', () => {
-                broadcastGrup(`╭━━〔 ⛩️ *𝙽𝙸𝙶𝙷𝚃𝚈 𝚁𝙴𝙼𝙸𝙽𝙳𝙴𝚁* ⛩️ 〕━━┓\n┃ 🏮 Udah jam 9 malam uy!\n┃ 💤 Waktunya turu biar besok\n┃ ✨ Badan-nya tetep seger.\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n_Lanjut besok lagi ya... ✨_`);
+                broadcastGrup(`╭━━〔 ⛩️ *𝙽𝙸𝙶𝙷𝚃𝚈 𝚁𝙴𝙼𝙸𝙽𝙳𝙴𝚁* ⛩️ 〕━━┓\n┃ 🏮 Udah jam 9 malam uy!\n┃ 💤 Waktunya turu biar besok\n┃ ✨ Badan-nya tetep seger.\n┗━━━━━━━━━━━━━━━┛\n\n_Lanjut besok lagi ya... ✨_`);
             }, { timezone: "Asia/Jakarta" });
 
             // 2. Jam 12 Siang (12:00) - Pengingat Produktivitas
-            cron.schedule('0 0 12 * * *', () => {
-                broadcastGrup(`╭━━〔 ⛩️ *SELAMAT SIANG* ⛩️ 〕━━┓\n┃ 😼 Udah siang aja nih, jangan lupa rehat sejenak\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n_Tetap semangat demi masa depan yang cerah..✨_`);
+            cron.schedule('0 0 12 * * *', () => 
+                broadcastGrup(`╭━━〔 ⛩️ *SELAMAT SIANG* ⛩️ 〕━━┓\n┃ 😼 Udah siang aja nih, jangan lupa rehat sejenak\n┗━━━━━━━━━━━━━━━━┛\n\n_Tetap semangat demi masa depan yang cerah..✨_`);
             }, { timezone: "Asia/Jakarta" });
 
             // 3. Jam 6 Pagi (06:00) - Pengingat Produktivitas
             cron.schedule('0 0 6 * * *', () => {
-                broadcastGrup(`╭━━〔 ⛩️ *𝙼𝙾𝚁𝙽𝙸𝙽𝙶 𝚂𝙿𝙸𝚁𝙸𝚃* ⛩️ 〕━━┓\n┃ 😡 Bangun woy, udah pagi nih.\n┃ 🚀 Ayo yang semangat dong!!\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n_The world is waiting for your magic... ✨_`);
+                broadcastGrup(`╭━━〔 ⛩️ *𝙼𝙾𝚁𝙽𝙸𝙽𝙶 𝚂𝙿𝙸𝚁𝙸𝚃* ⛩️ 〕━━┓\n┃ 😡 Bangun woy, udah pagi nih.\n┃ 🚀 Ayo yang semangat dong!!\n┗━━━━━━━━━━━━━━━┛\n\n_The world is waiting for your magic... ✨_`);
             }, { timezone: "Asia/Jakarta" });
 
 // --- [ SISTEM AUTO-OUT SEWA ] ---
@@ -259,7 +271,7 @@ cron.schedule('0 0 0 * * *', async () => {
     let chats = global.db.data.chats;
     for (let jid in chats) {
         if (chats[jid].expired && now > chats[jid].expired) {
-            let caption = `╭━━〔 ⛩️ *𝚂𝙴𝚆𝙰 𝙴𝚇𝙿𝙸𝚁𝙴𝙳* ⛩️ 〕━━┓\n┃ 🏮 Masa sewa grup ini telah habis!\n┃ 🚀 Saatnya Euphy pamit undur diri.\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n_Hubungi Owner untuk perpanjang!_`;
+            let caption = `╭━━〔 ⛩️ *𝚂𝙴𝚆𝙰 𝙴𝚇𝙿𝙸𝚁𝙴𝙳* ⛩️ 〕━━┓\n┃ 🏮 Masa sewa grup ini telah habis!\n┃ 🚀 Saatnya Euphy pamit undur diri.\n┗━━━━━━━━━━━━━━┛\n\n_Hubungi Owner untuk perpanjang!_`;
             await conn.sendMessage(jid, { text: caption });
             await conn.groupLeave(jid); // Otomatis keluar grup
             chats[jid].expired = 0; // Reset data expired
