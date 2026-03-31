@@ -42,7 +42,7 @@ module.exports = {
             menuList += `┃ 👤 *𝚄𝚜𝚎𝚛:* ${name}\n`
             menuList += `┃ 🕒 *𝚄𝚙𝚝𝚒𝚖𝚎:* ${uptime}\n`
             menuList += `┃ 📚 *𝙻𝚒𝚋𝚛𝚊𝚛𝚢:* Baileys v6.7.0\n`
-            menuList += `┗━━━━━━━━━━━━━━━━━━━━┛\n\n`
+            menuList += `┗━━━━━━━━━━━━━━━━━┛\n\n`
             
             // Perulangan Kategori
             for (let tag in allTags) {
