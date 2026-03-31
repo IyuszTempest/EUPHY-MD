@@ -254,7 +254,7 @@ setInterval(async () => {
                 broadcastGrup(`╭━━〔 ⛩️ *𝙽𝙸𝙶𝙷𝚃𝚈 𝚁𝙴𝙼𝙸𝙽𝙳𝙴𝚁* ⛩️ 〕━━┓\n┃ 🏮 Udah jam 9 malam uy!\n┃ 💤 Waktunya turu biar besok\n┃ ✨ Badan-nya tetep seger.\n┗━━━━━━━━━━━━━━━┛\n\n_Lanjut besok lagi ya... ✨_`);
             }, { timezone: "Asia/Jakarta" });
 
-            // 2. Jam 12 Siang (12:00) - Pengingat Produktivitas (FIXED)
+            // 2. Jam 6 Pagi - Pengingat Produktivitas (FIXED)
 cron.schedule('0 0 6 * * *', () => {
     broadcastGrup(`╭━━〔 ⛩️ *Selamat Pagi* ⛩️ 〕━━┓\n┃ 😼 Udah pagi aja nih, udh sarapan belom?\n┗━━━━━━━━━━━━━━━━┛\n\n_Tetap semangat demi masa depan yang cerah..✨_`);
 }, { timezone: "Asia/Jakarta" });.
