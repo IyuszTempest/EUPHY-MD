@@ -80,24 +80,31 @@ module.exports = {
                 user.afkReason = '';
                 m.reply(`Selamat datang kembali @${m.sender.split('@')[0]}! ✨`);
             }
-            
-                        // --- [ 5. LOGIC OWNER & ADMIN DETECTOR ] ---
+                        // --- [ 5. LOGIC OWNER & ADMIN DETECTOR (JID/LID SYNC) ] ---
             const ownerList = Array.isArray(global.owner) ? global.owner : [global.owner];
             const cleanOwners = ownerList.map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net');
             const isOwner = m.fromMe || (m.sender === global.lidowner) || cleanOwners.includes(m.sender);
 
-            // Kita ambil data admin di sini supaya plugin.before tidak error
+            // 1. Ambil data peserta (Wajib Paling Atas)
             const groupMetadata = m.isGroup ? await this.groupMetadata(m.chat).catch(_ => ({})) : {};
             const participants = m.isGroup ? (groupMetadata.participants || []) : [];
-            const botJid = this.user.id.split(':')[0] + '@s.whatsapp.net';
+            
+            // 2. Ambil ID Bot (Support JID & LID)
+            const botNumber = this.user.id; 
+            const botLid = this.user.lid || '';
 
-            const userInGroup = m.isGroup ? participants.find(u => u.id === m.sender) : {};
+            // 3. DEFINISIKAN SIAPA USER & BOT (Ini yang tadi hilang!)
+            const userInGroup = m.isGroup ? participants.find(u => areJidsSameUser(u.id, m.sender)) : {};
             const botInGroup = m.isGroup ? participants.find(u => 
-                areJidsSameUser(u.id, botJid) || (this.user.lid && areJidsSameUser(u.id, this.user.lid))
+                areJidsSameUser(u.id, botNumber) || 
+                (botLid && areJidsSameUser(u.id, botLid)) ||
+                u.id.split('@')[0] === botNumber.split(':')[0]
             ) : {};
 
-            const isAdmin = userInGroup?.admin?.includes('admin') || false;
-            const isBotAdmin = botInGroup?.admin?.includes('admin') || false;
+            // 4. Baru Tentukan Status Admin (Sekarang variabel di atas sudah ada)
+            const isAdmin = m.isGroup ? (!!userInGroup?.admin) : false;
+            const isBotAdmin = m.isGroup ? (!!botInGroup?.admin) : false;
+
 
             // --- [ SEKARANG PANGGIL PLUGIN BEFORE ] ---
             for (let name in global.plugins) {
@@ -167,4 +174,4 @@ module.exports = {
 // ... (Plugin Reload System Tetap Sama)
 
 
-                                                              
+
