@@ -254,15 +254,11 @@ setInterval(async () => {
                 broadcastGrup(`╭━━〔 ⛩️ *𝙽𝙸𝙶𝙷𝚃𝚈 𝚁𝙴𝙼𝙸𝙽𝙳𝙴𝚁* ⛩️ 〕━━┓\n┃ 🏮 Udah jam 9 malam uy!\n┃ 💤 Waktunya turu biar besok\n┃ ✨ Badan-nya tetep seger.\n┗━━━━━━━━━━━━━━━┛\n\n_Lanjut besok lagi ya... ✨_`);
             }, { timezone: "Asia/Jakarta" });
 
-            // 2. Jam 12 Siang (12:00) - Pengingat Produktivitas
-            cron.schedule('0 0 12 * * *', () => 
-                broadcastGrup(`╭━━〔 ⛩️ *SELAMAT SIANG* ⛩️ 〕━━┓\n┃ 😼 Udah siang aja nih, jangan lupa rehat sejenak\n┗━━━━━━━━━━━━━━━━┛\n\n_Tetap semangat demi masa depan yang cerah..✨_`);
-            }, { timezone: "Asia/Jakarta" });
-
-            // 3. Jam 6 Pagi (06:00) - Pengingat Produktivitas
-            cron.schedule('0 0 6 * * *', () => {
-                broadcastGrup(`╭━━〔 ⛩️ *𝙼𝙾𝚁𝙽𝙸𝙽𝙶 𝚂𝙿𝙸𝚁𝙸𝚃* ⛩️ 〕━━┓\n┃ 😡 Bangun woy, udah pagi nih.\n┃ 🚀 Ayo yang semangat dong!!\n┗━━━━━━━━━━━━━━━┛\n\n_The world is waiting for your magic... ✨_`);
-            }, { timezone: "Asia/Jakarta" });
+            // 2. Jam 12 Siang (12:00) - Pengingat Produktivitas (FIXED)
+cron.schedule('0 0 6 * * *', () => {
+    broadcastGrup(`╭━━〔 ⛩️ *Selamat Pagi* ⛩️ 〕━━┓\n┃ 😼 Udah pagi aja nih, udh sarapan belom?\n┗━━━━━━━━━━━━━━━━┛\n\n_Tetap semangat demi masa depan yang cerah..✨_`);
+}, { timezone: "Asia/Jakarta" });.
+    
 
 // --- [ SISTEM AUTO-OUT SEWA ] ---
 // Cek setiap hari jam 00:00
