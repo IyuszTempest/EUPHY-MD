@@ -27,7 +27,7 @@ module.exports = {
                 + `┃ 📱 *𝙽𝚞𝚖𝚋𝚎𝚛:* ${who.split('@')[0]}\n`
                 + `┃ 🏮 *𝙻𝙸𝙳:* ${who.endsWith('@lid') ? 'Active ✅' : 'Standard 📱'}\n`
                 + `┗━━━━━━━━━━━━━━━━━━━━┛\n\n`
-                + `_Terus gunakan Euphy untuk fitur menarik lainnya!_ [cite: 2025-05-24]`;
+                + `_Terus gunakan Euphy untuk fitur menarik lainnya!_`;
 
         return await conn.sendMessage(m.chat, {
             text: cap,
