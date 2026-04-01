@@ -40,18 +40,6 @@ module.exports = {
             { soal: "Sebutkan isi dari nasi kotak pas acara kampus!", jawaban: ["Nasi", "Ayam", "Sambal", "Lalapan", "Kerupuk", "Jeruk"] },
             { soal: "Apa yang bikin orang betah di cafe?", jawaban: ["WiFi Kencang", "AC Dingin", "Kopi Enak", "Banyak Colokan", "Suasana"] },
 
-            // --- [ ERA SEKARANG & TONGKRONGAN ] ---
-            { soal: "Sebutkan istilah yang sering diucap anak jaman sekarang!", jawaban: ["Gak Jelas", "Cringe", "Menyala Abangku", "Suki", "Sigma", "Mewing", "Yapping"] },
-            { soal: "Apa yang dilakukan kalau tiba-tiba mati lampu pas lagi asik main HP?", jawaban: ["Cek Sekring", "Cari Lilin", "Nyalain Flashlight", "Keluar Rumah", "Update Status"] },
-            { soal: "Sebutkan alasan orang bikin story WA!", jawaban: ["Gengsi", "Galau", "Pamer Makanan", "Promosi", "Gabut", "Nyindir Orang"] },
-            { soal: "Apa yang biasa dicari di minimarket (Indomaret/Alfamart)?", jawaban: ["Minuman Dingin", "Rokok", "Camilan", "Tisu", "Pulsa", "Skincare"] },
-            { soal: "Sebutkan benda yang sering dipinjam temen tapi jarang balik!", jawaban: ["Korek Api", "Pulpen", "Charger", "Payung", "Uang", "Helm"] },
-
-            // --- [ DUNIA KULIAH & DOSEN ] ---
-            { soal: "Sebutkan alasan mahasiswa gak ngerjain tugas!", jawaban: ["Lupa", "Gak Paham", "Ketiduran", "Mabar", "Nunggu Jawaban Temen", "Internet Mati"] },
-            { soal: "Apa yang dilakukan saat nunggu dosen telat masuk?", jawaban: ["Main HP", "Ghibah", "Ke Kantin", "Tidur", "Nugas Lain", "Pulang"] },
-            { soal: "Sebutkan perlengkapan wajib saat mau presentasi!", jawaban: ["Laptop", "Materi", "Pointer", "Mental", "Kabel HDMI", "Baju Rapi"] },
-            { soal: "Apa yang bikin mahasiswa pengen cepet lulus?", jawaban: ["Bosen Tugas", "Pengen Kerja", "Tekanan Ortu", "Capek Revisi", "Biar Gak Bayar UKT"] },
 
             // --- [ MAKANAN & RUMAH TANGGA ] ---
             { soal: "Sebutkan topping martabak manis yang paling lari!", jawaban: ["Cokelat", "Keju", "Kacang", "Wijen", "Susu", "Ketan Hitam"] },
@@ -70,33 +58,11 @@ module.exports = {
             { soal: "Apa yang dilakukan kalau sinyal internet tiba-tiba lemot?", jawaban: ["Mode Pesawat", "Restart HP", "Cek Kuota", "Pindah Tempat", "Ngomel", "Cari WiFi"] },
             { soal: "Sebutkan barang yang sering dibeli lewat toko online karena diskon!", jawaban: ["Baju", "Skincare", "Sepatu", "Gadget", "Camilan", "Aksesoris"] },
 
-            // --- [ KATEGORI: TONGKRONGAN & GAYA HIDUP ] ---
-            { soal: "Apa yang ditanyakan temen kalau kamu baru beli barang baru?", jawaban: ["Harga", "Beli Dimana", "Pinjam", "Minta", "Kualitas", "Merk"] },
-            { soal: "Sebutkan barang yang wajib dibawa pas lagi nongkrong!", jawaban: ["HP", "Powerbank", "Korek Api", "Rokok", "Dompet", "Vape"] },
-            { soal: "Apa yang dilakukan cowok kalau lagi ngumpul bareng temen?", jawaban: ["Mabar", "Ghibah", "Ngopi", "Bahas Motor", "Main Kartu"] },
-            { soal: "Sebutkan istilah yang sering dipakai buat orang yang sok tau!", jawaban: ["Yapping", "Sok Asik", "Sok Suhu", "Pick Me", "Gak Jelas"] },
-
             // --- [ KATEGORI: KULIAH & KERJA ] ---
             { soal: "Apa yang bikin semangat kalau lagi di kampus atau kantor?", jawaban: ["Gajian", "Libur", "Doi", "Kantin", "Wifi Gratis", "Temen Lucu"] },
             { soal: "Sebutkan benda yang sering ada di atas meja kerja atau meja belajar!", jawaban: ["Laptop", "Kopi", "Tisu", "Buku", "Penghapus", "Camilan"] },
             { soal: "Apa yang dirasain pas dapet tugas kelompok?", jawaban: ["Males", "Seneng", "Pasrah", "Bingung", "Beban"] },
 
-            // --- [ KATEGORI: RUMAH TANGGA & RANDOM ] ---
-            { soal: "Apa yang dilakukan orang kalau denger suara tukang bakso lewat?", jawaban: ["Panggil", "Cari Mangkok", "Cek Dompet", "Nitip", "Keluar Rumah"] },
-            { soal: "Sebutkan benda di rumah yang gampang rusak kalau jatuh!", jawaban: ["Gelas", "Piring", "HP", "Cermin", "Lampu", "Jam Dinding"] },
-            { soal: "Apa yang dicari ibu-ibu pas lagi masak di dapur?", jawaban: ["Garam", "Micin", "Spatula", "Lap", "Pisau", "Korek Gas"] },
-            { soal: "Sebutkan jenis gorengan yang paling cepet abis kalau dibeli!", jawaban: ["Bala-bala", "Gehu", "Tempe", "Pisang Goreng", "Cireng"] },
-
-            // --- [ KATEGORI: LIFESTYLE & TONGKRONGAN ] ---
-            { soal: "Apa yang dilakukan kalau saldo ATM tinggal 50 ribu?", jawaban: ["Tarik Tunai", "Berdoa", "Cari Makan Murah", "Nabung Lagi", "Cek Mutasi", "Pasrah"] },
-            { soal: "Sebutkan alasan orang gak jadi nongkrong!", jawaban: ["Gak Ada Duit", "Mager", "Hujan", "Gak Boleh Ortu", "Ketiduran", "Ada Acara Keluarga"] },
-            { soal: "Apa yang biasa ditanyakan pas lagi kumpul keluarga?", jawaban: ["Kapan Lulus", "Kapan Nikah", "Jurusan Apa", "Semester Berapa", "Mana Pacarnya"] },
-            { soal: "Sebutkan hal yang sering didebatkan bareng temen!", jawaban: ["Game", "Motor", "Cewek", "Sepak Bola", "Pilihan Makanan", "Politik"] },
-
-            // --- [ KATEGORI: MAHASISWA & KAMPUS ] ---
-            { soal: "Sebutkan benda yang sering dipinjam mahasiswa di kelas!", jawaban: ["Pulpen", "Kertas", "Charger", "Tipe-x", "Penghapus", "Catatan"] },
-            { soal: "Apa yang dilakukan kalau dosen gak kunjung datang ke kelas?", jawaban: ["Ghibah", "Main Game", "Tidur", "Ke Kantin", "Pulang", "Mendengarkan Musik"] },
-            { soal: "Sebutkan tempat favorit mahasiswa buat ngerjain tugas!", jawaban: ["Perpustakaan", "Cafe", "Kos-kosan", "Kantin", "Taman Kampus"] },
 
             // --- [ KATEGORI: KEBIASAAN DI RUMAH ] ---
             { soal: "Apa yang paling sering dicari di rumah pas mau pergi?", jawaban: ["Kunci Motor", "Dompet", "HP", "Kaos Kaki", "Helm", "Jaket"] },
@@ -108,22 +74,6 @@ module.exports = {
             { soal: "Apa yang biasanya ada di dalam nasi bungkus/nasi rames?", jawaban: ["Nasi", "Ayam", "Tempe", "Sambal", "Sayur", "Telur"] },
             { soal: "Sebutkan hewan yang bikin geli atau takut di dalam rumah!", jawaban: ["Kecoak", "Cicak", "Tikus", "Laba-laba", "Kelabang"] },
             { soal: "Apa yang sering dilakukan orang kalau lagi nunggu antrian?", jawaban: ["Main HP", "Ngobrol", "Liat Sekitar", "Denger Musik", "Bengong"] },
-
-            // --- [ KATEGORI: KALIMANTAN & LOKAL ] ---
-            { soal: "Sebutkan buah-buahan yang banyak tumbuh di Kalimantan!", jawaban: ["Durian", "Rambutan", "Langsat", "Cempedak", "Manggis", "Lai"] },
-            { soal: "Apa yang dilakukan orang kalau cuaca lagi panas banget di siang hari?", jawaban: ["Nyalain Kipas", "Minum Es", "Mandi", "Neduh", "Nyalain AC", "Tidur"] },
-            { soal: "Sebutkan transportasi yang sering dipakai orang di daerah kamu!", jawaban: ["Motor", "Mobil", "Bus", "Truk", "Perahu", "Sepeda"] },
-
-            // --- [ KATEGORI: CODING & GADGET ] ---
-            { soal: "Sebutkan bahasa pemrograman yang populer buat dipelajari!", jawaban: ["Javascript", "Python", "Java", "PHP", "C++", "Golang", "HTML"] },
-            { soal: "Apa yang bikin pusing pas lagi bikin program atau website?", jawaban: ["Error", "Bug", "Kurang Kurung", "Logika Mati", "Lupa Save", "Deadline"] },
-            { soal: "Sebutkan komponen yang ada di dalam sebuah PC!", jawaban: ["Prosesor", "RAM", "Motherboard", "VGA", "Power Supply", "SSD", "Hardisk"] },
-            { soal: "Apa yang dilakukan kalau HP tiba-tiba ngehang atau lag?", jawaban: ["Restart", "Hapus Cache", "Banting", "Diamkan", "Cek Memori"] },
-
-            // --- [ KATEGORI: ANAK KOS & KULIAH ] ---
-            { soal: "Sebutkan menu andalan anak kos pas akhir bulan!", jawaban: ["Mie Instan", "Promag", "Nasi Garam", "Telor", "Kerupuk", "Air Putih"] },
-            { soal: "Apa yang bikin mahasiswa males berangkat kuliah pagi?", jawaban: ["Ngantuk", "Hujan", "Dosen Galak", "Mager", "Gak Mandi", "Begadang"] },
-            { soal: "Sebutkan barang yang sering hilang di dalam tas kuliah!", jawaban: ["Pulpen", "Flashdisk", "Tipe-X", "Kunci Motor", "Uang Receh"] },
 
             // --- [ KATEGORI: RANDOM & MEME ] ---
             { soal: "Sebutkan hewan yang suaranya berisik di malam hari!", jawaban: ["Tokek", "Kucing", "Anjing", "Jangkrik", "Katak", "Nyamuk"] },
