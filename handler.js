@@ -118,18 +118,22 @@ module.exports = {
                 }
             }
 
-            // --- [ 6. COMMAND PARSING (MEDIA CAPTION FIX) ] ---
+                       // --- [ 6. COMMAND PARSING (FIX NULL & TRIM) ] ---
             let body = (m.mtype === 'conversation' ? m.message.conversation : 
                         m.mtype === 'imageMessage' ? m.message.imageMessage.caption : 
                         m.mtype === 'videoMessage' ? m.message.videoMessage.caption : 
                         m.mtype === 'extendedTextMessage' ? m.message.extendedTextMessage.text : 
                         m.text || ''); 
+
+            // Validasi: Kalau body kosong/bukan string, kasih string kosong biar gak error trim()
+            let teksBody = typeof body === 'string' ? body : '';
             
-            let isPrefix = /^[.!]/.test(body);
-            let usedPrefix = isPrefix ? body[0] : '';
-            let noPrefix = isPrefix ? body.slice(1).trim() : body.trim();
+            let isPrefix = /^[.!]/.test(teksBody);
+            let usedPrefix = isPrefix ? teksBody[0] : '';
+            let noPrefix = isPrefix ? teksBody.slice(1).trim() : teksBody.trim();
             let [command, ...args] = noPrefix.split` `.filter(v => v);
             command = (command || '').toLowerCase();
+
 
             // --- [ 7. HAPUS DEKLARASI ULANG DI SINI ] ---
             // Bagian const userInGroup, isAdmin, dll yang tadinya ada di sini SUDAH DIHAPUS 
@@ -165,6 +169,24 @@ module.exports = {
                     break; 
                 }
             }
+                        // --- [ EXTRA: PESAN MASUK UNTUK GAME/MESSAGE HANDLER ] ---
+            // Ini biar plugin Susun Kata bisa baca jawaban tanpa pake titik (.)
+            for (let name in global.plugins) {
+                let plugin = global.plugins[name];
+                if (!plugin || plugin.disabled) continue;
+                if (typeof plugin.onMessage === 'function') {
+                    try {
+                        // isAdmin dan isBotAdmin sudah ada di atas, jadi bisa kita lempar ke plugin
+                        await plugin.onMessage.call(this, this, m, { 
+                            isAdmin, isBotAdmin, isOwner, participants 
+                        });
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+            }
+
+            
         } catch (e) {
             console.error(e);
         }
