@@ -1,10 +1,10 @@
 /**
- * Plugin: Family 100 V4 (Clean Edition) 📺
- * Fitur: .outf100 untuk menyerah & Anti-Spam Response.
+ * Plugin: Family 100 V4.5 (Ultimate Edition) 📺
+ * Fitur: Anti-Self Talk, Auto-Rekap, Modern & Anime Database.
  */
 
 module.exports = {
-    command: ['family100', 'stop100'], // Tambah command out
+    command: ['family100', 'stop'],
     category: 'fun',
     group: true,
     noPrefix: true,
@@ -12,9 +12,9 @@ module.exports = {
         conn.family100 = conn.family100 ? conn.family100 : {};
         let id = m.chat;
 
-        // --- [ FITUR KELUAR / MENYERAH ] ---
-        if (command === 'stop100') {
-            if (!(id in conn.family100)) return m.reply("Gak ada game Family 100 yang lagi jalan di sini. 🙄");
+        // --- [ FITUR KELUAR / STOP ] ---
+        if (command === 'stop') {
+            if (!(id in conn.family100)) return m.reply("Gak ada game yang lagi jalan di sini. 🙄");
             let [msg, json, tertebak] = conn.family100[id];
             await m.reply(`🏳️ *GAME DIHENTIKAN!*\nJawabannya adalah: ${json.jawaban.join(', ')}`);
             delete conn.family100[id];
@@ -22,10 +22,10 @@ module.exports = {
         }
 
         if (id in conn.family100) {
-            return conn.reply(m.chat, `Selesaikan dulu soal yang ini! Atau ketik *.stop100* buat berhenti. 😤`, conn.family100[id][0]);
+            return conn.reply(m.chat, `Selesaikan dulu soal yang ini! Atau ketik *.stop* buat berhenti. 😤`, conn.family100[id][0]);
         }
 
-        // --- [ DATABASE SOAL ] ---
+        // --- [ DATABASE LENGKAP: UMUM & ANIME ] ---
         const database = [
             { soal: "Apa yang biasa dilakukan orang kalau lagi stres?", jawaban: ["Tidur", "Makan", "Jalan-jalan", "Menangis", "Belanja"] },
             { soal: "Sebutkan alasan orang telat masuk kuliah!", jawaban: ["Bangun Siang", "Macet", "Ban Bocor", "Hujan", "Ketinggalan Bus"] },
@@ -160,18 +160,19 @@ module.exports = {
             { soal: "Apa yang sering dilakukan karakter anime pas lagi jatuh cinta?", jawaban: ["Salting", "Muka Merah", "Gagap", "Lari", "Bengong"] }
         ];
 
-
         let json = database[Math.floor(Math.random() * database.length)];
         
         let caption = `📺 *FAMILY 100* 📺\n\n`;
         caption += `*Pertanyaan:* ${json.soal}\n\n`;
         caption += `Terdapat *${json.jawaban.length}* jawaban teratas.\n`;
-        caption += `_Ketik *.outf100* untuk menyerah!_`;
+        caption += `_Ketik jawabannya langsung (Tanpa Titik)!_\n`;
+        caption += `_Ketik *.stop* untuk berhenti._`;
 
+        // Simpan sesi game
         conn.family100[id] = [
             await conn.reply(m.chat, caption, m),
             json,
-            []
+            [] // Koleksi jawaban tertebak
         ];
     },
 
@@ -179,44 +180,52 @@ module.exports = {
         conn.family100 = conn.family100 ? conn.family100 : {};
         let id = m.chat;
 
-        // Hanya respon kalau game AKTIF dan pesan bukan dari bot
-        if (!(id in conn.family100) || m.fromMe || !m.text) return false;
+        // --- [ 1. GATEKEEPER ANTI-SELF-TALK (PENTING!) ] ---
+        if (!(id in conn.family100)) return false;
+        
+        // Cek ID Bot secara dinamis
+        let botJid = conn.user.jid || conn.user.id;
 
-        // Jangan respon kalau user ngetik command lain (pake prefix)
+        // STOP JIKA: Pesan dari bot sendiri, dari sistem, atau pesan kosong
+        if (m.fromMe || m.key.fromMe || m.sender === botJid || m.isBaileys || !m.text) return false;
+
+        // STOP JIKA: User ngetik command bot (prefix)
         if (/^[.!#]/.test(m.text)) return false;
 
         let [msg, json, tertebak] = conn.family100[id];
         let input = m.text.trim().toLowerCase();
 
-        // Cari Jawaban
+        // --- [ 2. LOGIKA JAWABAN ] ---
         let index = json.jawaban.findIndex(v => v.toLowerCase() === input);
         
         if (index > -1) {
-            if (tertebak.includes(input)) return m.reply(`*${input.toUpperCase()}* sudah ditebak!`);
+            // Jika sudah ditebak, bot diam saja (menghindari spam list berulang)
+            if (tertebak.includes(input)) return false;
 
             tertebak.push(input);
             
+            // Build List Rekap Status
             let rekap = json.jawaban.map((v, i) => {
                 return tertebak.includes(v.toLowerCase()) ? `✅ ${v.toUpperCase()}` : `${i + 1}. ???`;
             }).join('\n');
 
             if (tertebak.length === json.jawaban.length) {
-                await conn.reply(m.chat, `✅ *LENGKAP!*\n\n${rekap}\n\nKompak banget kalian! 🌸`, m);
+                await conn.reply(m.chat, `✅ *LENGKAP! SEMUA TERTEBAK!*\n\n${rekap}\n\nKalian kompak banget! 🌸`, m);
                 delete conn.family100[id];
             } else {
                 let teks = `✅ *BENAR!* (${input.toUpperCase()})\n\n`;
                 teks += `*LIST JAWABAN:*\n${rekap}\n\n`;
-                teks += `Tersisa *${json.jawaban.length - tertebak.length}* lagi!`;
+                teks += `Tersisa *${json.jawaban.length - tertebak.length}* lagi! 🚀`;
                 await m.reply(teks);
             }
             return true;
-        } 
-        
-        // --- [ LOGIKA ANTI-SPAM SALAH ] ---
-        // Dia cuma bakal bilang "Salah" kalau panjang kata minimal 3 huruf 
-        // biar kalau orang cuma ketik "hah", "wkwk", "oke" gak dikira jawab.
-        if (input.length > 2) {
-            return m.reply(`❌ Salah, coba lagi!`);
+        } else {
+            // --- [ 3. RESPONS SALAH ] ---
+            // Hanya merespon jika input panjangnya > 3 huruf
+            // Dan dipastikan bukan chat dari bot sendiri
+            if (input.length > 3) {
+                return m.reply(`❌ Salah, coba lagi!`);
+            }
         }
     }
 };
