@@ -257,7 +257,7 @@ setInterval(async () => {
             // 2. Jam 6 Pagi - Pengingat Produktivitas (FIXED)
 cron.schedule('0 0 6 * * *', () => {
     broadcastGrup(`╭━━〔 ⛩️ *Selamat Pagi* ⛩️ 〕━━┓\n┃ 😼 Udah pagi aja nih, udh sarapan belom?\n┗━━━━━━━━━━━━━━━━┛\n\n_Tetap semangat demi masa depan yang cerah..✨_`);
-}, { timezone: "Asia/Jakarta" });.
+}, { timezone: "Asia/Jakarta" });
     
 
 // --- [ SISTEM AUTO-OUT SEWA ] ---
