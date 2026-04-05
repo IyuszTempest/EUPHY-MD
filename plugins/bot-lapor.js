@@ -56,8 +56,8 @@ module.exports = {
             
             let resUser = `✅ *TERKIRIM!*\n\n`;
             resUser += `Laporan/Request kamu sudah diteruskan ke Owner.\n`;
-            resUser += `Mohon tunggu tanggapan selanjutnya. Terima kasih!`;
-            
+            resUser += `Mohon tunggu tanggapan dan ikuti channel untuk melihat respon dari owner. Terima kasih!\n`;
+            resUser += `Link CH: https://whatsapp.com/channel/0029VaUAQxUHwXb4O5mN610c`;
             return m.reply(resUser);
 
         } catch (e) {
