@@ -1,6 +1,5 @@
 /**
  * Plugin: Game Kerja Utama 💼
- * Fitur: Pangkat, Gaji Dinamis, & Sistem Energi.
  */
 
 module.exports = {
@@ -10,28 +9,20 @@ module.exports = {
     call: async (conn, m, { command, text }) => {
         let user = global.db.data.users[m.sender];
         
-        // Inisialisasi data user kalau belum ada
+        // Inisialisasi Database
         if (typeof user.money === 'undefined') user.money = 0;
         if (typeof user.lastkerja === 'undefined') user.lastkerja = 0;
         if (typeof user.pangkat === 'undefined') user.pangkat = 'Pengangguran';
         if (typeof user.xp === 'undefined') user.xp = 0;
 
-        // --- [ DAFTAR PROFESI & GAJI ] ---
         const profesi = {
-            'Pengangguran': { gaji: 0, minXp: 0, energy: 0 },
-            'Kurir Paket': { gaji: 250000, minXp: 0, energy: 10 },
-            'Ojek Online': { gaji: 286000, minXp: 100, energy: 15 },
-            'Admin Olshop': { gaji: 556000, minXp: 500, energy: 20 },
-            'Backend Dev': { gaji: 1250000, minXp: 2000, energy: 30 },
-            'Project Manager': { gaji: 7480000, minXp: 5000, energy: 40 },
-            'CEO Muda': { gaji: 1580000000, minXp: 15000, energy: 50 }
+            'Pengangguran': { gaji: 0, minXp: 0 },
+            'Kurir Paket': { gaji: 145700, minXp: 0 },
+            'Ojek Online': { gaji: 286000, minXp: 150 },
+            'Admin Olshop': { gaji: 675800, minXp: 500 },
+            'Backend Dev': { gaji: 4340000, minXp: 1500 },
+            'CEO Muda': { gaji: 53040000, minXp: 10000 }
         };
-
-        // --- [ LOGIKA RESIGN ] ---
-        if (command === 'resign') {
-            user.pangkat = 'Pengangguran';
-            return m.reply('Kamu sekarang mengundurkan diri dan menjadi Pengangguran. 🥀');
-        }
 
         // --- [ LOGIKA PILIH PROFESI ] ---
         if (command === 'profesi') {
@@ -39,56 +30,45 @@ module.exports = {
                 let status = user.pangkat === p ? '✅' : (user.xp >= profesi[p].minXp ? '🔓' : '🔒');
                 return `${status} *${p}*\nGaji: Rp${profesi[p].gaji.toLocaleString()} | Min XP: ${profesi[p].minXp}`;
             }).join('\n\n');
-            
-            return m.reply(`💼 *DAFTAR PROFESI TERSEDIA*\n\n${list}\n\nKetik *.kerja [nama profesi]* untuk melamar!`);
+            return m.reply(`💼 *DAFTAR PROFESI*\n\n${list}\n\nKetik *.kerja [nama]* untuk melamar!`);
         }
 
-        // --- [ LOGIKA MELAMAR KERJA ] ---
-        if (text) {
+        // --- [ LOGIKA MELAMAR ] ---
+        if (command === 'kerja' && text) {
             let jobFound = Object.keys(profesi).find(p => p.toLowerCase() === text.toLowerCase());
-            if (!jobFound) return m.reply('Profesi itu nggak ada di database! Ketik *.profesi* buat cek.');
-            
-            if (user.xp < profesi[jobFound].minXp) {
-                return m.reply(`XP kamu belum cukup buat jadi *${jobFound}*! Butuh minimal ${profesi[jobFound].minXp} XP.`);
-            }
-            
+            if (!jobFound) return m.reply('Profesi tidak ditemukan! Cek di *.profesi*');
+            if (user.xp < profesi[jobFound].minXp) return m.reply(`XP kamu belum cukup untuk jadi *${jobFound}*!`);
             user.pangkat = jobFound;
-            return m.reply(`Selamat! Kamu sekarang bekerja sebagai *${jobFound}*. Ketik *.kerja* buat mulai cari duit! 🚀`);
+            return m.reply(`Selamat! Sekarang kamu bekerja sebagai *${jobFound}*. 🚀`);
         }
 
-        // --- [ LOGIKA MULAI KERJA ] ---
-        if (user.pangkat === 'Pengangguran') {
-            return m.reply('Kamu masih nganggur! Ketik *.profesi* buat cari kerja dulu.');
+        // --- [ LOGIKA ABSEN KERJA ] ---
+        if (command === 'kerja' || command === 'work') {
+            if (user.pangkat === 'Pengangguran') return m.reply('Kamu masih nganggur! Cari kerja dulu di *.profesi*');
+
+            let cooldown = 3600000; // 1 Jam
+            if (new Date - user.lastkerja < cooldown) {
+                let sisa = (user.lastkerja + cooldown) - (new Date);
+                let menit = Math.floor(sisa / 60000);
+                let detik = Math.floor((sisa % 60000) / 1000);
+                return m.reply(`Masih capek! Tunggu *${menit}m ${detik}s* lagi atau beli *Energy Drink* di *.shop* untuk skip waktu! 🥤`);
+            }
+
+            let gajiBase = profesi[user.pangkat].gaji;
+            let bonus = Math.floor(Math.random() * 5000);
+            let total = gajiBase + bonus;
+            let xpDapet = Math.floor(Math.random() * 30) + 10;
+
+            user.money += total;
+            user.xp += xpDapet;
+            user.lastkerja = new Date * 1;
+
+            return m.reply(`💼 *LAPORAN KERJA*\n\nHasil: *Rp${total.toLocaleString()}*\nXP: *+${xpDapet}*\nPangkat: *${user.pangkat}*\n\nSaldo: Rp${user.money.toLocaleString()}`);
         }
 
-        // Cooldown Kerja (Misal 1 jam sekali)
-        let cooldown = 3600000; // 1 Jam dalam ms
-        if (new Date - user.lastkerja < cooldown) {
-            let sisa = (user.lastkerja + cooldown) - (new Date);
-            let menit = Math.floor(sisa / 60000);
-            let detik = Math.floor((sisa % 60000) / 1000);
-            return m.reply(`Kamu masih capek! Istirahat dulu selama *${menit} menit ${detik} detik* lagi. ☕`);
+        if (command === 'resign') {
+            user.pangkat = 'Pengangguran';
+            return m.reply('Kamu resmi resign dan jadi Pengangguran sekarang. 🥀');
         }
-
-        // Proses Gajian
-        let dataJob = profesi[user.pangkat];
-        let bonus = Math.floor(Math.random() * 2000); // Bonus random biar gak kaku
-        let totalGaji = dataJob.gaji + bonus;
-        let dapetXp = Math.floor(Math.random() * 50) + 10;
-
-        user.money += totalGaji;
-        user.xp += dapetXp;
-        user.lastkerja = new Date * 1;
-
-        let caption = `💼 *LAPORAN KERJA* 💼\n\n`;
-        caption += `Profesi: *${user.pangkat}*\n`;
-        caption += `Gaji: *Rp${dataJob.gaji.toLocaleString()}*\n`;
-        caption += `Bonus Tip: *Rp${bonus.toLocaleString()}*\n`;
-        caption += `XP Tambahan: *+${dapetXp} XP*\n\n`;
-        caption += `*Total Pendapatan:* Rp${totalGaji.toLocaleString()}\n`;
-        caption += `_Gunakan duitmu dengan bijak!_`;
-
-        return m.reply(caption);
     }
 };
-                  
