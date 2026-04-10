@@ -34,7 +34,7 @@ module.exports = {
             if (!user) return m.reply('Sistem sedang memuat data user...')
             
             let name = `@${m.sender.split`@`[0]}`
-            const imageMenu = global.imgall;
+            const imageMenu = global.imgreply;
             let uptime = clockString(process.uptime() * 1000)
 
             // Header Menu dengan Font Estetik
