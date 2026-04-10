@@ -42,7 +42,7 @@ module.exports = {
 
             // Kirim poster dengan gaya Newsletter + AdReply
             await conn.sendMessage(m.chat, { 
-                image: global.imgreply, 
+                image: { url: data.images.jpg.image_url }, 
                 caption: caption,
                 contextInfo: {
                     forwardingScore: 999,
@@ -54,7 +54,7 @@ module.exports = {
                     externalAdReply: {
                         title: `Info: ${data.title}`,
                         body: `Season: ${data.season || 'N/A'} ${data.year || ''}`,
-                        thumbnailUrl: data.images.jpg.image_url,
+                        thumbnailUrl: global.imgreply,
                         sourceUrl: data.url,
                         mediaType: 1,
                         renderLargerThumbnail: true
