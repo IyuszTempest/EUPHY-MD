@@ -8,6 +8,8 @@
 [![Node.js](https://img.shields.io/badge/Node.js-22+-68a063?style=for-the-badge&logo=nodedotjs)](https://nodejs.org)
 [![Library](https://img.shields.io/badge/Library-Baileys_Official-00a884?style=for-the-badge&logo=whatsapp)](#)
 [![Tech](https://img.shields.io/badge/AI-Nano_Banana-yellow?style=for-the-badge&logo=google-gemini)](#)
+<img src="https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=for-the-badge" alt="Maintained">
+<img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="License MIT">
 
 </div>
 
