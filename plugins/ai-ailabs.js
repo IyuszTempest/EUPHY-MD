@@ -31,7 +31,7 @@ module.exports = {
             // Kirim hasil dengan UI mewah
             await conn.sendMessage(m.chat, { 
                 image: { url: imageUrl }, 
-                caption: `╭━━〔 ⛩️ *AILABS GENERATOR* ⛩️ 〕━━┓\n┃ 🏮 *Prompt:* ${text}\n┃ 👤 *Requester:* @${m.sender.split`@`[0]}\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n_✨ Berhasil dibuat oleh Euphy System_`,
+                caption: `╭━━〔 ⛩️ *AILABS GENERATOR* ⛩️ 〕━━┓\n┃ 🏮 *Prompt:* ${text}\n┃ 👤 *Requester:* @${m.sender.split`@`[0]}\n┗━━━━━━━━━━━━━━━━━┛\n\n_✨ Berhasil dibuat oleh Euphy System_`,
                 contextInfo: {
                     mentionedJid: [m.sender],
                     forwardingScore: 999,
