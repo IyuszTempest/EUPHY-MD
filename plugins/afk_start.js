@@ -33,7 +33,7 @@ module.exports = {
                 externalAdReply: {
                     title: "EUPHY SYSTEM: AFK ACTIVATED",
                     body: `${senderName} sedang istirahat`,
-                    thumbnailUrl: global.imgall,
+                    thumbnailUrl: global.imgreply,
                     sourceUrl: "https://github.com/IyuszTempest",
                     mediaType: 1,
                     renderLargerThumbnail: true
