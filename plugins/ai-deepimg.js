@@ -44,7 +44,7 @@ module.exports = {
             // Kirim hasil dengan UI Estetik
             await conn.sendMessage(m.chat, { 
                 image: { url: imageUrl }, 
-                caption: `╭━━〔 ⛩️ *DEEPIMAGE AI* ⛩️ 〕━━┓\n┃ 🏮 *Prompt:* ${prompt}\n┃ ✨ *Style:* ${selectedStyle.charAt(0).toUpperCase() + selectedStyle.slice(1)}\n┃ 👤 *Requester:* @${m.sender.split`@`[0]}\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n_Powered by IyuszTempest AI_`,
+                caption: `╭━━〔 ⛩️ *DEEPIMAGE AI* ⛩️ 〕━━┓\n┃ 🏮 *Prompt:* ${prompt}\n┃ ✨ *Style:* ${selectedStyle.charAt(0).toUpperCase() + selectedStyle.slice(1)}\n┃ 👤 *Requester:* @${m.sender.split`@`[0]}\n┗━━━━━━━━━━━━━━━━┛\n\n_Powered by IyuszTempest AI_`,
                 contextInfo: {
                     mentionedJid: [m.sender],
                     forwardingScore: 999,
