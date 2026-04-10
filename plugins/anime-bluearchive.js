@@ -6,7 +6,7 @@
 module.exports = {
     command: ['bluearchive'],
     category: 'anime',
-    noPreifx: true,
+    noPrefix: true,
     call: async (conn, m) => {
         try {
             await conn.sendMessage(m.chat, { react: { text: '📸', key: m.key } });
