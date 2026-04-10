@@ -34,7 +34,7 @@ module.exports = {
             if (!user) return m.reply('Sistem sedang memuat data user...')
             
             let name = `@${m.sender.split`@`[0]}`
-            const imageMenu = global.imgreply;
+            const imageMenu = global.imgall;
             let uptime = clockString(process.uptime() * 1000)
 
             // Header Menu dengan Font Estetik
@@ -76,7 +76,7 @@ module.exports = {
                     externalAdReply: {
                         title: `Euphylia Magenta | Active`,
                         body: `Selamat datang, ${name.replace('@', '')}!`,
-                        thumbnailUrl: global.imgall,
+                        thumbnailUrl: global.imgreply,
                         sourceUrl: global.idch,
                         mediaType: 1,
                         renderLargerThumbnail: true
