@@ -29,9 +29,9 @@ module.exports = {
                 }
             }, { quoted: m });
 
-            
-        } catch (e) {
-            m.reply("Gagal mengambil foto, servernya mungkin lagi lelah.");
+             } catch (e) {
+            console.error(e)
+            m.reply(`error nih`)
         }
     }
 };
