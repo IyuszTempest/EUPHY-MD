@@ -36,7 +36,7 @@ module.exports = {
             // Kirim video dengan UI Newsletter
             await conn.sendMessage(m.chat, { 
                 video: buffer, 
-                caption: `╭━━〔 ⛩️ *JJ COSPLAY ANIME* ⛩️ 〕━━┓\n┃ ✨ *Type:* Video MP4\n┃ 🏮 *Source:* IyuszTempest API\n┃ 👤 *Requester:* @${m.sender.split`@`[0]}\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n_✨ Enjoy the show!_`,
+                caption: `〔 ⛩️ *JJ COSPLAY ANIME* ⛩️ 〕\n┃ ✨ *Type:* Video MP4\n┃ 🏮 *Source:* IyuszTempest API\n┃ 👤 *Requester:* @${m.sender.split`@`[0]}\n┗━━━━━━━━━━━━━━━━┛\n\n_✨ Enjoy the show!_`,
                 mentions: [m.sender],
                 contextInfo: {
                     forwardingScore: 999,
