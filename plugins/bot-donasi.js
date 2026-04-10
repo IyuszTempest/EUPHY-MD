@@ -13,7 +13,7 @@ module.exports = {
         caption += `*Bisa lewat:* \n`;
         caption += `• Dana / OVO / GoPay / LinkAja / Dll\n`;
         caption += `• All Bank (Scan via Mobile Banking)\n\n`;
-        caption += `_Berapapun donasinya, sangat berarti buat kelangsungan hidup bot ini. Terima kasih!_ 🌸`;
+        caption += `_Berapapun donasinya, sangat berarti buat kelangsungan hidup bot ini. Terima kasih!_ `;
 
         // Ambil link dari global.qris
         const qrisUrl = global.qris; 
