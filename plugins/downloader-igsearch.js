@@ -22,7 +22,7 @@ module.exports = {
 
             if (!res.status || !res.result.search_data) throw "Gagal mencari Reels.";
 
-            let capt = `╭━━〔 ⛩️ *𝙸𝙶 𝚁𝙴𝙴𝙻𝚂 𝚂𝙴𝙰𝚁𝙲𝙷* ⛩️ 〕━━┓\n┃ 🔍 *Query:* ${res.result.query}\n┃ 📊 *Total:* ${res.result.count} data\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n`;
+            let capt = `╭━━〔 ⛩️ *𝙸𝙶 𝚁𝙴𝙴𝙻𝚂 𝚂𝙴𝙰𝚁𝙲𝙷* ⛩️ 〕━━┓\n┃ 🔍 *Query:* ${res.result.query}\n┃ 📊 *Total:* ${res.result.count} data\n┗━━━━━━━━━━━━━┛\n\n`;
             
             // Ambil 3 hasil teratas agar tidak spam & hemat RAM
             const results = res.result.search_data.slice(0, 3);
