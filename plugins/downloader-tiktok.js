@@ -34,7 +34,7 @@ module.exports = {
             if (video) {
                 await conn.sendMessage(m.chat, { 
                     video: { url: video }, 
-                    caption: `╭━━〔 ⛩️ *𝚃𝙸𝙺𝚃𝙾𝙺 𝙳𝙻* ⛩️ 〕━━┓\n┃ 📝 *Title:* ${title || 'No Title'}\n┗━━━━━━━━━━━━━━━━━━━━┛` 
+                    caption: `╭━━〔 ⛩️ *𝚃𝙸𝙺𝚃𝙾𝙺 𝙳𝙻* ⛩️ 〕━━┓\n┃ 📝 *Title:* ${title || 'No Title'}\n┗━━━━━━━━━━━━━━━┛` 
                 }, { quoted: m });
             }
 
