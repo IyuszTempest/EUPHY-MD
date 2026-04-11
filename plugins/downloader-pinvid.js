@@ -22,7 +22,7 @@ module.exports = {
 
             if (!res.status || res.result.result.length === 0) throw "Video Pinterest nggak ketemu.";
 
-            let capt = `╭━━〔 ⛩️ *𝙿𝙸𝙽𝚃𝙴𝚁𝙴𝚂𝚃 𝚅𝙸𝙳𝙴𝙾* ⛩️ 〕━━┓\n┃ 🔍 *Query:* ${res.result.query}\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n`;
+            let capt = `╭━━〔 ⛩️ *𝙿𝙸𝙽𝚃𝙴𝚁𝙴𝚂𝚃 𝚅𝙸𝙳𝙴𝙾* ⛩️ 〕━━┓\n┃ 🔍 *Query:* ${res.result.query}\n┗━━━━━━━━━━━━┛\n\n`;
             
             // Ambil 3 hasil teratas agar RAM 512MB kamu tetap stabil
             const results = res.result.result.slice(0, 3);
