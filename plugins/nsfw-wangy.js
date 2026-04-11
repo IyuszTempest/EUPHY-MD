@@ -32,7 +32,7 @@ module.exports = {
             let caption = `╭━━〔 🔞 *NSFW CONTENT* 🔞 〕━━┓\n`
             caption += `┃ 🏮 *Type:* ${mediaType.toUpperCase()}\n`
             caption += `┃ ⚠️ *Warning:* Gunakan bijak!\n┃ 👤 *Requester:* @${m.sender.split`@`[0]}\n`
-            caption += `┗━━━━━━━━━━━━━━━━━━━━┛\n\n_Powered by IyuszTempest_`
+            caption += `┗━━━━━━━━━━━━━━━┛\n\n_Powered by IyuszTempest_`
 
             let messageOptions = {
                 caption: caption,
