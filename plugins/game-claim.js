@@ -17,7 +17,7 @@ module.exports = {
         if (typeof user.dana_balance === 'undefined') user.dana_balance = 0;
         if (typeof user.lastclaim === 'undefined') user.lastclaim = 0;
 
-        const bonus = 300000; // Nominal Rp300.000
+        const bonus = 1650000; // Nominal Rp300.000
         const cooldown = 86400000; // 24 Jam dalam milidetik
 
         // Cek apakah sudah waktunya klaim atau belum
@@ -36,9 +36,9 @@ module.exports = {
         res += `┃ 💰 *Bonus:* Rp${bonus.toLocaleString()}\n`;
         res += `┃ 📱 *Saldo DANA:* Rp${user.dana_balance.toLocaleString()}\n`;
         res += `┃\n`;
-        res += `┣━━━━━━━━━━━━━━━━━━━━┛\n`;
+        res += `┣━━━━━━━━━━━━━━━━━━┛\n`;
         res += `┃ _Gunakan buat modal Sawit atau Padi!_\n`;
-        res += `┗━━━━━━━━━━━━━━━━━━━━┛`;
+        res += `┗━━━━━━━━━━━━━━━━━━┛`;
 
         await conn.sendMessage(m.chat, { react: { text: '💸', key: m.key } });
         return m.reply(res);
