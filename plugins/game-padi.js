@@ -18,7 +18,7 @@ module.exports = {
         if (typeof user.lastpanenpadi === 'undefined') user.lastpanenpadi = 0;
 
         const hargaBibit = 20000; // Harga 1 petak sawah
-        const hasilPanen = 15000; // Hasil jual per petak
+        const hasilPanen = 23000; // Hasil jual per petak
         const cooldownPanen = 3600000; // 1 Jam untuk panen
 
         const cmd = command.toLowerCase();
@@ -37,7 +37,7 @@ module.exports = {
             status += `┃ 🚜 *${usedPrefix}panenpadi*\n`;
             status += `┃    (Ambil hasil panen padi)\n`;
             status += `┃\n`;
-            status += `┗━━━━━━━━━━━━━━━━━━━━┛\n`;
+            status += `┗━━━━━━━━━━━━━━━━━━━┛\n`;
             status += `_Padi menguning, dompet pun garing!_`;
             
             return m.reply(status);
