@@ -22,7 +22,7 @@ module.exports = {
 
             if (!res.status || !res.result.search_data) throw "Gagal mencari video TikTok.";
 
-            let capt = `╭━━〔 ⛩️ *𝚃𝙸𝙺𝚃𝙾𝙺 𝚂𝙴𝙰𝚁𝙲𝙷* ⛩️ 〕━━┓\n┃ 🔍 *Query:* ${res.result.query}\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n`;
+            let capt = `╭━━〔 ⛩️ *𝚃𝙸𝙺𝚃𝙾𝙺 𝚂𝙴𝙰𝚁𝙲𝙷* ⛩️ 〕━━┓\n┃ 🔍 *Query:* ${res.result.query}\n┗━━━━━━━━━━━━━━━┛\n\n`;
             
             // Ambil 3 hasil teratas biar RAM 512MB kamu tetap stabil
             const results = res.result.search_data.slice(0, 3);
@@ -34,7 +34,7 @@ module.exports = {
                 capt += `🔗 Link No WM: \`${v.data.find(d => d.type === 'no_watermark')?.url}\`\n\n`;
             });
 
-            capt += `📍 *Euphylia Magenta* ✨\n_Ketik .tt [link] untuk unduh videonya!_`;
+            capt += `📍 *Euphylia Magenta* ✨\n_Ketik tt [link] untuk unduh videonya!_`;
 
             // Kirim dengan cover video pertama
             await conn.sendMessage(m.chat, { 
