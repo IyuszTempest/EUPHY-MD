@@ -38,7 +38,7 @@ module.exports = {
             helpText += `┃ 4️⃣ *Status Lahan:* \n`;
             helpText += `┃ \`${usedPrefix}sawit\` \n`;
             helpText += `┃\n`;
-            helpText += `┗━━━━━━━━━━━━━━━━━━━━┛\n`;
+            helpText += `┗━━━━━━━━━━━━━━━┛\n`;
             helpText += `_Semangat kerjanya, demi negara!_ 🪓`;
             return m.reply(helpText);
         }
@@ -52,18 +52,29 @@ module.exports = {
             status += `┃ 💰 *Saldo:* Rp${(user.money || 0).toLocaleString()}\n`;
             status += `┃\n`;
             status += `┃ _Ketik *${usedPrefix}helpsawit* untuk bantuan._\n`;
-            status += `┗━━━━━━━━━━━━━━━━━━━━┛`;
+            status += `┗━━━━━━━━━━━━━━━━━━┛`;
             return m.reply(status);
         }
 
-        // --- 3. TANAM SAWIT ---
+// --- 3. TANAM SAWIT ---
         if (cmd === 'tanamsawit') {
-            const hargaBibit = 5000;
-            if (user.money < hargaBibit) return m.reply(`❌ Saldo kurang! Harga bibit: Rp${hargaBibit.toLocaleString()}`);
+            const hargaBibit = 70000;
+            // Ambil angka dari ketikan user, kalau gak ada angka default ke 1
+            let jumlah = parseInt(text) || 1;
             
-            user.money -= hargaBibit;
-            user.sawit += 1;
-            return m.reply(`🌱 Berhasil tanam 1 pohon! Total: ${user.sawit} pohon.`);
+            // Validasi agar user tidak memasukkan angka negatif atau nol
+            if (jumlah < 1) return m.reply('❌ Minimal tanam adalah 1 pohon!');
+            
+            const totalHarga = hargaBibit * jumlah;
+
+            if (user.money < totalHarga) {
+                return m.reply(`❌ Saldo kurang! Untuk tanam ${jumlah} pohon, kamu butuh Rp${totalHarga.toLocaleString()}.\n💰 Saldo kamu saat ini: Rp${user.money.toLocaleString()}`);
+            }
+            
+            user.money -= totalHarga;
+            user.sawit += jumlah;
+            
+            return m.reply(`🌱 *BERHASIL TANAM SAWIT* 🌱\n\n┃ 🚜 *Jumlah:* ${jumlah} pohon\n┃ 💸 *Total Biaya:* Rp${totalHarga.toLocaleString()}\n┃ 🌴 *Total Sawitmu:* ${user.sawit} pohon\n┃ 💰 *Sisa Saldo:* Rp${user.money.toLocaleString()}\n\n_Semoga panennya melimpah! ✨_`);
         }
 
         // --- 4. PANEN SAWIT ---
