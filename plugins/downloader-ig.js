@@ -30,7 +30,7 @@ module.exports = {
             // Kirim video langsung ke chat
             await conn.sendMessage(m.chat, { 
                 video: { url: videoUrl }, 
-                caption: `✨ *Instagram Downloader Success!*\n\n🔗 *Source:* ${text}\n\nBerhasil didownload buat kamu!`
+                caption: `✨🔗 *Source:* ${text}`
             }, { quoted: m });
 
         } catch (e) {
