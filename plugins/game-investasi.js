@@ -4,7 +4,7 @@
  */
 
 module.exports = {
-    command: ['inves', 'beliinves', 'jualinves', 'portofolio', 'helpiv', 'investasi'],
+    command: ['inves', 'beliinves', 'jualinves', 'portofolio', 'helpiv'],
     category: 'game',
     noPrefix: true,
     call: async (conn, m, { usedPrefix, command, text }) => {
@@ -66,7 +66,7 @@ module.exports = {
                 marketText += `🔸 *${market[x].nama}*\n`;
                 marketText += `   Price: Rp${currentPrice.toLocaleString()}\n\n`;
             }
-            marketText += `_Ketik *${usedPrefix}beliinvest [jenis] [jumlah]* untuk membeli._`;
+            marketText += `_Ketik *${usedPrefix}beliinvest [jenis] [jumlah]* untuk membeli. Ketik ${usedPrefix}helpiv untuk melihat menu investasi._`;
             return m.reply(marketText);
         }
 
