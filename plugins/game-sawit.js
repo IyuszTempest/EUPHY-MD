@@ -84,7 +84,7 @@ module.exports = {
             let cooldown = 3600000; // 1 Jam
             if (new Date() - user.last_panen < cooldown) {
                 let sisa = cooldown - (new Date() - user.last_panen);
-                return m.reply(`⏳ Belum brondol! Tunggu *${Math.ceil(sisa / 60000)} menit* lagi.`);
+                return m.reply(`⏳ Belum brondol! Tunggu *${Math.ceil(sisa / 12000)} menit* lagi.`);
             }
 
             let hasil = 0;
