@@ -1,9 +1,7 @@
 /**
- * Plugin: Trading Simulator V1 (Fast Trade) 📉📈
- * Fitur: Open Position, Duration, & Profit/Loss Logic
+ * Plugin: Trading Simulator V2 (DANA Edition) 📉📈
+ * Fitur: Taruhan pakai Saldo DANA, Auto-Help, & Realistic Profit.
  */
-
-const crypto = require('crypto');
 
 module.exports = {
     command: ['helptrade', 'op', 'cekaset', 'trade'],
@@ -14,26 +12,27 @@ module.exports = {
         if (!user) return m.reply("Daftar dulu di database bot!");
 
         // --- INISIALISASI ---
-        if (typeof user.money === 'undefined') user.money = 0;
+        user.dana_balance = user.dana_balance || 0;
         if (typeof user.last_trade === 'undefined') user.last_trade = 0;
 
         const cmd = command.toLowerCase();
 
-        // --- 1. MENU HELP ---
-        if (cmd === 'helptrade') {
+        // --- 1. MENU HELP (Pusat Bantuan) ---
+        if (cmd === 'helptrade' || (cmd === 'trade' && !text)) {
             let h = `╭━━〔 💹 *𝙴𝚄𝙿𝙷𝚈 𝚃𝚁𝙰𝙳𝙸𝙽𝙶* 💹 〕━━┓\n`;
             h += `┃\n`;
             h += `┃ 🚀 *Cara Main:* \n`;
-            h += `┃ \`trade [nominal] [durasi]\` \n`;
+            h += `┃ \`${usedPrefix}trade [nominal] [durasi]\` \n`;
             h += `┃\n`;
             h += `┃ 📝 *Contoh:* \n`;
-            h += `┃ \`trade 50000 1\` \n`;
-            h += `┃ _(Artinya trade Rp50rb selama 1 menit)_\n`;
+            h += `┃ \`${usedPrefix}trade 50000 1\` \n`;
+            h += `┃ _(Trade Rp50rb selama 1 menit)_\n`;
             h += `┃\n`;
-            h += `┃ 💰 *Profit:* Up to 90% \n`;
-            h += `┃ ⏱️ *Limit:* Minimal 1 Menit \n`;
+            h += `┃ 📱 *Saldo DANA:* Rp${user.dana_balance.toLocaleString()}\n`;
+            h += `┃ 💰 *Profit:* 85% - 90% \n`;
+            h += `┃ ⏱️ *Limit:* 1 - 10 Menit \n`;
             h += `┗━━━━━━━━━━━━━━━┛\n`;
-            h += `_High Risk, High Return! Gunakan uang dingin._ ☕`;
+            h += `_Gunakan saldo DANA untuk modal!_ 🌸`;
             return m.reply(h);
         }
 
@@ -41,63 +40,66 @@ module.exports = {
         if (cmd === 'trade' || cmd === 'op') {
             let [nominal, durasi] = text.split(' ');
             nominal = parseInt(nominal);
-            durasi = parseInt(durasi) || 1; // Default 1 menit
+            durasi = parseInt(durasi) || 1; 
 
             if (isNaN(nominal) || nominal < 1000) {
-                return m.reply(`❌ Masukkan nominal yang valid! Minimal Rp1.000.\nContoh: *trade 10000 1*`);
+                return m.reply(`❌ Masukkan nominal yang valid! Minimal Rp1.000.\nContoh: *${usedPrefix}trade 10000 1*`);
             }
             if (durasi < 1 || durasi > 10) {
                 return m.reply(`❌ Durasi minimal 1 menit dan maksimal 10 menit.`);
             }
-            if (user.money < nominal) {
-                return m.reply(`❌ Saldo kamu gak cukup! Saldo saat ini: Rp${user.money.toLocaleString()}`);
+            if (user.dana_balance < nominal) {
+                return m.reply(`❌ Saldo DANA kamu gak cukup! Saldo DANA saat ini: Rp${user.dana_balance.toLocaleString()}\n\n_Topup dulu dari saldo utama ke DANA._`);
             }
 
-            // Cooldown agar tidak spam (berdasarkan durasi yang dipilih)
+            // Cooldown berdasarkan durasi
             let cooldown = durasi * 60000; 
             if (new Date() - user.last_trade < cooldown) {
-                return m.reply(`❌ Kamu masih punya posisi yang terbuka! Tunggu trade sebelumnya selesai.`);
+                let sisa = cooldown - (new Date() - user.last_trade);
+                let menit = Math.floor(sisa / 60000);
+                let detik = Math.floor((sisa % 60000) / 1000);
+                return m.reply(`❌ Masih ada posisi terbuka! Tunggu *${menit}m ${detik}s* lagi.`);
             }
 
-            // Potong saldo di awal (Margin)
-            user.money -= nominal;
+            // Potong saldo DANA di awal
+            user.dana_balance -= nominal;
             user.last_trade = new Date() * 1;
 
             let { key } = await conn.sendMessage(m.chat, { 
-                text: `📊 *OPEN POSITION BERHASIL*\n\n💰 *Investasi:* Rp${nominal.toLocaleString()}\n⏱️ *Durasi:* ${durasi} Menit\n📈 *Status:* Menganalisa Market...` 
+                text: `📊 *OPEN POSITION BERHASIL*\n\n💰 *Modal DANA:* Rp${nominal.toLocaleString()}\n⏱️ *Durasi:* ${durasi} Menit\n📈 *Status:* Menganalisa Market...` 
             });
 
-            // Simulasi pergerakan grafik (delay 3 detik buat gaya-gayaan)
-            await new Promise(r => setTimeout(r, 3000));
-            await conn.sendMessage(m.chat, { text: `📉 *Grafik sedang fluktuatif...*`, edit: key });
+            // Delay animasi
+            await new Promise(r => setTimeout(r, 2500));
+            await conn.sendMessage(m.chat, { text: `📉 *Grafik sedang fluktuatif (Binary Option)...*`, edit: key });
 
-            // Set Timeout sesuai durasi trade
+            // Set Timeout sesuai durasi
             setTimeout(async () => {
-                // Logika Win/Lose (50:50 Chance, bisa kamu modif)
-                let isWin = Math.random() > 0.5;
-                let multiplier = 1.85; // Profit 85% dari modal
+                let isWin = Math.random() > 0.5; // 50:50 Chance
+                let multiplier = 1.85; 
                 let winAmount = Math.floor(nominal * multiplier);
 
                 if (isWin) {
-                    user.money += winAmount;
+                    user.dana_balance += winAmount;
                     let notaWin = `✅ *TRADE PROFIT!* 🟢\n\n`;
-                    notaWin += `📈 *Market:* Crypto/USDT\n`;
+                    notaWin += `📈 *Market:* BTC/USDT\n`;
                     notaWin += `💰 *Hasil:* Rp${winAmount.toLocaleString()}\n`;
                     notaWin += `💸 *Net Profit:* +Rp${(winAmount - nominal).toLocaleString()}\n\n`;
-                    notaWin += `*Total Saldo:* Rp${user.money.toLocaleString()}`;
+                    notaWin += `*Saldo DANA Sekarang:* Rp${user.dana_balance.toLocaleString()}`;
                     await conn.sendMessage(m.chat, { text: notaWin });
                 } else {
                     let notaLoss = `❌ *TRADE LOSS!* 🔴\n\n`;
-                    notaLoss += `📉 *Market:* Crypto/USDT\n`;
-                    notaLoss += `💸 *Kerugian:* -Rp${nominal.toLocaleString()}\n\n`;
-                    notaLoss += `_Jangan menyerah, pasar selalu ada esok hari._`;
+                    notaLoss += `📉 *Market:* BTC/USDT\n`;
+                    notaLoss += `💸 *Loss:* -Rp${nominal.toLocaleString()}\n\n`;
+                    notaLoss += `_Pasar lagi kejam, coba lagi nanti!_`;
                     await conn.sendMessage(m.chat, { text: notaLoss });
                 }
             }, durasi * 60000);
         }
 
+        // --- 3. CEK ASET ---
         if (cmd === 'cekaset') {
-            return m.reply(`💰 *SALDO UTAMA:* Rp${user.money.toLocaleString()}`);
+            return m.reply(`📱 *DOMPET DANA:* Rp${user.dana_balance.toLocaleString()}\n💵 *SALDO UTAMA:* Rp${(user.money || 0).toLocaleString()}`);
         }
     }
 };
