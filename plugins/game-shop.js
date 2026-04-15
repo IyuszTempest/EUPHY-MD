@@ -39,6 +39,17 @@ module.exports = {
             'fern': { nama: 'Figure Fern (Mage)', harga: 2400000, tipe: 'figure' },
             'power': { nama: 'Figure Power (Chainsaw Man)', harga: 2100000, tipe: 'figure' },
             'makima': { nama: 'Figure Makima', harga: 2700000, tipe: 'figure' },
+            'toki': { nama: 'Figure Asuma Toki (Bunny)', harga: 3500000, tipe: 'figure' },
+            'nagisa': { nama: 'Figure Kirifuji Nagisa', harga: 2900000, tipe: 'figure' },
+            'rio': { nama: 'Figure Tsukatsuki Rio', harga: 3800000, tipe: 'figure' },
+            'clorinde': { nama: 'Figure Clorinde', harga: 3400000, tipe: 'figure' },
+            'navia': { nama: 'Figure Navia', harga: 3200000, tipe: 'figure' },
+            'anya': { nama: 'Figure Anya Forger', harga: 1100000, tipe: 'figure' },
+            'yor': { nama: 'Figure Yor Forger', harga: 2600000, tipe: 'figure' },
+            'megumin': { nama: 'Figure Megumin (Explosion)', harga: 2400000, tipe: 'figure' },
+            'aqua': { nama: 'Figure Aqua (Useless Goddess)', harga: 2000000, tipe: 'figure' },
+            'ruby': { nama: 'Figure Hoshino Ruby', harga: 2150000, tipe: 'figure' },
+            'kana': { nama: 'Figure Arima Kana', harga: 2100000, tipe: 'figure' },
 
             // --- EQUIPMENT & CLOTHING ---
             'hoodie': { nama: 'Hoodie Lycoris Recoil', harga: 450000, tipe: 'baju' },
@@ -54,7 +65,14 @@ module.exports = {
             'helm': { nama: 'Helm KYT Custom Repaint', harga: 1200000, tipe: 'harian' },
             'speaker': { nama: 'Subwoofer 15-inch Horeg', harga: 3500000, tipe: 'harian' },
             'power-amp': { nama: 'Amplifier SOCL 506 Horeg', harga: 1500000, tipe: 'harian' },
-            'knalpot': { nama: 'Knalpot Racing Jupiter', harga: 850000, tipe: 'harian' }
+            'knalpot': { nama: 'Knalpot Racing Jupiter', harga: 850000, tipe: 'harian' },
+
+            // --- LUXURY & REAL ESTATE ---
+            'mobil': { nama: 'Toyota GR Supra (A90)', harga: 1200000000, tipe: 'harian' },
+            'rumah': { nama: 'Rumah Minimalis Modern', harga: 5000000000, tipe: 'harian' },
+            'tv': { nama: 'Smart TV OLED 65-inch', harga: 25000000, tipe: 'harian' },
+            'ac': { nama: 'AC Split 1 PK', harga: 4500000, tipe: 'harian' },
+            'kulkas': { nama: 'Kulkas 2 Pintu', harga: 3500000, tipe: 'harian' }
         };
 
         const cmd = command.toLowerCase();
@@ -67,17 +85,21 @@ module.exports = {
             teks += `┃ • furina | kafka | firefly | march\n`;
             teks += `┃ • robin | zongli | kazuha | rimuru\n`;
             teks += `┃ • miku | arona | shiroko | hina\n`;
-            teks += `┃ • mika | frieren | fern | power\n┃\n`;
+            teks += `┃ • mika | frieren | fern | power | makima\n`;
+            teks += `┃ • toki | nagisa | rio | clorinde | navia\n`;
+            teks += `┃ • anya | yor | megumin | aqua | ruby | kana\n┃\n`;
             
             teks += `┣ 👕 *CLOTHING & GEAR*\n`;
             teks += `┃ • hoodie : 450rb | jersey : 850rb\n`;
             teks += `┃ • kimono : 600rb | techwear : 1.2jt\n┃\n`;
             
             teks += `┣ 🛠️ *DAILY STUFF & HOREG*\n`;
-            teks += `┃ • pc      : 5jt (PC Kayu)\n`;
             teks += `┃ • motor   : 15jt (Jupiter Z1)\n`;
-            teks += `┃ • speaker : 3.5jt (15-inch)\n`;
-            teks += `┃ • helm    : 1.2jt (KYT Custom)\n┃\n`;
+            teks += `┃ • pc      : 5jt | motor : 15jt\n`;
+            teks += `┃ • speaker : 3.5jt | helm : 1.2jt\n`;
+            teks += `┃ • tv      : 25jt | ac   : 4.5jt\n┃\n`;
+            teks += `┃ • mobil   : 1.2M (GR Supra)\n`;
+            teks += `┃ • rumah   : 5M (Minimalis)\n┃\n`;
             
             teks += `┣ 🥤 *CONSUMABLE*\n`;
             teks += `┃ • redbull : 25rb (.beliredbull)\n┃\n`;
@@ -91,7 +113,7 @@ module.exports = {
 
         if (cmd === 'beli') {
             let kode = text.toLowerCase().trim();
-            if (!katalog[kode]) return m.reply(`Kode salah, Yus! Contoh: *${usedPrefix}beli firefly*`);
+            if (!katalog[kode]) return m.reply(`Kode salah! Contoh: *${usedPrefix}beli firefly*`);
             
             let item = katalog[kode];
             if (user.koleksi[item.tipe].includes(item.nama)) {
