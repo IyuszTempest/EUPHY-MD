@@ -58,7 +58,7 @@ module.exports = {
         }
 
         // --- 2. CEK MARKET (HARGA SEKARANG) ---
-        if (cmd === 'invest') {
+        if (cmd === 'inves') {
             let marketText = `📊 *MARKET UPDATE HARI INI* 📊\n\n`;
             for (let x in market) {
                 // Logika harga acak: Base +/- (Acak * Volt)
