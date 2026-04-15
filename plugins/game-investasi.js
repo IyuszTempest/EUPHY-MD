@@ -4,7 +4,7 @@
  */
 
 module.exports = {
-    command: ['inves', 'beliinvest', 'jualinves', 'portofolio', 'helpiv'],
+    command: ['inves', 'beliinvest', 'jualinves', 'portofolio', 'helpiv', 'investasi'],
     category: 'game',
     noPrefix: true,
     call: async (conn, m, { usedPrefix, command, text }) => {
