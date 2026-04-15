@@ -5,7 +5,7 @@
  */
 
 module.exports = {
-    command: ['sawah', 'tanam', 'panenpadi', 'pupuk'],
+    command: ['sawah', 'tanampadi', 'panenpadi', 'pupuk'],
     category: 'game',
     noPrefix: true,
     call: async (conn, m, { usedPrefix, command, text }) => {
@@ -44,7 +44,7 @@ module.exports = {
         }
 
         // --- 2. TANAM PADI ---
-        if (cmd === 'tanam') {
+        if (cmd === 'tanampadi') {
             if (!text || isNaN(text)) return m.reply(`Mau tanam berapa petak?\nContoh: *${usedPrefix + command} 5*`);
             let jumlah = parseInt(text);
             let totalBiaya = jumlah * hargaBibit;
