@@ -21,9 +21,6 @@ module.exports = {
         let nextLvlXp = (level + 1) * 1000;
         let progresXp = user.xp % 1000;
         
-        // Progress Bar (10 kotak)
-        let progress = Math.floor((progresXp / 1000) * 10);
-        let bar = '🟩'.repeat(progress) + '⬜'.repeat(10 - progress);
 
         let k = user.koleksi;
         let daftar = `╭━━〔 🎒 *𝙸𝙽𝚅𝙴𝙽𝚃𝙾𝚁𝚈* 〕━━┓\n┃\n`;
@@ -31,7 +28,6 @@ module.exports = {
         // Bagian Status User
         daftar += `┣ 💼 *PEKERJAAN:* ${user.pangkat}\n`;
         daftar += `┣ ✨ *XP:* ${user.xp.toLocaleString()} / ${nextLvlXp.toLocaleString()}\n`;
-        daftar += `┣ 📊 *PROG:* [${bar}]\n┃\n`;
         
         // Kategori Figure
         if (k.figure?.length) {
@@ -51,7 +47,7 @@ module.exports = {
         // Bagian Consumable
         daftar += `┃\n┣ 🥤 *REDBULL:* ${user.inventory.redbull || 0} pcs\n`;
         
-        daftar += `┗━━━━━━━━━━━━━━┛\n`;
+        daftar += `┗━━━━━━━━━━━━┛\n`;
         daftar += `💰 Saldo: Rp${user.money.toLocaleString()}`;
 
         // Cek jika inventory benar-benar kosong
