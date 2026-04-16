@@ -1,46 +1,60 @@
-/** * Euphy-Bot - Media to URL (Catbox Version)
- * Fitur: Mengubah Gambar/Video menjadi link URL permanen
+/**
+ * Plugin: Kabox Uploader 🚀
  */
-
-// Menggunakan destructuring { } karena lib kamu mengekspor sebagai objek
-const { uploadImage } = require('../lib/uploadImage') 
+const fetch = require('node-fetch');
+const FormData = require('form-data');
+const { fromBuffer } = require('file-type');
 
 module.exports = {
     command: ['tolink', 'tourl'],
     category: 'tools',
     noPrefix: true,
-    call: async (conn, m, { text }) => {
-        // Deteksi apakah user melakukan reply media atau mengirim media langsung
-        let q = m.quoted ? m.quoted : m
-        let mime = (q.msg || q).mimetype || ''
+    call: async (conn, m, { usedPrefix, command }) => {
+        let q = m.quoted ? m.quoted : m;
+        let mime = (q.msg || q).mimetype || '';
         
-        // Validasi input: Harus berupa media
-        if (!mime) return m.reply('Reply foto atau video yang mau dijadiin link! 🏮')
-        
-        // Kirim reaksi agar user tahu bot sedang memproses
-        await conn.sendMessage(m.chat, { react: { text: "☁️", key: m.key } })
+        if (!mime) return m.reply(`Kirim atau reply media (gambar/video/stiker) dengan perintah *${usedPrefix + command}*`);
+
+        await m.reply('Sedang mengunggah ke Kabox... ⏳');
 
         try {
-            // Proses download media dari server WhatsApp
-            let media = await q.download()
+            let media = await q.download();
+            let { ext } = await fromBuffer(media);
             
-            // Proses upload ke Catbox via lib
-            let link = await uploadImage(media)
-            
-            if (!link) throw new Error('Server uploader tidak merespon')
+            // Persiapkan Form Data untuk API kabox
+            let form = new FormData();
+            form.append('file', media, {
+                filename: `upload-${Date.now()}.${ext}`,
+                contentType: mime
+            });
 
-            let caption = `╭━━〔 ⛩️ *𝙼𝙴𝙳𝙸𝙰 𝚄𝚁𝙻* ⛩️ 〕━━┓\n`
-                        + `┃ ✨ *Status:* Success\n`
-                        + `┃ 🔗 *Link:* ${link}\n`
-                        + `┗━━━━━━━━━━━━━━━━━━━━┛\n\n`
-                        + `Ini link-nya ya!`
+            // Eksekusi POST ke API
+            let res = await fetch('https://api.kabox.my.id/api/upload', {
+                method: 'POST',
+                headers: {
+                    'x-expire': '1d', // Expire dalam 1 hari sesuai curl kamu
+                    ...form.getHeaders()
+                },
+                body: form
+            });
 
-            m.reply(caption)
-            
+            let json = await res.json();
+
+            if (json.success) {
+                let teks = `✅ *UPLOAD BERHASIL*\n\n`;
+                teks += `┣ 📄 *NAMA:* ${json.metadata.original_name}\n`;
+                teks += `┣ ⚖️ *SIZE:* ${json.metadata.size_formatted}\n`;
+                teks += `┣ 🔗 *URL:* ${json.url}\n\n`;
+                teks += `*Note:* File akan kadaluarsa dalam 1 hari.`;
+                
+                return m.reply(teks);
+            } else {
+                throw new Error('Upload gagal');
+            }
+
         } catch (e) {
-            console.error(e)
-            // Pesan error jika gagal, agar tidak bingung
-            m.reply(`⚠️ Gagal konversi ke link: ${e.message}\nPastikan file lib/uploadImage.js sudah benar.`)
+            console.error(e);
+            m.reply('Terjadi kesalahan saat mengunggah file. Pastikan server API sedang aktif!');
         }
     }
-}
+};
