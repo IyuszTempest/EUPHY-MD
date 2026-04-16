@@ -1,20 +1,37 @@
 /**
- * Plugin: Inventory & Showcase 🎒
+ * Plugin: Inventory & Showcase (Updated with XP & Pangkat) 🎒
  */
 module.exports = {
-    command: ['inv', 'koleksi', 'inventory'],
+    command: ['inv', 'koleksi', 'inventory', 'xp'],
     category: 'game',
     noPrefix: true,
     call: async (conn, m, { usedPrefix }) => {
         let user = global.db.data.users[m.sender];
         
-        // Inisialisasi data (Hanya kategori yang tersedia di shop)
+        // --- [ INISIALISASI DATABASE ] ---
         if (!user.koleksi) user.koleksi = { figure: [], baju: [], harian: [] };
         if (!user.inventory) user.inventory = { redbull: 0 };
-        
-        let k = user.koleksi;
+        if (typeof user.xp === 'undefined') user.xp = 0;
+        if (typeof user.pangkat === 'undefined') user.pangkat = 'Pengangguran';
+        if (typeof user.money === 'undefined') user.money = 0;
 
+        // --- [ LOGIKA LEVEL UP ] ---
+        // Menentukan level berdasarkan total XP (tiap 1000 XP naik 1 level)
+        let level = Math.floor(user.xp / 1000);
+        let nextLvlXp = (level + 1) * 1000;
+        let progresXp = user.xp % 1000;
+        
+        // Progress Bar (10 kotak)
+        let progress = Math.floor((progresXp / 1000) * 10);
+        let bar = '🟩'.repeat(progress) + '⬜'.repeat(10 - progress);
+
+        let k = user.koleksi;
         let daftar = `╭━━〔 🎒 *𝙸𝙽𝚅𝙴𝙽𝚃𝙾𝚁𝚈* 〕━━┓\n┃\n`;
+        
+        // Bagian Status User
+        daftar += `┣ 💼 *PEKERJAAN:* ${user.pangkat}\n`;
+        daftar += `┣ ✨ *XP:* ${user.xp.toLocaleString()} / ${nextLvlXp.toLocaleString()}\n`;
+        daftar += `┣ 📊 *PROG:* [${bar}]\n┃\n`;
         
         // Kategori Figure
         if (k.figure?.length) {
@@ -35,12 +52,12 @@ module.exports = {
         daftar += `┃\n┣ 🥤 *REDBULL:* ${user.inventory.redbull || 0} pcs\n`;
         
         daftar += `┗━━━━━━━━━━━━━━┛\n`;
-        daftar += `💰 Saldo: Rp${(user.money || 0).toLocaleString()}`;
+        daftar += `💰 Saldo: Rp${user.money.toLocaleString()}`;
 
         // Cek jika inventory benar-benar kosong
         const isKosong = !k.figure?.length && !k.baju?.length && !k.harian?.length;
-        if (isKosong && (user.inventory.redbull || 0) === 0) {
-            return m.reply("Inventory masih kosong! Yuk belanja dulu di *.shop*");
+        if (isKosong && (user.inventory.redbull || 0) === 0 && user.xp === 0) {
+            return m.reply("Inventory masih kosong! Yuk kerja di *.kerja* dan belanja di *.shop*");
         }
 
         return m.reply(daftar);
