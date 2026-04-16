@@ -27,7 +27,7 @@ module.exports = {
         
         // Bagian Status User
         daftar += `┣ 💼 *PEKERJAAN:* ${user.pangkat}\n`;
-        daftar += `┣ ✨ *XP:* ${user.xp.toLocaleString()} / ${nextLvlXp.toLocaleString()}\n`;
+        daftar += `┣ ✨ *XP:* ${user.xp.toLocaleString()} / ${nextLvlXp.toLocaleString()}\n┃\n`;
         
         // Kategori Figure
         if (k.figure?.length) {
