@@ -16,8 +16,8 @@ module.exports = {
         const vcard = 'BEGIN:VCARD\n' 
                     + 'VERSION:3.0\n' 
                     + `FN:${ownerName}\n` 
-                    + `ORG:Universitas Katolik Santo Agustinus Hippo;\n`
-                    + `TITLE:Systems Information Student\n`
+                    + `ORG:${orgowner}\n`
+                    + `TITLE:${titleowner}\n`
                     + `TEL;type=CELL;type=VOICE;waid=${ownerNumber}:+${ownerNumber}\n` 
                     + `URL;type=Website:${global.social.website}\n`
                     + 'END:VCARD';
