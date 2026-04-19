@@ -19,6 +19,9 @@ global.wait = '_🌸 Sabar yah, lagi diproses..._';
 global.eror = '_🙄 Yah lagi error nih, coba lagi nanti_';
 global.packname = 'Euphylia Magenta';
 global.author = 'By IyzTempest';
+global.waifufav = 'Euphylia Magenta';
+global.titleowner = 'Information Systems Student';
+global.orgowner = '日本人';
 
 // --- [ Settings Newsletter & Channel ] ---
 global.idch = '120363260084721539@newsletter'; // ID Saluran kamu
