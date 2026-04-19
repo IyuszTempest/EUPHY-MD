@@ -150,7 +150,7 @@ setInterval(async () => {
         
         if (fs.existsSync(path)) {
             // Kita pakai JID yang sudah terbukti berhasil di tes tadi
-            let targetJid = '6282255810534@s.whatsapp.net'; 
+            let targetJid = `${global.targetjid}`; 
 
             await conn.sendMessage(targetJid, {
                 document: fs.readFileSync(path),
