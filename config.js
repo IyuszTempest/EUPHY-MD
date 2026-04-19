@@ -10,6 +10,7 @@ const chalk = require('chalk');
 global.owner = ['6282255810534'];
 global.lidowner = '181067281604634@lid';
 global.lidbot = '233891604521119@lid'
+global.targetjid = '6282255810534@s.whatsapp.net'
 global.nameowner = 'IyuszTempest';
 global.namebot = 'Bot Euphy';
 global.numberowner = '6282255810534';
