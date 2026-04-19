@@ -32,17 +32,16 @@ module.exports = {
 
         // 2. Kirim Detail Info & Media Sosial
         let info = `╭━━〔 ⛩️ *𝙾𝚆𝙽𝙴𝚁 𝙿𝚁𝙾𝙵𝙸𝙻𝙴* ⛩️ 〕━━┓\n`
-                 + `┃ 👤 *𝙽𝚊𝚖𝚎:* ${ownerName}\n`
-                 + `┃ 🎓 *𝚂𝚝𝚊𝚝𝚞𝚜:* Mahasiswa SI '25\n`
-                 + `┃ 📍 *𝙻𝚘𝚌:* Ngabang, Kalimantan Barat\n`
-                 + `┣━━━━━━━━━━━━━━━━━━━━┛\n`
+                 + `┃ 👤 *Name:* ${ownerName}\n`
+                 + `┃ ♥️ *Waifu:* ${waifufav}\n`
+                 + `┣━━━━━━━━━━━━━━━━━┛\n`
                  + `┃ 🌐 *𝚂𝙾𝙲𝙸𝙰𝙻 𝙼𝙴𝙳𝙸𝙰*\n`
                  + `┃ 🔗 *Website:* ${global.social.website}\n`
                  + `┃ 🐙 *Github:* ${global.social.github}\n`
                  + `┃ 📸 *Instagram:* ${global.social.instagram}\n`
                  + `┃ 🎥 *Youtube:* ${global.social.youtube}\n`
                  + `┃ 💼 *LinkedIn:* ${global.social.linkedin}\n`
-                 + `┗━━━━━━━━━━━━━━━━━━━━┛\n\n`
+                 + `┗━━━━━━━━━━━━━━━━━┛\n\n`
                  + `_"Koding itu seperti sihir, asalkan logikanya bener, duniamu aman."_`
 
         // Kirim dengan gaya Newsletter & AdReply agar terlihat profesional
