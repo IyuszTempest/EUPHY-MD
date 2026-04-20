@@ -119,11 +119,23 @@ module.exports = {
             }
 
                        // --- [ 6. COMMAND PARSING (FIX NULL & TRIM) ] ---
-            let body = (m.mtype === 'conversation' ? m.message.conversation : 
-                        m.mtype === 'imageMessage' ? m.message.imageMessage.caption : 
-                        m.mtype === 'videoMessage' ? m.message.videoMessage.caption : 
-                        m.mtype === 'extendedTextMessage' ? m.message.extendedTextMessage.text : 
-                        m.text || ''); 
+            let body = m.message?.conversation || 
+                m.message?.extendedTextMessage?.text ||
+                m.message?.imageMessage?.caption ||
+                m.message?.videoMessage?.caption ||
+                m.message?.buttonsResponseMessage?.selectedButtonId ||
+                m.message?.templateButtonReplyMessage?.selectedId ||
+                '';
+            
+            // support interactive (native flow)
+            if (!body && m?.message?.interactiveResponseMessage) {
+                try {
+                    let json = JSON.parse(
+                        m.message.interactiveResponseMessage.nativeFlowResponseMessage.paramsJson || '{}'
+                    );
+                    body = json.id || '';
+                } catch {}
+            }
 
             // Validasi: Kalau body kosong/bukan string, kasih string kosong biar gak error trim()
             let teksBody = typeof body === 'string' ? body : '';
