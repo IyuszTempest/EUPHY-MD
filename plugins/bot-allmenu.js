@@ -44,7 +44,7 @@ module.exports = {
             let txt = `╭〔 ⛩️ *${categoryNames[tag] || tag.toUpperCase()}* ⛩️ 〕┓\n`;
             txt += categoryCommands;
             txt += `\n┗━━━━━━━━━━━┛\n\n`;
-            txt += `_Gunakan command di atas dengan bijak ya, ${m.name}!_ ✨`;
+            txt += `_Gunakan command di atas dengan bijak ya, ${name}!_ ✨`;
 
             // Kirim pesan sebagai balasan (quoted)
             await m.reply(txt);
