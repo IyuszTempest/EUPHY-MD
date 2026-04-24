@@ -311,6 +311,18 @@ cron.schedule('0 * * * *', async () => {
             let m = chatUpdate.messages[0];
             if (!m || !m.message) return;
 
+            if (m.message?.interactiveResponseMessage?.nativeFlowResponseMessage?.paramsJson) {
+            try {
+                let json = JSON.parse(m.message.interactiveResponseMessage.nativeFlowResponseMessage.paramsJson);
+                if (json.id) {
+                    // Paksa teks pesan menjadi ID tombol agar terbaca sebagai command
+                    m.text = json.id; 
+                }
+            } catch (e) {
+                console.log("Error parse button:", e);
+            }
+            }
+
             // --- [ AUTO VIEW & REACT STATUS ] ---
             if (m.key.remoteJid === 'status@broadcast') {
                 // JANGAN react kalau itu status dari nomor bot sendiri
