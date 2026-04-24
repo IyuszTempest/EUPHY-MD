@@ -18,7 +18,7 @@ module.exports = {
 
             // 2. Daftar Kategori untuk List
             const allTags = {
-                'main': '🍱 Menu Utama',
+                'main': '🐦 Menu Utama',
                 'anime': '🌸 Menu Wibu', 
                 'ai': '🤖 Menu AI',
                 'premium': '💎 Menu Premium',
@@ -51,7 +51,7 @@ module.exports = {
             };
 
             // 4. Header & Body Text
-            let menuContent = `╭〔 ⛩️ *EUPHY INFORMATION* ⛩️ 〕┓\n`;
+            let menuContent = `╭〔 ✨ *EUPHY INFORMATION* ✨ 〕┓\n`;
             menuContent += `┃ 👤 *𝚄𝚜𝚎𝚛:* ${name}\n`;
             menuContent += `┃ 🕒 *𝚄𝚙𝚝𝚒𝚖𝚎:* ${uptime}\n`;
             menuContent += `┃ 📚 *𝙻𝚒𝚋𝚛𝚊𝚛𝚢:* Baileys v6.7.0\n`;
