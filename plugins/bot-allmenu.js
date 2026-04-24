@@ -16,7 +16,7 @@ module.exports = {
 
             // Mapping Nama Kategori agar tampilan di Header lebih rapi
             const categoryNames = {
-                'main': '🍱 MENU UTAMA',
+                'main': '🐦 MENU UTAMA',
                 'anime': '🌸 MENU WIBU',
                 'ai': '🤖 MENU AI',
                 'premium': '💎 MENU PREMIUM',
@@ -41,10 +41,10 @@ module.exports = {
             if (!categoryCommands) return;
 
             // Susun tampilan Menu per Kategori
-            let txt = `╭━━〔 ⛩️ *${categoryNames[tag] || tag.toUpperCase()}* ⛩️ 〕━━┓\n`;
+            let txt = `╭〔 ⛩️ *${categoryNames[tag] || tag.toUpperCase()}* ⛩️ 〕┓\n`;
             txt += categoryCommands;
-            txt += `\n┗━━━━━━━━━━━━┛\n\n`;
-            txt += `_Gunakan command di atas dengan bijak ya, ${m.name || 'User'}!_ ✨`;
+            txt += `\n┗━━━━━━━━━━━┛\n\n`;
+            txt += `_Gunakan command di atas dengan bijak ya, ${m.name}!_ ✨`;
 
             // Kirim pesan sebagai balasan (quoted)
             await m.reply(txt);
