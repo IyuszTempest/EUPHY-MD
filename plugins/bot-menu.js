@@ -18,7 +18,6 @@ module.exports = {
 
             // 2. Daftar Kategori untuk List
             const allTags = {
-                'main': '🐦 Menu Utama',
                 'anime': '🌸 Menu Wibu', 
                 'ai': '🤖 Menu AI',
                 'premium': '💎 Menu Premium',
@@ -27,7 +26,8 @@ module.exports = {
                 'group': '👥 Menu Group',
                 'game': '🎮 Menu Gaming', 
                 'tools': '🛠️ Menu Tools',
-                'owner': '👑 Menu Owner'
+                'owner': '👑 Menu Owner',
+                'main': '🐦 Menu Main'
             };
 
             // 3. Susun Rows untuk Button List
@@ -51,11 +51,10 @@ module.exports = {
             };
 
             // 4. Header & Body Text
-            let menuContent = `╭〔 ✨ *EUPHY INFORMATION* ✨ 〕┓\n`;
-            menuContent += `┃ 👤 *𝚄𝚜𝚎𝚛:* ${name}\n`;
-            menuContent += `┃ 🕒 *𝚄𝚙𝚝𝚒𝚖𝚎:* ${uptime}\n`;
-            menuContent += `┃ 📚 *𝙻𝚒𝚋𝚛𝚊𝚛𝚢:* Baileys v6.7.0\n`;
-            menuContent += `┗━━━━━━━━━━━━┛\n\n`;
+            let menuContent = `〔 ✨ *EUPHY INFORMATION* ✨ 〕\n`;
+            menuContent += ` 👤 *𝚄𝚜𝚎𝚛:* ${name}\n`;
+            menuContent += ` 🕒 *𝚄𝚙𝚝𝚒𝚖𝚎:* ${uptime}\n`;
+            menuContent += ` 📚 *𝙻𝚒𝚋𝚛𝚊𝚛𝚢:* Baileys v6.7.0\n`;
             menuContent += `Silahkan pilih kategori menu pada tombol di bawah ini untuk melihat daftar perintah yang tersedia. ✨`;
 
             // 5. Generate Message
