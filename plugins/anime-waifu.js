@@ -1,35 +1,78 @@
+/**
+ * Random Waifu Carousel 🌸⛩️
+ * Fitur: Mengambil 5 gambar waifu random dan menampilkannya dalam slide.
+ */
+
+const { proto, generateWAMessageFromContent, prepareWAMessageMedia } = require('@whiskeysockets/baileys');
 const axios = require('axios');
 
 module.exports = {
-    command: ['waifu'],
+    command: ['waifu', 'randomwaifu'],
     category: 'anime',
-    noPrefix: true, 
-    call: async (conn, m) => {
-        await conn.sendMessage(m.chat, { react: { text: '💖', key: m.key } });
+    noPrefix: true,
+    register: true,
+    call: async (conn, m, { usedPrefix, command }) => {
+        // Reaksi 'Love' biar makin wibu ✨
+        await conn.sendMessage(m.chat, { react: { text: '🌸', key: m.key } });
 
         try {
-            const { data } = await axios.get(`https://iyusztempest.my.id/api/anime/waifu?apikey=${global.apiyus}`);
-            if (!data.status || !data.result) throw new Error('API Error');
+            let cards = [];
+            
+            // Kita ambil 5 gambar waifu sekaligus secara paralel biar kencang
+            const requests = Array.from({ length: 5 }, () => axios.get('https://api.waifu.pics/sfw/waifu'));
+            const responses = await Promise.all(requests);
+            const images = responses.map(res => res.data.url);
 
-            const response = await axios.get(data.result, { responseType: 'arraybuffer' });
-            const buffer = Buffer.from(response.data, 'binary');
+            for (let i = 0; i < images.length; i++) {
+                const imageUrl = images[i];
+                
+                // Siapkan media untuk tiap card carousel
+                const media = await prepareWAMessageMedia(
+                    { image: { url: imageUrl } },
+                    { upload: conn.waUploadToServer }
+                );
 
-            await conn.sendMessage(m.chat, { 
-                image: buffer, 
-                caption: `╭━━〔 ⛩️ *ANIME GALLERY* ⛩️ 〕━━┓\n┃ 🏮 *Category:* WAIFU\n┃ ✨ *Source:* IyuszTempest API\n┃ 👤 *Requester:* @${m.sender.split`@`[0]}\n┗━━━━━━━━━━━━━━━━━┛\n\n_Enjoy your waifu! 🌸_`,
-                mentions: [m.sender],
-                contextInfo: {
-                    forwardingScore: 999,
-                    isForwarded: true,
-                    forwardedNewsletterMessageInfo: {
-                        newsletterJid: global.idch,
-                        newsletterName: `Waifu Gallery - ${global.namech}`
+                cards.push({
+                    body: proto.Message.InteractiveMessage.Body.create({ 
+                        text: `✨ *Waifu Collection #${i + 1}*\nini my bini gueh! 🌸` 
+                    }),
+                    footer: proto.Message.InteractiveMessage.Footer.create({ text: "Wangy Wangy" }),
+                    header: proto.Message.InteractiveMessage.Header.create({
+                        hasMediaAttachment: true,
+                        ...media
+                    }),
+                    nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
+                        buttons: [{
+                            name: "cta_url",
+                            buttonParamsJson: JSON.stringify({ 
+                                display_text: "Lihat Full HD", 
+                                url: imageUrl 
+                            })
+                        }]
+                    })
+                });
+            }
+
+            // Susun ke dalam Interactive Carousel Message
+            const msg = generateWAMessageFromContent(m.chat, {
+                viewOnceMessage: {
+                    message: {
+                        interactiveMessage: proto.Message.InteractiveMessage.create({
+                            body: proto.Message.InteractiveMessage.Body.create({ 
+                                text: `DONE 🥰` 
+                            }),
+                            footer: proto.Message.InteractiveMessage.Footer.create({ text: global.wm }),
+                            carouselMessage: proto.Message.InteractiveMessage.CarouselMessage.create({ cards })
+                        })
                     }
                 }
-            }, { quoted: m });
-            await conn.sendMessage(m.chat, { react: { text: '✨', key: m.key } });
+            }, { userJid: conn.user.id, quoted: m });
+
+            await conn.relayMessage(m.chat, msg.message, { messageId: msg.key.id });
+
         } catch (e) {
-            m.reply(`Gagal narik gambar! ❌`);
+            console.error(e);
+            m.reply(`❌ Aduh, gagal ambil waifu: ${e.message}`);
         }
     }
 };
