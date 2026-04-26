@@ -1,84 +1,107 @@
 /**
- * Euphy-Bot - TikTok DL (Fixed Path & Hybrid Audio) ✨
+ * Euphy-Bot - TikTok DL (Scraper TMate Edition) ✨
+ * Support: Video No WM, Audio, & Photo Slides
  */
 
-const fetch = require('node-fetch');
-const { exec } = require('child_process');
+const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
-
-// FIX PATH: Mundur satu folder buat nyari folder 'lib' di root
 const { getRandom } = require('../lib/myfunc'); 
+
+// --- [ FUNGSI SCRAPER TMATE ] ---
+const handleTikTok = async (tiktokUrl) => {
+    try {
+        const initialRes = await axios.get('https://tmate.cc/id', {
+            headers: { 'User-Agent': 'Mozilla/5.0' }
+        });
+        const cookie = initialRes.headers['set-cookie']?.map(c => c.split(';')[0]).join('; ') || '';
+        const tokenMatch = initialRes.data.match(/<input[^>]+name="token"[^>]+value="([^"]+)"/i);
+        const token = tokenMatch?.[1];
+
+        if (!token) throw new Error('Gagal ambil token TMate');
+
+        const params = new URLSearchParams();
+        params.append('url', tiktokUrl);
+        params.append('token', token);
+
+        const res = await axios.post('https://tmate.cc/action', params.toString(), {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'User-Agent': 'Mozilla/5.0',
+                'Referer': 'https://tmate.cc/id',
+                'Cookie': cookie
+            }
+        });
+
+        const html = res.data?.data;
+        if (!html) throw new Error('Data TikTok tidak ditemukan');
+
+        const titleMatch = html.match(/<h1[^>]*>(.*?)<\/h1>/i);
+        const title = titleMatch?.[1]?.replace(/<[^>]+>/g, '').trim() || 'Tanpa Judul';
+
+        const matches = [...html.matchAll(/<a[^>]+href="(https:\/\/[^"]+)"[^>]*>\s*<span>\s*<span>([^<]*)<\/span><\/span><\/a>/gi)];
+        const links = matches.map(([_, href, label]) => ({ href, label: label.trim() }));
+
+        const video = links.find(v => /download without watermark/i.test(v.label))?.href;
+        const audio = links.find(v => /download mp3 audio/i.test(v.label))?.href;
+        
+        const imageMatches = [...html.matchAll(/<img[^>]+src="(https:\/\/tikcdn\.app\/a\/images\/[^"]+)"/gi)];
+        const images = [...new Set(imageMatches.map(m => m[1]))];
+
+        return {
+            status: "success",
+            result: {
+                type: images.length > 0 ? 'image' : 'video',
+                title,
+                video: video || null,
+                audio: audio || null,
+                images: images.length > 0 ? images : null
+            }
+        };
+    } catch (error) {
+        throw new Error(`Scraper Error: ${error.message}`);
+    }
+};
 
 module.exports = {
     command: ['tt', 'tiktok'],
     category: 'downloader',
     noPrefix: true,
-    call: async (conn, m, { args, usedPrefix, command }) => {
-        const isUrl = args[0] && args[0].match(/tiktok.com/gi);
-        if (!isUrl) return;
+    call: async (conn, m, { args }) => {
+        if (!args[0] || !args[0].match(/tiktok.com/gi)) return m.reply("Mana link TikTok-nya, Yus? 🌸");
 
         try {
             await conn.sendMessage(m.chat, { react: { text: "⏳", key: m.key } });
 
-            const apikey = global.apiyus;
-            const url = `https://iyusztempest.my.id/api/download?feature=tiktok&url=${args[0]}&apikey=${apikey}`;
+            const data = await handleTikTok(args[0]);
+            const { type, title, video, audio, images } = data.result;
+
+            // --- 1. LOGIKA JIKA TIKTOK SLIDE (FOTO) ---
+            if (type === 'image' && images) {
+                for (let img of images) {
+                    await conn.sendMessage(m.chat, { image: { url: img } }, { quoted: m });
+                }
+                await m.reply(`✅ Berhasil kirim *${images.length}* foto slide.`);
+            } 
             
-            const response = await fetch(url);
-            const res = await response.json();
-            if (res.status !== "success") throw "Gagal ambil data API.";
-
-            const { title, author, video, music } = res.result;
-
-            // 1. KIRIM VIDEO
-            if (video) {
+            // --- 2. LOGIKA JIKA VIDEO ---
+            else if (video) {
                 await conn.sendMessage(m.chat, { 
                     video: { url: video }, 
-                    caption: `╭━━〔 ⛩️ *𝚃𝙸𝙺𝚃𝙾𝙺 𝙳𝙻* ⛩️ 〕━━┓\n┃ 📝 *Title:* ${title || 'No Title'}\n┗━━━━━━━━━━━━━━━┛` 
+                    caption: `╭━━〔 ⛩️ *𝚃𝙸𝙺𝚃𝙾𝙺 𝙳𝙻* ⛩️ 〕━━┓\n┃ 📝 *Title:* ${title}\n┗━━━━━━━━━━━━━━━┛` 
                 }, { quoted: m });
             }
 
-            // 2. LOGIKA AUDIO (HYBRID)
-            if (music || video) {
-                await conn.sendMessage(m.chat, { react: { text: "🎶", key: m.key } });
-                
-                let audioBuffer;
-                
-                if (music) {
-                    audioBuffer = { url: music };
-                } else {
-                    // Pakai folder 'tmp' yang udah dibuat otomatis di index.js
-                    const tmpFileIn = path.join(__dirname, `../tmp/${getRandom('.mp4')}`);
-                    const tmpFileOut = path.join(__dirname, `../tmp/${getRandom('.mp3')}`);
-                    
-                    const videoRes = await fetch(video);
-                    const buffer = await videoRes.buffer();
-                    fs.writeFileSync(tmpFileIn, buffer);
-
-                    // Extract Audio via FFMPEG (Size Kecil)
-                    await new Promise((resolve, reject) => {
-                        exec(`ffmpeg -i ${tmpFileIn} -vn -ab 128k -ar 44100 -y ${tmpFileOut}`, (err) => {
-                            if (err) reject(err);
-                            else resolve();
-                        });
-                    });
-
-                    audioBuffer = fs.readFileSync(tmpFileOut);
-                    
-                    // Cleanup
-                    if (fs.existsSync(tmpFileIn)) fs.unlinkSync(tmpFileIn);
-                    if (fs.existsSync(tmpFileOut)) fs.unlinkSync(tmpFileOut);
-                }
-
+            // --- 3. KIRIM AUDIO (DARI SCRAPE LANGSUNG) ---
+            if (audio) {
                 await conn.sendMessage(m.chat, { 
-                    audio: audioBuffer, 
+                    audio: { url: audio }, 
                     mimetype: 'audio/mpeg',
-                    fileName: `${title || 'tiktok'}.mp3`,
-                    ptt: false,
+                    fileName: `${title}.mp3`,
                     contextInfo: {
                         externalAdReply: {
-                            title: music ? '𝚃𝙸𝙺𝚃𝙾𝙺 𝙼𝚄𝚂𝙸𝙲 🎶' : '𝚃𝙸𝙺𝚃𝙾𝙺 𝙰𝚄𝙳𝙸𝙾 (𝙴𝚇𝚃𝚁𝙰𝙲𝚃) 🎙️',
-                            body: `By: ${author || 'Euphy System'}`,
+                            title: 'Nih soundnya',
+                            body: `Judul: ${title}`,
                             thumbnailUrl: global.imgall,
                             sourceUrl: args[0],
                             mediaType: 1,
@@ -92,8 +115,7 @@ module.exports = {
 
         } catch (e) {
             console.error(e);
-            m.reply(`❌ *Error:* ${e.message}`);
+            m.reply(`❌ *Gagal:* ${e.message}`);
         }
     }
 };
-                    
