@@ -23,7 +23,7 @@ module.exports = {
             if (!res.status || !res.data || res.data.length === 0) throw "Gagal ambil berita CNN.";
 
             // Ambil 5 berita teratas biar hemat RAM & gak spam
-            let capt = `╭━━〔 ⛩️ *𝙲𝙽𝙽 𝙸𝙽𝙳𝙾𝙽𝙴𝚂𝙸𝙰* ⛩️ 〕━━┓\n┃ 🌏 *Update Berita Terbaru*\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n`;
+            let capt = `╭━━〔 ⛩️ *𝙲𝙽𝙽 𝙸𝙽𝙳𝙾𝙽𝙴𝚂𝙸𝙰* ⛩️ 〕━━┓\n┃ 🌏 *Update Berita Terbaru*\n┗━━━━━━━━━━━━━━━━┛\n\n`;
             
             const newsList = res.data.slice(0, 5);
             newsList.forEach((v, i) => {
