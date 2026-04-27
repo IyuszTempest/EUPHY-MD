@@ -1,5 +1,5 @@
 /**
- * Plugin: Inventory & Showcase (Updated with XP & Pangkat) 🎒
+ * Plugin: Inventory & Showcase (Fixed Spam) 🎒
  */
 module.exports = {
     command: ['inv', 'koleksi', 'inventory', 'xp'],
@@ -16,46 +16,35 @@ module.exports = {
         if (typeof user.money === 'undefined') user.money = 0;
 
         // --- [ LOGIKA LEVEL UP ] ---
-        // Menentukan level berdasarkan total XP (tiap 1000 XP naik 1 level)
         let level = Math.floor(user.xp / 1000);
         let nextLvlXp = (level + 1) * 1000;
-        let progresXp = user.xp % 1000;
         
-
         let k = user.koleksi;
         let daftar = `╭━━〔 🎒 *𝙸𝙽𝚅𝙴𝙽𝚃𝙾𝚁𝚈* 〕━━┓\n┃\n`;
         
-        // Bagian Status User
-        daftar += `┣ 💼 *PEKERJAAN:* ${user.pangkat}\n`;
-        daftar += `┣ ✨ *XP:* ${user.xp.toLocaleString()} / ${nextLvlXp.toLocaleString()}\n┃\n`;
+        // Bagian Status User (Selalu Tampil)
+        daftar += `┣ 👤 *USER:* ${m.pushName}\n`;
+        daftar += `┣ 💼 *PANGKAT:* ${user.pangkat}\n`;
+        daftar += `┣ ✨ *LEVEL:* ${level}\n`;
+        daftar += `┣ 📊 *XP:* ${user.xp.toLocaleString()} / ${nextLvlXp.toLocaleString()}\n┃\n`;
         
-        // Kategori Figure
-        if (k.figure?.length) {
-            daftar += `┣ 🎎 *FIGURE:* ${k.figure.join(', ')}\n`;
-        }
-        
-        // Kategori Clothing & Gear
-        if (k.baju?.length) {
-            daftar += `┣ 👕 *CLOTHING:* ${k.baju.join(', ')}\n`;
-        }
-        
-        // Kategori Daily Stuff & Horeg
-        if (k.harian?.length) {
-            daftar += `┣ 🛠️ *DAILY & HOREG:* ${k.harian.join(', ')}\n`;
-        }
-        
-        // Bagian Consumable
-        daftar += `┃\n┣ 🥤 *REDBULL:* ${user.inventory.redbull || 0} pcs\n`;
-        
-        daftar += `┗━━━━━━━━━━━━┛\n`;
-        daftar += `💰 Saldo: Rp${user.money.toLocaleString()}`;
+        // Cek apakah ada barang atau tidak untuk menentukan tampilan
+        const hasItems = k.figure?.length || k.baju?.length || k.harian?.length || user.inventory.redbull > 0;
 
-        // Cek jika inventory benar-benar kosong
-        const isKosong = !k.figure?.length && !k.baju?.length && !k.harian?.length;
-        if (isKosong && (user.inventory.redbull || 0) === 0 && user.xp === 0) {
-            return m.reply("Inventory masih kosong! Yuk kerja di *.kerja* dan belanja di *.shop*");
+        if (!hasItems) {
+            daftar += `┣ 📦 *ITEM:* _Kosong_\n┃ _Yuk kerja & belanja!_\n`;
+        } else {
+            // Tampilkan kategori jika ada isinya
+            if (k.figure?.length) daftar += `┣ 🎎 *FIGURE:* ${k.figure.join(', ')}\n`;
+            if (k.baju?.length) daftar += `┣ 👕 *CLOTHING:* ${k.baju.join(', ')}\n`;
+            if (k.harian?.length) daftar += `┣ 🛠️ *DAILY:* ${k.harian.join(', ')}\n`;
+            if (user.inventory.redbull > 0) daftar += `┣ 🥤 *REDBULL:* ${user.inventory.redbull} pcs\n`;
         }
+        
+        daftar += `┃\n┗━━━━━━━━━━━━┛\n`;
+        daftar += `💰 *Saldo:* Rp${user.money.toLocaleString()}`;
 
+        // Langsung kirim tanpa return peringatan lagi biar gak nyepam
         return m.reply(daftar);
     }
 };
