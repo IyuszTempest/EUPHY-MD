@@ -1,64 +1,126 @@
 /**
- * Euphy-Bot - Spotify Downloader ✨
- * API: Vreden
+ * Plugin: Spotify Downloader (4 API Fallback) 🎧
+ * Author: @alfat.syah
+ * Fitur: Auto-switch API jika salah satu gagal.
  */
 
 const axios = require('axios');
+
+async function getSpotifyData(url) {
+    const apis = [
+        {
+            name: 'Siputzx-v1',
+            url: `https://api.siputzx.my.id/api/d/spotify?url=${encodeURIComponent(url)}`,
+            parse: r => ({
+                title: r.title,
+                artist: r.artist,
+                cover: r.thumbnail,
+                mp3: r.download_url
+            })
+        },
+        {
+            name: 'Siputzx-v2',
+            url: `https://api.siputzx.my.id/api/d/spotifyv2?url=${encodeURIComponent(url)}`,
+            parse: r => ({
+                title: r.title,
+                artist: r.artist,
+                cover: r.coverImage,
+                mp3: r.mp3DownloadLink
+            })
+        },
+        {
+            name: 'Vreden-v1',
+            url: `https://api.vreden.my.id/api/v1/download/spotify?url=${encodeURIComponent(url)}`,
+            parse: r => ({
+                title: r.title,
+                artist: r.artist,
+                cover: r.thumbnail,
+                mp3: r.download.url
+            })
+        },
+        {
+            name: 'Vreden-v2',
+            url: `https://api.vreden.my.id/api/v1/download/spotify?url=${encodeURIComponent(url)}`,
+            parse: r => ({
+                title: r.title,
+                artist: r.artists,
+                cover: r.cover_url,
+                mp3: r.download
+            }),
+            resultKey: 'result'
+        }
+    ];
+
+    for (let api of apis) {
+        try {
+            const res = await axios.get(api.url, { headers: { accept: '*/*' }, timeout: 10000 });
+            const data = res.data?.data || res.data?.[api.resultKey] || res.data?.result; // Tambah fallback key [cite: 2026-04-28]
+            
+            if (!data) continue;
+
+            const parsed = api.parse(data);
+            if (parsed?.mp3) {
+                return {
+                    status: true,
+                    source: api.name,
+                    data: parsed
+                };
+            }
+        } catch (e) {
+            console.log(`[SPOTIFY-DL] ${api.name} Skip:`, e.message);
+        }
+    }
+
+    return { status: false };
+}
 
 module.exports = {
     command: ['spotifydl'],
     category: 'downloader',
     noPrefix: true,
-    call: async (conn, m, { args, usedPrefix, command }) => {
-        if (!args[0]) return m.reply(`*Contoh:* ${usedPrefix + command} https://open.spotify.com/track/xxxx`);
+    call: async (conn, m, { usedPrefix, command, text }) => {
+        if (!text) return m.reply(`🚩 Mana link Spotify-nya?\nContoh: *${usedPrefix + command} https://open.spotify.com/track/...*`);
+
+        // Fake contact biar keren [cite: 2026-04-28]
+        const fkontak = {
+            key: { participants: '0@s.whatsapp.net', remoteJid: 'status@broadcast', fromMe: false, id: 'Spotify' },
+            message: { contactMessage: { vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Spotify Downloader\nEND:VCARD` } }
+        };
+
+        await conn.sendMessage(m.chat, { react: { text: '🎧', key: m.key } });
 
         try {
-            await conn.sendMessage(m.chat, { react: { text: "📥", key: m.key } });
+            const result = await getSpotifyData(text);
+            if (!result.status) return m.reply('❌ Waduh, semua jalur API Spotify lagi mogok. Coba lagi nanti ya!');
 
-            // Request ke API Spotify Downloader Vreden [cite: 2026-03-07]
-            const apiUrl = `https://api.vreden.my.id/api/v1/download/spotify?url=${encodeURIComponent(args[0])}`;
-            const response = await axios.get(apiUrl);
-            const res = response.data;
+            const { title, artist, cover, mp3 } = result.data;
 
-            if (!res.status || !res.result) throw "Gagal konversi lagu, link mungkin nggak valid atau API lagi sibuk.";
+            const caption = `╭━━〔 🎧 *𝚂𝙿𝙾𝚃𝙸𝙵𝚈 𝙳𝙻* 〕━━┓\n┃\n` +
+                            `┣ 🎵 *Judul:* ${title}\n` +
+                            `┣ 👤 *Artis:* ${artist}\n` +
+                            `┣ 📦 *Source:* ${result.source}\n┃\n` +
+                            `┗━━━━━━━━━━━━┛\n\n` +
+                            `⏳ _Wait..._`;
 
-            const data = res.result;
-
-            let capt = `╭━━〔 ⛩️ *𝚂𝙿𝙾𝚃𝙸𝙵𝚈 𝙳𝙾𝚆𝙽𝙻𝙾𝙰𝙳𝙴𝚁* ⛩️ 〕━━┓\n`;
-            capt += `┃ 🎵 *Title:* ${data.title}\n`;
-            capt += `┃ 👤 *Artist:* ${data.artists}\n`;
-            capt += `┃ 💿 *Album:* ${data.album}\n`;
-            capt += `┃ ⏱️ *Duration:* ${Math.floor(data.duration_ms / 60000)} menit\n`;
-            capt += `┗━━━━━━━━━━━━━━━━━━━━┛\n\n`;
-            capt += `*Euphylia Magenta* - Musik buat nemenin koding! ✨`;
-
-            // Kirim Info Lagu dengan Thumbnail
-            await conn.sendMessage(m.chat, {
-                text: capt,
-                contextInfo: {
-                    externalAdReply: {
-                        title: '𝚂𝙿𝙾𝚃𝙸𝙵𝚈 𝙳𝙾𝚆𝙽𝙻𝙾𝙰𝙳',
-                        body: data.title,
-                        thumbnailUrl: data.cover_url,
-                        sourceUrl: args[0],
-                        mediaType: 1,
-                        renderLargerThumbnail: true
-                    }
-                }
-            }, { quoted: m });
-
-            // Kirim Audio sebagai File agar Meta Data (Cover & Judul) muncul [cite: 2026-03-07]
+            // Kirim Cover
             await conn.sendMessage(m.chat, { 
-                audio: { url: data.download }, 
+                image: { url: cover }, 
+                caption, 
+                quoted: fkontak 
+            });
+
+            // Kirim Audio
+            await conn.sendMessage(m.chat, {
+                audio: { url: mp3 },
                 mimetype: 'audio/mpeg',
-                fileName: `${data.title}.mp3`
+                fileName: `${title}.mp3`
             }, { quoted: m });
 
-            await conn.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
+            await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
 
         } catch (e) {
             console.error(e);
-            m.reply(`❌ *Euphy Error:* ${e.message || "Gagal unduh lagu."}`);
+            m.reply(`⚠️ Terjadi kesalahan: ${e.message}`);
         }
     }
 };
