@@ -7,7 +7,7 @@ const fs = require('fs');
 
 module.exports = {
     command: ['totalfitur'],
-    category: 'info',
+    category: 'main',
     noPrefix: true,
     call: async (conn, m, { usedPrefix, command }) => {
         // Pengecekan database user
