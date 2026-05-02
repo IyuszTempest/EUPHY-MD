@@ -20,7 +20,7 @@ module.exports = {
     category: 'anime',
     noPrefix: true, 
     call: async (conn, m, { text, command, usedPrefix }) => {
-        if (!text) return m.reply(`Mau cari anime apa hari ini, Yus? 🌸\nContoh: *${usedPrefix + command} tenten kakumei*`);
+        if (!text) return m.reply(`Mau cari anime apa hari ini? 🌸\nContoh: *${usedPrefix + command} tenten kakumei*`);
 
         await conn.sendMessage(m.chat, { react: { text: '🔍', key: m.key } });
 
