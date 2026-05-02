@@ -38,7 +38,7 @@ module.exports = {
             // Kirim sebagai video estetik khas Euphylia Magenta
             await conn.sendMessage(m.chat, { 
                 video: fs.readFileSync(tmpFile),
-                caption: `🏮 *BRAT VIDEO GENERATED* 🏮\n\n_"${text}"_\n\nSpecial for: *Yus* ✨`,
+                caption: `🏮 *BRAT VIDEO GENERATED* 🏮`,
                 mimetype: 'video/mp4',
                 gifPlayback: false // Set true kalau mau jadi GIF otomatis
             }, { quoted: m });
