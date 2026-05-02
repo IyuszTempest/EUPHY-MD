@@ -1,4 +1,5 @@
-/** * Updated Menu Euphylia Magenta - "The King of UI" Style
+/** 
+ * Updated Menu Euphylia Magenta - "The King of UI" Style
  * Feature: Single Select List Button (Native Flow)
  */
 
@@ -37,7 +38,7 @@ module.exports = {
                     header: '',
                     title: allTags[tag],
                     description: `Klik untuk melihat fitur ${allTags[tag]}`,
-                    id: `${_p}allmenu ${tag}` // Mengarahkan ke command spesifik kategori
+                    id: `${_p}allmenu ${tag}` 
                 });
             }
 
@@ -50,10 +51,10 @@ module.exports = {
                 }]
             };
 
-            // 4. Header & Body Text
-            let menuContent += ` 👤 *𝚄𝚜𝚎𝚛:* ${name}\n`;
-            menuContent += ` 🕒 *𝚄𝚙𝚝𝚒𝚖𝚎:* ${uptime}\n`;
-            menuContent += ` 📚 *𝙻𝚒𝚋𝚛𝚊𝚛𝚢:* Baileys v6.7.0\n\n`;
+            // 4. Header & Body Text (Fixing the += error)
+            let menuContent = `👤 *𝚄𝚜𝚎𝚛:* ${name}\n`;
+            menuContent += `🕒 *𝚄𝚙𝚝𝚒𝚖𝚎:* ${uptime}\n`;
+            menuContent += `📚 *𝙻𝚒𝚋𝚛𝚊𝚛𝚢:* Baileys v6.7.0\n\n`;
             menuContent += `Silahkan pilih kategori menu pada tombol di bawah ini untuk melihat daftar perintah yang tersedia. ✨`;
 
             // 5. Generate Message
@@ -70,13 +71,13 @@ module.exports = {
                                 header: proto.Message.InteractiveMessage.Header.create({
                                     title: '⛩️ *Euphylia Magenta* ⛩️',
                                     hasMediaAttachment: true,
-                                    ...(await prepareWAMessageMedia({ image: { url: global.imgall } }, { upload: conn.waUploadToServer }))
+                                    ...(await prepareWAMessageMedia({ image: { url: global.imgall || 'https://telegra.ph/file/0a7096646864700f135b1.jpg' } }, { upload: conn.waUploadToServer }))
                                 }),
                                 body: proto.Message.InteractiveMessage.Body.create({
                                     text: menuContent
                                 }),
                                 footer: proto.Message.InteractiveMessage.Footer.create({
-                                    text: global.wm
+                                    text: global.wm || 'Euphylia Magenta'
                                 }),
                                 nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
                                     messageVersion: 1,
@@ -131,4 +132,4 @@ function clockString(ms) {
     let m = Math.floor(ms / 60000) % 60;
     let s = Math.floor(ms / 1000) % 60;
     return [h, m, s].map(v => v.toString().padStart(2, '0')).join(':');
-                 }
+}
