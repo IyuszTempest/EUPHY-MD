@@ -11,7 +11,7 @@ module.exports = {
     noPrefix: true,
     call: async (conn, m, { args, usedPrefix, command }) => {
         // Cek apakah ada URL yang dimasukkan
-        if (!args[0]) return m.reply(`Mana link-nya, Yus? ✨\n*Contoh:* ${usedPrefix + command} https://www.youtube.com/watch?v=uF7eT3nhyZ0`);
+        if (!args[0]) return m.reply(`Mana link-nya? ✨\n*Contoh:* ${usedPrefix + command} https://www.youtube.com/watch?v=uF7eT3nhyZ0`);
 
         // Validasi simpel link YouTube
         if (!/youtube\.com|youtu\.be/i.test(args[0])) return m.reply("❌ Masukkan link YouTube yang valid ya!");
