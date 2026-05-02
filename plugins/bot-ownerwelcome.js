@@ -10,7 +10,7 @@ module.exports = {
         if (m.fromMe) return;   // Abaikan jika bot yang kirim pesan
 
         // Identitas Owner (Nomor kamu sendiri)
-        const ownerNumber = '6282155827670@s.whatsapp.net';
+        const ownerNumber = global.targetjid;
         
         // Cek apakah pengirim adalah Owner
         if (m.sender !== ownerNumber) return;
@@ -28,7 +28,7 @@ module.exports = {
 
         // Mengirim pesan sambutan
         await conn.sendMessage(m.chat, {
-            text: `Halo. Sistem mendeteksi kehadiran pengelola.\n@${ownerNumber.split('@')[0]}`,
+            text: `Waspada, ownerku dah datang.\n@${ownerNumber.split('@')[0]}`,
             mentions: [ownerNumber]
         }, { quoted: m });
     }
