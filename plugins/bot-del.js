@@ -8,7 +8,7 @@ module.exports = {
     noPrefix: true, 
     call: async (conn, m, { isBotAdmin, isAdmin }) => {
         // Cek apakah user me-reply pesan yang mau dihapus
-        if (!m.quoted) return m.reply('Reply pesan yang mau kamu hapus, Yus! 🌸');
+        if (!m.quoted) return m.reply('Reply pesan yang mau kamu hapus! 🌸');
 
         try {
             // Data pesan yang di-reply
