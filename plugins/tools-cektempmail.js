@@ -21,7 +21,7 @@ module.exports = {
             const response = await axios.get(apiUrl);
             const res = response.data;
 
-            if (!res.status) throw res.message || "Gagal cek inbox, Yus.";
+            if (!res.status) throw res.message || "Gagal cek inbox.";
 
             let capt = `╭━━〔 ⛩️ *𝙼𝙰𝙸𝙻 𝙸𝙽𝙱𝙾𝚇* ⛩️ 〕━━┓\n┃ 🆔 *ID:* ${args[0].substring(0, 10)}...\n┗━━━━━━━━━━━━━━━━━━━━┛\n\n`;
             
