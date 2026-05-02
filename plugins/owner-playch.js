@@ -28,7 +28,7 @@ module.exports = {
         if (!text) return m.reply(`Contoh penggunaan:\n${usedPrefix + command} swim chase atlantic`);
 
         // Ganti dengan ID Newsletter / Saluran kamu
-        const idSaluran = '120363403952337689@newsletter';
+        const idSaluran = global.idch;
 
         let tempInput, tempOutput;
 
