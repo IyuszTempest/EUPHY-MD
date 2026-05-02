@@ -87,7 +87,7 @@ module.exports = {
 
         } catch (e) {
             console.error(e);
-            m.reply('Database JikanMoe lagi sibuk, Yus! ❌');
+            m.reply('Database JikanMoe lagi sibuk! ❌');
         }
     }
 };
