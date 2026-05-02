@@ -68,7 +68,7 @@ module.exports = {
     category: 'downloader',
     noPrefix: true,
     call: async (conn, m, { args }) => {
-        if (!args[0] || !args[0].match(/tiktok.com/gi)) return m.reply("Mana link TikTok-nya, Yus? 🌸");
+        if (!args[0] || !args[0].match(/tiktok.com/gi)) return m.reply("Mana link TikTok-nya? 🌸");
 
         try {
             await conn.sendMessage(m.chat, { react: { text: "⏳", key: m.key } });
