@@ -9,7 +9,7 @@ module.exports = {
     noPrefix: true,
     call: async (conn, m, { usedPrefix, command }) => {
         let caption = `*☕ SUPPORT EUPHY-BOT ☕*\n\n`;
-        caption += `Halo Kak! Terima kasih sudah menggunakan Euphy-Bot. Jika kakak ingin membantu biaya maintenance server Lunes Host dan pengembangan bot ini, bisa melalui QRIS di atas ya!\n\n`;
+        caption += `Halo Kak! Terima kasih sudah menggunakan Euphy-Bot. Jika kakak ingin membantu biaya maintenance server dan pengembangan bot ini, bisa melalui QRIS di atas ya!\n\n`;
         caption += `*Bisa lewat:* \n`;
         caption += `• Dana / OVO / GoPay / LinkAja / Dll\n`;
         caption += `• All Bank (Scan via Mobile Banking)\n\n`;
