@@ -16,7 +16,7 @@ module.exports = {
         let mime = (q.msg || q).mimetype || '';
 
         if (!/image/.test(mime)) {
-            return m.reply(`Mana gambarnya, Yus? Reply atau kirim gambar dengan caption *${usedPrefix + command}* 🌸`);
+            return m.reply(`Mana gambarnya? Reply atau kirim gambar dengan caption *${usedPrefix + command}* 🌸`);
         }
 
         try {
