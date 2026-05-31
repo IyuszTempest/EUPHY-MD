@@ -55,11 +55,20 @@ module.exports = {
             const videoUrl = data.result[0];
 
             if (!videoUrl) throw new Error("Link video tidak ditemukan");
-            await conn.sendMessage(m.chat, { 
-                video: { url: videoUrl }, 
-                caption: `> Done Sayangkuh ♥️`,
+            await conn.sendMessage(m.chat, {
+                video: { url: videoUrl },
+                caption: `> Done yah sayang`,
+                contextInfo: {
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: idch,
+                        newsletterName: namech,
+                        serverMessageId: 143
+                    }
+                }
             }, { quoted: m });
-
+   
+        
             await conn.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
         } catch (e) {
             await conn.sendMessage(m.chat, { react: { text: "❌", key: m.key } });
