@@ -32,7 +32,7 @@ module.exports = {
         const totalChats = Object.keys(global.db?.data?.chats || {}).length;
 
         const botName = global.namebot;
-        const ownerName = global.namowner;
+        const ownerName = global.nameowner;
         const nodeVersion = process.version;
         const hostname = os.hostname();
         const arch = os.arch();
@@ -40,20 +40,24 @@ module.exports = {
         const botNumber = conn.user && conn.user.id ? conn.user.id.split(':')[0] : m.chat;
         const botMode = global.db?.data?.settings?.[botNumber]?.self ? 'Self' : 'Public';
 
-        let teks += `${botName} • Advanced System Monitor\n\n`;
+        let teks = "```\n";
+        teks += `${botName} • Advanced System Monitor\n\n`;
         teks += `🤖 BOT INFO\n`;
         teks += `│ Bot Name : ${botName}\n`;
         teks += `│ Owner    : ${ownerName}\n`;
         teks += `│ Mode     : ${botMode}\n`;
         teks += `│ Plugins  : ${totalPlugins}\n`;
+        teks += `│ Chats    : ${totalChats}\n\n`;
 
         teks += `⚡ PERFORMANCE\n`;
         teks += `│ Latency  : ${latency} ms\n`;
         teks += `│ Uptime   : ${uptime}\n`;
         teks += `│ OS Uptime: ${osUptime}\n`;
         teks += `│ RAM Used : ${ramUsed} MB\n`;
-        
+        teks += `│ Heap Used: ${heapUsed} MB\n\n`;
+
         teks += `🖥️ SERVER INFO\n`;
+        teks += `│ Host     : ${hostname}\n`;
         teks += `│ OS       : ${os.platform()} (${arch})\n`;
         teks += `│ CPU      : ${cpuModel}\n`;
         teks += `│ Speed    : ${cpuSpeed} MHz\n`;
@@ -64,6 +68,7 @@ module.exports = {
         teks += `│ Used RAM : ${usedRam} GB\n`;
         teks += `│ Free RAM : ${freeRam} GB\n`;
         teks += `│ Usage    : ${((usedRam / ramTotal) * 100).toFixed(1)}%\n`;
+        teks += "```";
 
         await m.reply(teks, m.chat, {
             contextInfo: {
