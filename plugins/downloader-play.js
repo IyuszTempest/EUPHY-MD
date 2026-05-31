@@ -1,58 +1,41 @@
-/**
- * Euphy-Bot - YouTube Play Downloader ✨
- * Menggunakan API Ziaul (Query Direct Download)
- */
-
 const axios = require('axios');
 
 module.exports = {
     command: ['play'],
     category: 'downloader',
     noPrefix: true,
-    call: async (conn, m, { text, usedPrefix, command }) => {
-        if (!text) return m.reply(`Ayo mau dengerin lagu apa hari ini? ✨\nContoh: *${usedPrefix + command} Kawaikute Gomen*`);
+
+    call: async (conn, m, { text, command }) => {
+        if (!text) return m.reply('Lagu apa yg ingin dicari? Contoh: *Play Ave Mujica*');
 
         try {
-            // Reaksi lagi nyari biar gaul
-            await conn.sendMessage(m.chat, { react: { text: "🔍", key: m.key } });
+            await conn.sendMessage(m.chat, { react: { text: '🎶', key: m.key } });
 
-            // Request ke API Ziaul menggunakan query langsung
-            const apiUrl = `https://api.ziaul.my.id/api/downloader/ytplaymp3?query=${encodeURIComponent(text)}`;
-            const { data } = await axios.get(apiUrl, {
-                headers: { 'accept': '*/*' }
-            });
+            const res = await axios.get(
+                `https://neotex.my.id/download/ytplay?q=${encodeURIComponent(text)}`,
+                { timeout: 30000 }
+            );
 
-            if (!data.status || !data.result) {
-                throw new Error("Aduh, servernya lagi mogok atau lagunya nggak ketemu...");
-            }
+            if (!res.data?.status || !res.data?.result) throw new Error("> Gagal mengambil data dari API.");
 
-            const res = data.result;
+            const data = res.data.result;
+            const { title, duration, url } = data;
+            const audioUrl = data.download?.audio;
 
-            await conn.sendMessage(m.chat, { react: { text: "🎧", key: m.key } });
+            if (!audioUrl) throw new Error("> Link download audio tidak ditemukan.");
 
-            // Kirim Audio dengan tampilan keren
-            await conn.sendMessage(m.chat, { 
-                audio: { url: res.downloadUrl }, 
-                mimetype: 'audio/mpeg',
-                fileName: `${res.title}.mp3`,
-                contextInfo: {
-                    externalAdReply: {
-                        title: res.title,
-                        body: `Duration: ${res.duration} | Quality: ${res.quality}`,
-                        thumbnailUrl: res.thumbnail,
-                        sourceUrl: res.videoUrl,
-                        mediaType: 1,
-                        renderLargerThumbnail: true
-                    }
-                }
+            await conn.sendMessage(m.chat, {
+                audio: { url: audioUrl },
+                mimetype: "audio/mp4",
+                fileName: `${title}.mp3`
             }, { quoted: m });
 
-            await conn.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
+            await conn.sendMessage(m.chat, { react: { text: '👍🏻', key: m.key } });
 
         } catch (e) {
-            console.error("Error Play Ziaul:", e);
-            await conn.sendMessage(m.chat, { react: { text: "❌", key: m.key } });
-            m.reply(`❌ *Gagal nih:* ${e.message || "Ada masalah teknis, coba lagi nanti ya!"}`);
+            console.error("> Error pada plugin downloader/play.js:", e);
+            await conn.sendMessage(m.chat, { react: { text: '🚫', key: m.key } });
+            return m.reply('> Gagal mengambil lagu, coba kata kunci lain atau API sedang maintenance.');
         }
     }
 };
