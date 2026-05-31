@@ -43,9 +43,9 @@ module.exports = {
             }
 
             let listMessage = {
-                title: 'Klik di sini untuk pilih kategori',
+                title: 'Open list!',
                 sections: [{
-                    title: '🏮 EUPHYLIA CATEGORIES',
+                    title: 'List Menu',
                     highlight_label: 'Hot Menu',
                     rows: rows
                 }]
@@ -69,15 +69,15 @@ module.exports = {
                             },
                             interactiveMessage: proto.Message.InteractiveMessage.create({
                                 header: proto.Message.InteractiveMessage.Header.create({
-                                    title: '⛩️ *Euphylia Magenta* ⛩️',
+                                    title: global.namebot,
                                     hasMediaAttachment: true,
-                                    ...(await prepareWAMessageMedia({ image: { url: global.imgall || 'https://telegra.ph/file/0a7096646864700f135b1.jpg' } }, { upload: conn.waUploadToServer }))
+                                    ...(await prepareWAMessageMedia({ image: { url: global.imgall} }, { upload: conn.waUploadToServer }))
                                 }),
                                 body: proto.Message.InteractiveMessage.Body.create({
                                     text: menuContent
                                 }),
                                 footer: proto.Message.InteractiveMessage.Footer.create({
-                                    text: global.wm || 'Euphylia Magenta'
+                                    text: global.wm
                                 }),
                                 nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
                                     messageVersion: 1,
