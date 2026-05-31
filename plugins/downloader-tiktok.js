@@ -86,17 +86,18 @@ module.exports = {
             // --- 2. LOGIKA JIKA VIDEO ---
             else if (video) {
                 await conn.sendMessage(m.chat, {
-                video: { url: video },
-                caption: `> ${title}`,
-                contextInfo: {
-                    isForwarded: true,
-                    forwardedNewsletterMessageInfo: {
-                        newsletterJid: idch,
-                        newsletterName: namech,
-                        serverMessageId: 143
+                    video: { url: video },
+                    caption: `> ${title}`,
+                    contextInfo: {
+                        isForwarded: true,
+                        forwardedNewsletterMessageInfo: {
+                            newsletterJid: idch,
+                            newsletterName: namech,
+                            serverMessageId: 143
+                        }
                     }
-                }
-            }, { quoted: m });
+                }, { quoted: m });
+            } // <-- SEBELUMNYA KURANG TUTUP KURUNG KURAWAL DI SINI!
 
             // --- 3. KIRIM AUDIO (DARI SCRAPE LANGSUNG) ---
             if (audio) {
