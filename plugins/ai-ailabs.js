@@ -59,7 +59,7 @@ module.exports = {
                 if (!result.url) throw new Error("Gagal mendapatkan URL gambar.");
                 await conn.sendMessage(m.chat, { 
                     image: { url: result.url }, 
-                    caption: `╭━━〔 ⛩️ *𝙰𝙸 𝙻𝙰𝙱𝚂 𝙸𝙼𝙰𝙶𝙴* ⛩️ 〕━━┓\n┃ 📝 *Prompt:* ${text}\n┗━━━━━━━━━━━━┛` 
+                    caption: `> AI Labs Image` 
                 }, { quoted: m });
             } else {
                 // Untuk video, biasanya API Aritek mengembalikan ID/Key untuk dicek berkala
