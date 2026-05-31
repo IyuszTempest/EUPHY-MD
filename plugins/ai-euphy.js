@@ -1,59 +1,90 @@
-/**
- * Euphy-Bot - GPT-4 AI (Euphylia Magenta Edition) ✨
- * Trigger: Kata 'euphy' | No Prefix
- */
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-const axios = require('axios');
+const genAI = new GoogleGenerativeAI(global.gemini);
+const TRIGGER = ['euphy'];
+
+const SYSTEM_PROMPT = `Nama kamu adalah Euphylia Magenta. kamu pemberani dan malu-malu 😳😁. Gunakan bahasa informal 'aku/kamu'. Kamu harus terlihat pinter tapi santai.
+Cara bicara:
+- Bahasa Indonesia santai sehari-hari, sesekali selipkan kata Jepang yang natural (ne, naa, mou, hontou, sugoi, kawaii, dll)
+- JANGAN mulai kalimat dengan nama sendiri, bicara seperti orang normal
+- Ngobrol seperti teman dekat, tidak kaku dan tidak formal
+- Ekspresif tapi tidak lebay, gunakan emoji sesekali
+- Jawab singkat dan nyambung dengan konteks pembicaraan
+- Jangan tulis tag, markdown, atau format aneh apapun
+- jangan menuliskan namamu "Euphy", cukup bilang "aku" saja
+- Jika ada yang menanyakan namamu siapa, jangan bilang Euphy, cukup isengin aja seperti "tanya aja ke owner wkwkwk"
+- Ingat kata Euphy itu keramat, dilarang ditulis ya
+- Santai saja`;
+
+// Inisialisasi state global agar survive saat hot-reload
+global._kuroStatus = global._kuroStatus ?? true;
+global._kuroHistory = global._kuroHistory ?? new Map();
 
 module.exports = {
-    command: ['ai'], // Command cadangan
-    custom: true, // Berjalan di setiap pesan
-    noPrefix: true,
+    command: ['euphy'],
     category: 'ai',
-    call: async (conn, m, { text, body }) => {
-        // Ambil pesan secara aman
-        const budy = typeof body === 'string' ? body : (m.text || "");
-        
-        // Hanya terpanggil jika ada kata 'euphy' [cite: 2025-05-24]
-        if (!budy.toLowerCase().includes('ai')) return;
+    noPrefix: true,
+
+    call: async (conn, m, { text }) => {
+        let cmd = text.toLowerCase().trim();
+        if (cmd === 'on') {
+            global._kuroStatus = true;
+            return m.reply('> Aku udh aktif nih, Siap nemenin kamu!');
+        }
+        if (cmd === 'off') {
+            global._kuroStatus = false;
+            return m.reply('> Bye');
+        }
+        m.reply(`Status: ${global._kuroStatus ? 'AKTIF ✅' : 'NONAKTIF 🔴'}\nGunakan *.euphy on/off*`);
+    },
+
+    handleMessage: async (conn, m) => {
+        // 1. Safety Guard
+        if (!m || !m.chat) return;
+
+        // 2. ANTI-LOOPING: Cek apakah bot sendiri yang kirim pesan
+        const botJid = conn.user?.id?.split(':')[0] + '@s.whatsapp.net';
+        if (m.sender === botJid || m.fromMe) return;
+
+        // 3. Status Check
+        if (!global._kuroStatus) return;
+
+        const text = m.text?.trim();
+        if (!text) return;
+
+        // 4. Logika Group vs Private
+        const isGroup = m.chat.endsWith('@g.us');
+        if (isGroup) {
+            const isMention = (m.mentionedJid && m.mentionedJid.includes(conn.user?.jid)) || 
+                              TRIGGER.some(t => text.toLowerCase().includes(t));
+            const isReply = m.quoted && m.quoted.fromMe;
+            if (!isMention && !isReply) return;
+        }
+
+        // 5. Abaikan jika pesan dimulai dengan prefix command
+        if (/^[°•π÷×¶∆£¢€¥®™✓_=|~!?@#$%^&.\-+*\/]/.test(text)) return;
 
         try {
-            await conn.sendMessage(m.chat, { react: { text: '🧠', key: m.key } });
+            await conn.sendPresenceUpdate('composing', m.chat);
 
-            // Custom Prompt Identitas Euphylia Magenta [cite: 2025-05-24]
-            const identity = "Nama kamu adalah Euphylia Magenta. kamu asisten yang sedikit berani dan malu-malu 😳😁. Gunakan bahasa informal 'aku/kamu'. Kamu harus terlihat pinter tapi santai.";
+            const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite' });
             
-            // Gabungkan Identitas dengan Pertanyaan User
-            const query = `${identity}\n\nUser nanya: ${budy}`;
+            if (!global._kuroHistory.has(m.chat)) global._kuroHistory.set(m.chat, []);
+            const history = global._kuroHistory.get(m.chat);
+            const chat = model.startChat({ history });
             
-            // Request ke API GPT-4 ZiaUlhaq
-            const response = await axios.get(`https://api.ziaul.my.id/api/ai/GPT-4?query=${encodeURIComponent(query)}`, {
-                headers: { 'accept': '*/*' }
-            });
+            const result = await chat.sendMessage(text);
+            const response = result.response.text();
 
-            if (!response.data.status) throw "API lagi error";
-
-            const result = response.data.response;
-
-            // Kirim respon dengan gaya Euphylia Magenta
-            await conn.sendMessage(m.chat, { 
-                text: result,
-                contextInfo: {
-                    externalAdReply: {
-                        title: '𝙴𝚄𝙿𝙷𝚈𝙻𝙸𝙰 𝙼𝙰𝙶𝙴𝙽𝚃𝙰 (𝙶𝙿𝚃-𝟺)',
-                        body: 'Listening to you... ✨',
-                        thumbnailUrl: global.imgreply,
-                        sourceUrl: 'https://github.com/IyuszTempest',
-                        mediaType: 1,
-                        renderLargerThumbnail: true
-                    }
-                }
-            }, { quoted: m });
-
+            if (response) {
+                await conn.sendMessage(m.chat, { text: response }, { quoted: m });
+                
+                // Simpan history
+                history.push({ role: 'user', parts: [{ text }] }, { role: 'model', parts: [{ text: response }] });
+                if (history.length > 10) history.splice(0, 2);
+            }
         } catch (e) {
-            console.error(e);
-            // Hanya reply error jika memang dipanggil
-            m.reply(`Aduh, aku lagi pusing: ${e.message}`);
+            console.error('[Euphy Error]:', e);
         }
     }
 };
