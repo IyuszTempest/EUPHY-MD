@@ -42,7 +42,7 @@ module.exports = {
 
         let teks += `${botName} • Advanced System Monitor\n\n`;
         teks += `🤖 BOT INFO\n`;
-        teks += `│ Bot Name : ${nameowner}\n`;
+        teks += `│ Bot Name : ${botName}\n`;
         teks += `│ Owner    : ${ownerName}\n`;
         teks += `│ Mode     : ${botMode}\n`;
         teks += `│ Plugins  : ${totalPlugins}\n`;
