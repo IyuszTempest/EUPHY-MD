@@ -1,11 +1,6 @@
-/**
- * All-in-One Downloader (Instant Mode) 📥
- * Powered by Zanixon API (ZTRdiamond)
- * Format: Unified Plugin System
- * Mode: Kirim Video Saja (Tanpa Info/Caption)
- */
-
 const axios = require('axios');
+const cheerio = require('cheerio');
+const { fromBuffer } = require('file-type');
 
 module.exports = {
     command: ['dl', 'download', 'aio'],
@@ -13,50 +8,60 @@ module.exports = {
     premium: false,
     noPrefix: true,
     call: async (conn, m, { usedPrefix, command, text }) => {
-        if (!text) return m.reply(`Mana link-nya?\n\n*Note*: Support Tiktok, Instagram, YouTube`);
+    if (!text) return reply('Masukkan link sosmednya!');
 
-        // Daftar domain yang didukung (TikTok, IG, YouTube)
-        const isUrl = text.match(/(https?:\/\/(?:www\.|vm\.|vt\.|v\.|reels\.)?(?:tiktok\.com|instagram\.com|youtube\.com|youtu\.be)\/[^\s]+)/gi);
-        if (!isUrl) return m.reply('❌ Link tidak didukung! Pastikan link dari TikTok, IG, atau YouTube.');
+    await conn.sendMessage(m.chat, { react: { text: '🥀', key: m.key } });
 
-        // Beri reaksi 'Proses' (Emoji Jam/Tunggu)
-        await conn.sendMessage(m.chat, { react: { text: '⏳', key: m.key } });
+    try {
+      // 1. Ambil Token (Fetch Initial)
+      const initialRes = await axios.get('https://on4t.com/online-video-downloader', {
+        headers: { 'User-Agent': 'Mozilla/5.0' }
+      });
+      const $ = cheerio.load(initialRes.data);
+      const csrfToken = $('meta[name="csrf-token"]').attr('content');
+      const cookies = initialRes.headers['set-cookie']?.join('; ') || '';
 
-        try {
-            // Nembak API AIO
-            const apiUrl = `https://chocomilk.amira.us.kg/v1/download/aio?url=${encodeURIComponent(isUrl[0])}`;
-            const { data } = await axios.get(apiUrl);
+      // 2. Request Download
+      const postData = new URLSearchParams();
+      postData.append('_token', csrfToken);
+      postData.append('link[]', text);
 
-            if (!data.success || !data.data) {
-                return m.reply('❌ Gagal mengambil data. Link tidak valid atau server API sibuk.');
-            }
-
-            const res = data.data;
-            
-            // Logika pencarian media video (Cari kualitas terbaik/HD jika tersedia)
-            // Terutama untuk TikTok, kita utamakan yang No-Watermark.
-            let videoData = res.medias.find(m => m.quality === 'hd_no_watermark' || m.quality === 'no_watermark') 
-                         || res.medias.find(m => m.type === 'video');
-
-            // Jika masih tidak ketemu di list medias, ambil yang pertama saja
-            if (!videoData && res.medias.length > 0) videoData = res.medias[0];
-            const videoUrl = videoData?.url;
-
-            if (!videoUrl) return m.reply('❌ Konten video tidak ditemukan.');
-
-            // --- INSTANT MODE: KIRIM VIDEO SAJA ---
-            // Caption dikosongkan agar respon bersih dan instan.
-            await conn.sendMessage(m.chat, { 
-                video: { url: videoUrl }, 
-                caption: '' // Tanpa caption info
-            }, { quoted: m });
-
-            // Beri reaksi 'Selesai' (Emoji Centang)
-            await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
-
-        } catch (e) {
-            console.error(e);
-            m.reply('❌ Gagal mendownload. Pastikan link benar dan server API online.');
+      const res = await axios.post('https://on4t.com/all-video-download', postData.toString(), {
+        headers: {
+          'User-Agent': 'Mozilla/5.0',
+          'Cookie': cookies,
+          'X-Requested-With': 'XMLHttpRequest'
         }
+      });
+
+      const results = res.data?.result;
+      if (!results || results.length === 0) return reply('> Gagal ambil data, link mungkin tidak didukung.');
+
+      // 3. Proses Pengiriman
+      for (let item of results) {
+        let fileUrl = item.video_file_url || item.videoimg_file_url;
+        let mediaRes = await axios.get(fileUrl, { responseType: 'arraybuffer' });
+        let buff = Buffer.from(mediaRes.data);
+        let fileInfo = await fromBuffer(buff) || { mime: 'video/mp4', ext: 'mp4' };
+
+        await conn.sendMessage(m.chat, {
+          [fileInfo.mime.split('/')[0]]: buff,
+          caption: `> ${item.title || 'Download'}`,
+          contextInfo: {
+            isForwarded: true,
+            forwardedNewsletterMessageInfo: {
+              newsletterJid: idch,
+              newsletterName: namech,
+              serverMessageId: 143
+            }
+          }
+        }, { quoted: m });
+      }
+
+      await conn.sendMessage(m.chat, { react: { text: '✨', key: m.key } });
+    } catch (err) {
+      await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } });
+      reply(`Error: ${err.message}`);
     }
+  }
 };
