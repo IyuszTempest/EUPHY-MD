@@ -8,7 +8,6 @@ const fs = require('fs');
 const path = require('path');
 const { getRandom } = require('../lib/myfunc'); 
 
-// --- [ FUNGSI SCRAPER TMATE ] ---
 const handleTikTok = async (tiktokUrl) => {
     try {
         const initialRes = await axios.get('https://tmate.cc/id', {
@@ -68,10 +67,10 @@ module.exports = {
     category: 'downloader',
     noPrefix: true,
     call: async (conn, m, { args }) => {
-        if (!args[0] || !args[0].match(/tiktok.com/gi)) return m.reply("Mana link TikTok-nya? 🌸");
+        if (!args[0] || !args[0].match(/tiktok.com/gi)) return m.reply("Mana link TikTok-nya?");
 
         try {
-            await conn.sendMessage(m.chat, { react: { text: "⏳", key: m.key } });
+            await conn.sendMessage(m.chat, { react: { text: "🙎🏻", key: m.key } });
 
             const data = await handleTikTok(args[0]);
             const { type, title, video, audio, images } = data.result;
@@ -81,14 +80,14 @@ module.exports = {
                 for (let img of images) {
                     await conn.sendMessage(m.chat, { image: { url: img } }, { quoted: m });
                 }
-                await m.reply(`✅ Berhasil kirim *${images.length}* foto slide.`);
+                await m.reply(`> Berhasil kirim *${images.length}* foto slide.`);
             } 
             
             // --- 2. LOGIKA JIKA VIDEO ---
             else if (video) {
                 await conn.sendMessage(m.chat, { 
                     video: { url: video }, 
-                    caption: `╭━━〔 ⛩️ *𝚃𝙸𝙺𝚃𝙾𝙺 𝙳𝙻* ⛩️ 〕━━┓\n┃ 📝 *Title:* ${title}\n┗━━━━━━━━━━━━━━━┛` 
+                    caption: `> *Title:* ${title}` 
                 }, { quoted: m });
             }
 
@@ -98,24 +97,14 @@ module.exports = {
                     audio: { url: audio }, 
                     mimetype: 'audio/mpeg',
                     fileName: `${title}.mp3`,
-                    contextInfo: {
-                        externalAdReply: {
-                            title: 'Nih soundnya',
-                            body: `Judul: ${title}`,
-                            thumbnailUrl: global.imgall,
-                            sourceUrl: args[0],
-                            mediaType: 1,
-                            renderLargerThumbnail: true
-                        }
-                    }
                 }, { quoted: m });
             }
 
-            await conn.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
+            await conn.sendMessage(m.chat, { react: { text: "😁", key: m.key } });
 
         } catch (e) {
             console.error(e);
-            m.reply(`❌ *Gagal:* ${e.message}`);
+            m.reply(`> Gagal: ${e.message}`);
         }
     }
 };
