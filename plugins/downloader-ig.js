@@ -18,7 +18,8 @@ const handleIgdl = async (url) => {
                 "user-agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36",
                 "origin": "https://snapinsta.top",
                 "referer": "https://snapinsta.top/"
-            }
+            },
+            timeout: 15000
         });
 
         const $ = cheerio.load(res.data);
@@ -31,7 +32,7 @@ const handleIgdl = async (url) => {
             result.push(path);
         });
 
-        if (result.length === 0) throw new Error("Gagal mengambil video Reels.");
+        if (result.length === 0) throw new Error("Gagal mengambil video Reels");
 
         return { status: "success", result: result };
     } catch (error) {
@@ -44,41 +45,25 @@ module.exports = {
     category: 'downloader',
     noPrefix: true,
     call: async (conn, m, { text }) => {
-        if (!text) return m.reply('Mana link Reels-nya? ✨\nContoh: .reels https://www.instagram.com/reels/xxxxx/');
-
-        // Validasi link Instagram/Reels
-        if (!/instagram.com\/(reels|reel)/.test(text)) return m.reply('Link-nya harus dari Instagram Reels ya! 🌸');
+        if (!text) return m.reply('> Mana link Reels-nya?');
+        if (!/instagram\.com\/(reels|reel|p)/.test(text)) return m.reply('> Link-nya harus dari Instagram Reels ya!');
 
         try {
             await conn.sendMessage(m.chat, { react: { text: "📥", key: m.key } });
             
-            // Eksekusi Scraper
             const data = await handleIgdl(text);
-            const videoUrl = data.result[0]; // Ambil link pertama karena Reels biasanya cuma satu video
+            const videoUrl = data.result[0];
 
-            if (!videoUrl) throw new Error("Link video tidak ditemukan.");
-
-            // Kirim video langsung ke chat
+            if (!videoUrl) throw new Error("Link video tidak ditemukan");
             await conn.sendMessage(m.chat, { 
                 video: { url: videoUrl }, 
-                caption: `DONE`,
-                contextInfo: {
-                    externalAdReply: {
-                        title: '𝙸𝙽𝚂𝚃𝙰𝙶𝚁𝙰𝙼 𝚁𝙴𝙴𝙻𝚂',
-                        body: 'Success Download Video',
-                        thumbnailUrl: global.imgall,
-                        sourceUrl: text,
-                        mediaType: 1,
-                        renderLargerThumbnail: true
-                    }
-                }
+                caption: `> Done Sayangkuh ♥️`,
             }, { quoted: m });
 
             await conn.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
-
         } catch (e) {
-            console.error(e);
-            m.reply(`❌ *Gagal:* ${e.message}`);
+            await conn.sendMessage(m.chat, { react: { text: "❌", key: m.key } });
+            return m.reply(`> ${e.message}`);
         }
-    }
+    } 
 };
