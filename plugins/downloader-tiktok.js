@@ -85,11 +85,18 @@ module.exports = {
             
             // --- 2. LOGIKA JIKA VIDEO ---
             else if (video) {
-                await conn.sendMessage(m.chat, { 
-                    video: { url: video }, 
-                    caption: `> *Title:* ${title}` 
-                }, { quoted: m });
-            }
+                await conn.sendMessage(m.chat, {
+                video: { url: video },
+                caption: `> ${title}`,
+                contextInfo: {
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: idch,
+                        newsletterName: namech,
+                        serverMessageId: 143
+                    }
+                }
+            }, { quoted: m });
 
             // --- 3. KIRIM AUDIO (DARI SCRAPE LANGSUNG) ---
             if (audio) {
