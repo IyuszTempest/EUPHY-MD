@@ -23,7 +23,7 @@ module.exports = {
             const buffer = Buffer.from(response.data, 'utf-8');
 
             // Proses jadi stiker pakai library sticker.js kamu
-            let stiker = await sticker(buffer, false, 'Euphylia Magenta', 'by IyuszTempest');
+            let stiker = await sticker(buffer, false, packname, author);
 
             if (stiker) {
                 // Kirim sebagai stiker beneran
@@ -35,7 +35,7 @@ module.exports = {
 
         } catch (e) {
             console.error(e);
-            m.reply(`Maaf, sistem Euphylia Magenta sedang gangguan: ${e.message}`);
+            m.reply(`> Maaf, sistem sedang gangguan: ${e.message}`);
         }
     }
 };
