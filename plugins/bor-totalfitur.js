@@ -31,10 +31,9 @@ module.exports = {
 
             await conn.sendMessage(m.chat, { react: { text: '🌀', key: m.key } });
 
-            let caption = `╭━━〔 📊 *𝚂𝚃𝙰𝚃𝙸𝚂𝚃𝙸𝙺 𝙵𝙸𝚃𝚄𝚁* 〕━━┓\n┃\n` +
-                          `┣ 🔹 *Total Fitur:* ${totalFitur} file\n` +
+            let caption = `╭ 📊 *𝚂𝚃𝙰𝚃𝙸𝚂𝚃𝙸𝙺 𝙵𝙸𝚃𝚄𝚁*\n┃\n` +
+                          `┣ 🔹 *Total Fitur:* ${totalPlugins} file\n` +
                           `┣ 📘 *Total Command:* ${totalCommand} perintah\n┃\n` +
-                          `┗━━━━━━━━━━━━━━━━━━┛`;
 
             await conn.sendMessage(
                 m.chat,
@@ -44,7 +43,7 @@ module.exports = {
 
         } catch (e) {
             console.error(e);
-            m.reply('Terjadi kesalahan saat menghitung statistik fitur.');
+            m.reply('> Terjadi kesalahan saat menghitung statistik fitur.');
         }
     }
 };
