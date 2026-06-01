@@ -53,7 +53,7 @@ module.exports = {
             // Susun tampilan sub-menu dengan gaya yang super Clean & Minimalis
             let txt = `🌸 *${categoryNames[tag] || tag.toUpperCase()}* 🌸\n\n`;
             txt += `${categoryCommands}\n\n`;
-            txt += `_Pilih dan gunakan perintah dengan bijak ya, Yus!_`;
+            txt += `_Pilih dan gunakan perintah dengan bijak ya!_`;
 
             // Balas pesan ke user
             await m.reply(txt);
