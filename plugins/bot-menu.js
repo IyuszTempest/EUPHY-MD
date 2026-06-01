@@ -11,7 +11,7 @@ module.exports = {
     noPrefix: true, 
     call: async (conn, m, { usedPrefix: _p }) => {
         try {
-            await conn.sendMessage(m.chat, { react: { text: "🏮", key: m.key } });
+            await conn.sendMessage(m.chat, { react: { text: "🗿", key: m.key } });
 
             // 1. Inisialisasi Data
             let name = `@${m.sender.split`@`[0]}`;
@@ -19,13 +19,15 @@ module.exports = {
 
             // 2. Daftar Kategori untuk List
             const allTags = {
-                'anime': '🌸 Menu Wibu', 
+                'anime': '🌸 Zona Wibu', 
                 'ai': '🤖 Menu AI',
                 'premium': '💎 Menu Premium',
                 'downloader': '📥 Menu Downloader',
+                'economic': '💵 Menu Ekonomi Global',
                 'fun': '😁 Menu Fun',
                 'group': '👥 Menu Group',
                 'game': '🎮 Menu Gaming', 
+                'nsfw': '🔞 Zona +18',
                 'tools': '🛠️ Menu Tools',
                 'owner': '👑 Menu Owner',
                 'main': '🐦 Menu Main'
@@ -55,7 +57,7 @@ module.exports = {
             let menuContent = `👤 *𝚄𝚜𝚎𝚛:* ${name}\n`;
             menuContent += `🕒 *𝚄𝚙𝚝𝚒𝚖𝚎:* ${uptime}\n`;
             menuContent += `📚 *𝙻𝚒𝚋𝚛𝚊𝚛𝚢:* Baileys v6.7.0\n\n`;
-            menuContent += `Silahkan pilih kategori menu pada tombol di bawah ini untuk melihat daftar perintah yang tersedia. ✨`;
+            menuContent += `Silahkan pilih kategori menu pada tombol di bawah ini untuk melihat daftar perintah yang tersedia.`;
 
             // 5. Generate Message
             const msg = generateWAMessageFromContent(
