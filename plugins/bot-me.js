@@ -62,7 +62,7 @@ module.exports = {
                             },
                             interactiveMessage: proto.Message.InteractiveMessage.create({
                                 header: proto.Message.InteractiveMessage.Header.create({
-                                    title: 'Profile Mu Tuan',
+                                    title: 'User Profile Info',
                                     hasMediaAttachment: true,
                                     ...media
                                 }),
