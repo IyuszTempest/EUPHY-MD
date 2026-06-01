@@ -5,7 +5,7 @@
  */
 
 module.exports = {
-    command: ['cekid', 'idch', 'channelid'],
+    command: ['cekidch', 'idch', 'channelid'],
     category: 'tools',
     noPrefix: true,
     call: async (conn, m, { usedPrefix }) => {
