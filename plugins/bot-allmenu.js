@@ -16,7 +16,6 @@ module.exports = {
 
             // Daftar nama kategori yang rapi
             const categoryNames = {
-                'menuall': 'SEMUA MENU',
                 'main': 'MENU UTAMA',
                 'anime': 'MENU WIBU',
                 'ai': 'MENU AI',
