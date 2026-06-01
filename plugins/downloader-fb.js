@@ -4,8 +4,6 @@
  */
 
 const cloudscraper = require('cloudscraper');
-
-// Fungsi pembersih URL
 function clean(url) {
     return url?.replace(/&amp;/g, '&') || null;
 }
@@ -20,7 +18,6 @@ module.exports = {
         try {
             await conn.sendMessage(m.chat, { react: { text: "⏳", key: m.key } });
 
-            // Proses Scrape ke FDown
             const res = await cloudscraper.post({
                 uri: 'https://www.fdown.net/download.php',
                 formData: { URLz: args[0] },
@@ -35,24 +32,29 @@ module.exports = {
             let sdlink = clean(res.match(/id="sdlink" href="([^"]+)"/)?.[1]);
             let hdlink = clean(res.match(/id="hdlink" href="([^"]+)"/)?.[1]);
 
-            // Ambil link HD kalau ada, kalau nggak ada pakai SD
             let finalVideo = hdlink || sdlink;
 
-            if (!finalVideo) throw new Error("Gagal mendapatkan link download. Pastikan video publik!");
+            if (!finalVideo) throw new Error("> Gagal mendapatkan link download. Pastikan video publik!");
 
-            // Kirim Video
-            await conn.sendMessage(m.chat, { 
-                video: { url: finalVideo }, 
-                caption: `✅ *FACEBOOK DOWNLOAD SUCCESS*\n\nQuality: ${hdlink ? 'HD' : 'SD'}`,
-                fileName: `fb_download.mp4`
-            }, { quoted: m });
+            await conn.sendMessage(m.chat, {
+                    video: { url: finalVideo },
+                    caption: `> Done`,
+                    contextInfo: {
+                        isForwarded: true,
+                        forwardedNewsletterMessageInfo: {
+                            newsletterJid: idch,
+                            newsletterName: namech,
+                            serverMessageId: 143
+                        }
+                    }
+                }, { quoted: m });
 
-            await conn.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
+            await conn.sendMessage(m.chat, { react: { text: "😹", key: m.key } });
 
         } catch (e) {
             console.error(e);
-            await conn.sendMessage(m.chat, { react: { text: "❌", key: m.key } });
-            m.reply(`❌ *Error:* ${e.message || "Terjadi kesalahan saat mendownload video."}`);
+            await conn.sendMessage(m.chat, { react: { text: "😑", key: m.key } });
+            m.reply(`❌ *Error:* ${e.message || "> Terjadi kesalahan saat mendownload video."}`);
         }
     }
 };
