@@ -22,7 +22,7 @@ require('./config');
 const { uploadImage } = require('./lib/uploadImage');
 global.uploadImage = uploadImage; 
 
-const kuroyami = require('./plugins/kuroyami');
+const kuroyami = require('./plugins/ai-euphy');
 
 const tmpDir = path.join(__dirname, 'tmp');
 if (!fs.existsSync(tmpDir)) {
