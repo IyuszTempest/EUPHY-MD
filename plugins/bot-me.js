@@ -45,8 +45,7 @@ module.exports = {
             }
 
             // Desain teks body profile yang super simpel dan clean
-            let cap = `🌸 *USER PROFILE* 🌸\n\n`;
-            cap += `👤 *Name:* ${userName}\n`;
+            let cap += `👤 *Name:* ${userName}\n`;
             cap += `🔢 *Age:* ${userAge} Tahun\n`;
             cap += `📱 *Number:* @${who.split('@')[0]}\n`;
             cap += `📌 *LID:* ${who.endsWith('@lid') ? 'Active ✓' : 'Standard 📱'}\n\n`;
@@ -63,7 +62,7 @@ module.exports = {
                             },
                             interactiveMessage: proto.Message.InteractiveMessage.create({
                                 header: proto.Message.InteractiveMessage.Header.create({
-                                    title: 'USER CARD INFO',
+                                    title: 'Profile Mu Tuan',
                                     hasMediaAttachment: true,
                                     ...media
                                 }),
