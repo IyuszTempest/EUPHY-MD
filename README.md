@@ -1,7 +1,7 @@
 <div align="center">
 
 # 🎭 Euphylia Magenta Script
-<img src="https://i.ibb.co/YF9vK9NK/IMG-20260218-WA0085.jpg" width="280" style="border-radius: 50%; box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);" alt="Euphylia Magenta">
+<img src="https://i.pinimg.com/1200x/38/74/7c/38747c61317f12126ba8270319cc26d1.jpg" width="280" style="border-radius: 50%; box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);" alt="Euphylia Magenta">
 
 **Modern WhatsApp Bot Engine with Hybrid AI & High-Efficiency Tools**
 
@@ -15,14 +15,16 @@
 ---
 
 ## 🌸 Overview
-**Euphylia Magenta** (Euphy) adalah bot WhatsApp berbasis Node.js yang dikembangkan dari **Base Botcahx** dan dioptimasi secara mendalam oleh **IyuszTempest**. Versi V2.0 ini fokus pada efisiensi penggunaan sumber daya (RAM Monitoring) dan integrasi **Dual-ID System (JID & LID)**.
+**Euphylia Magenta** (Euphy) adalah bot WhatsApp berbasis Node.js yang dikembangkan dari **Base Botcahx** dan dioptimasi secara mendalam oleh **IyuszTempest**. Versi V2.5 ini fokus pada efisiensi penggunaan sumber daya (RAM Monitoring) dan integrasi **Dual-ID System (JID & LID)**.
 
-## 🚀 Fitur Unggulan (V2.0 Update)
+## 🚀 Fitur Unggulan (V2.5 Update)
 
 * 🔄 **Auto-Reload Plugins:** Sistem deteksi file otomatis (`fs.watch`) yang memungkinkan update fitur tanpa perlu restart bot.
 * 🎞️ **Optimized Sticker:** Mesin pengolah stiker video dengan *Hard Compression* (< 1MB) untuk menjamin stabilitas pengiriman.
-* 📂 **REST API:** 100% Fitur terintegrasi langsung dengan REST API.
+* 📂 **REST API:** 100% Fitur terintegrasi langsung dengan REST API free.
 * 🛡️ **Dual-ID Support:** Deteksi Owner otomatis untuk sistem WhatsApp terbaru yang menggunakan format **LID**.
+* 🔝 **Button & Fake Reply:** Membuat tampilan chat bot lebih modern dan simple.
+* ✨ **Sistem Lebih Efisien:** Penggunaan ram hanya dibawah 200MB saja.
 
 ---
 
@@ -30,9 +32,8 @@
 
 > [!NOTE]
 > - Proyek ini sekarang dioptimasi untuk dijalankan pada **Environment Laptop/PC** untuk performa FFmpeg yang maksimal.
-> - Gunakan **npm install --legacy-peer-deps --production** untuk menginstall modul.
+> - Gunakan **npm install --legacy-peer-deps --production** jika **npm install** tidak bisa digunakan.
 
 ### Prasyarat Sistem
-- **Node.js:** wajib node 22 agar stabil
 - **FFmpeg:** Terinstall secara global (untuk proses stiker & converter)
 - **RAM:** Minimal 1GB (Disarankan, meskipun bot berjalan stabil di resource rendah)
