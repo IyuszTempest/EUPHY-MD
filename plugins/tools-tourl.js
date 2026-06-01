@@ -1,68 +1,82 @@
-/**
- * Plugin: ToURL (File Uploader) ☁️
- * Fitur: Mengunggah file/media ke CDN dan memberikan link publik.
+/** * Plugin: Media to URL Uploader 📤⛩️
+ * Deskripsi: Mengunggah media (gambar, video, atau audio) ke AliceeCDN.
+ * Style: Clean & Minimalist ✨
+ * Adopted to Euphylia Magenta Bot Structure
  */
 
 const axios = require('axios');
 const FormData = require('form-data');
 
 module.exports = {
-    command: ['tourl'],
+    command: ['tourl', 'upload'],
     category: 'tools',
     noPrefix: true,
-    call: async (conn, m, { usedPrefix, command }) => {
-        // Pengecekan database user
-        let user = global.db.data.users[m.sender];
-        if (!user) return m.reply("Daftar dulu di database!");
-
-        let q = m.quoted ? m.quoted : m;
-        let mime = (q.msg || q).mimetype || '';
-
-        // Validasi input media
-        if (!mime) return m.reply('✨ Reply atau kirim file yang ingin diunggah.');
-
+    call: async (conn, m, { usedPrefix: _p, command }) => {
         try {
-            await conn.sendMessage(m.chat, { react: { text: '✨', key: m.key } });
+            // 1. Deteksi Media (Quoted atau Media Baru)
+            const targetMsg = m.quoted ? m.quoted : m;
+            const mime = (targetMsg.msg || targetMsg).mimetype || '';
 
-            // Proses download media dari WhatsApp
-            let buffer = await q.download();
-            if (!buffer) throw 'Gagal mengunduh media.';
+            if (!mime || !/image|video|audio/.test(mime)) {
+                return m.reply(`> Kirim atau reply media (gambar/video/audio) dengan caption *${_p + command}*`);
+            }
 
-            let ext = mime.split('/')[1] || 'bin';
-            let filename = `upload_${Date.now()}.${ext}`;
+            // Berikan reaksi upload biar interaktif 📤
+            await conn.sendMessage(m.chat, { react: { text: '📤', key: m.key } });
+            await m.reply("> Sedang mengunduh dan mengunggah berkas ke CDN, mohon tunggu sebentar ya...");
 
-            // Persiapan form data untuk upload
+            // 2. Download Buffer (Menggunakan metode download internal bot kamu)
+            let mediaBuffer;
+            try {
+                mediaBuffer = await targetMsg.download();
+            } catch (downloadError) {
+                console.error("Gagal mendownload media:", downloadError);
+                return m.reply("> Gagal mendownload media dari server WhatsApp!");
+            }
+
+            if (!mediaBuffer) {
+                return m.reply("> Gagal memproses berkas media!");
+            }
+
+            // 3. Cek ukuran (Limit 10MB)
+            const MAX_SIZE = 10 * 1024 * 1024;
+            if (mediaBuffer.length > MAX_SIZE) {
+                return m.reply("> File terlalu besar! Maksimal ukuran file adalah 10MB ya.");
+            }
+
+            // 4. Upload ke CDN Alicee
             const form = new FormData();
-            form.append('file', buffer, filename);
+            const extension = mime.split('/')[1] || 'bin';
+            const fileName = `${Date.now()}.${extension}`;
+            
+            form.append('cdnFile', mediaBuffer, {
+                filename: fileName,
+                contentType: mime,
+            });
 
-            // Pengiriman ke server CDN
-            const { data } = await axios.post(
-                'https://cdn.nekohime.site/upload',
-                form,
-                { headers: form.getHeaders() }
-            );
+            const res = await axios.post('https://aliceecdn.vercel.app/upload', form, {
+                headers: { 
+                    ...form.getHeaders() 
+                }
+            });
 
-            // Validasi respon server
-            if (!data?.files?.length) throw 'Proses unggah ke server gagal.';
+            // 5. Kirim Hasil
+            if (res.data && res.data.url) {
+                let txt = `🌸 *UPLOAD SUCCESS* 🌸\n\n`;
+                txt += `🔗 *URL:* ${res.data.url}\n`;
+                txt += `📄 *File:* ${fileName}\n`;
+                txt += `📏 *Size:* ${(mediaBuffer.length / 1024 / 1024).toFixed(2)} MB\n\n`;
+                txt += `_Gunakan tautan di atas dengan bijak ya!_`;
 
-            let url = data.files[0].url || data.files[0];
+                await m.reply(txt);
+                await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
+            } else {
+                throw new Error("Respon server CDN tidak valid.");
+            }
 
-            // Mengirimkan hasil link ke chat
-            await conn.sendMessage(
-                m.chat,
-                {
-                    text: `╭━━〔 ☁️ *𝚄𝙿𝙻𝙾𝙰𝙳 𝚂𝚄𝙲𝙲𝙴𝚂𝚂* 〕━━┓\n┃\n` +
-                          `┣ ✨ *URL:* ${url}\n┃\n` +
-                          `┗━━━━━━━━━━━━━━━━┛`
-                },
-                { quoted: m }
-            );
-
-            await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
-
-        } catch (e) {
-            console.error(e);
-            m.reply('✨ Terjadi kesalahan saat memproses unggahan.');
+        } catch (err) {
+            console.error("Error in ToURL:", err);
+            m.reply(`⚠️ Gagal mengunggah berkas: ${err.message}`);
             await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } });
         }
     }
