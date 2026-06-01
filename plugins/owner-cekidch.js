@@ -1,48 +1,45 @@
-/**
- * Plugin: Cek ID Saluran (Newsletter JID) 🔍📢
- * Fitur: Mengambil ID JID dari pesan Saluran yang di-forward atau di-reply.
+/** * Plugin: Check Channel/Newsletter ID 📢⛩️
+ * Deskripsi: Mendeteksi ID unik dari Channel WhatsApp (Newsletter) melalui pesan atau reply.
+ * Style: Clean & Minimalist ✨
+ * Adopted to Euphylia Magenta Bot Structure
  */
 
 module.exports = {
-    command: ['cekidch', 'jidch', 'newsletterjid'],
+    command: ['cekid', 'idch', 'channelid'],
     category: 'tools',
     noPrefix: true,
-    call: async (conn, m, { usedPrefix, command }) => {
-        // Pengecekan database user
-        let user = global.db.data.users[m.sender];
-        if (!user) return m.reply("Daftar dulu di database!");
+    call: async (conn, m, { usedPrefix }) => {
+        try {
+            // Berikan reaksi pengeras suara biar interaktif
+            await conn.sendMessage(m.chat, { react: { text: '📢', key: m.key } });
 
-        // Mendeteksi pesan yang di-reply atau di-forward
-        let q = m.quoted ? m.quoted : m;
-        let newsletterJid = q.msg?.contextInfo?.forwardedNewsletterMessageInfo?.newsletterJid;
-
-        // Validasi jika ID tidak ditemukan
-        if (!newsletterJid) {
-            return m.reply(`🚩 *Gagal mendapatkan ID Saluran.*\n\nPastikan Anda me-reply pesan yang berasal dari saluran/newsletter.`);
-        }
-
-        await conn.sendMessage(m.chat, { react: { text: '🔍', key: m.key } });
-
-        // Menyusun informasi ID Saluran
-        let caption = `╭━━〔 📢 *𝙸𝙳 𝚂𝙰𝙻𝚄𝚁𝙰𝙽* 〕━━┓\n┃\n` +
-                      `┣ 🆔 *JID:* ${newsletterJid}\n┃\n` +
-                      `┗━━━━━━━━━━━━━━┛\n\n` +
-                      `Gunakan ID di atas untuk keperluan konfigurasi plugin saluran.`;
-
-        await conn.sendMessage(m.chat, {
-            text: caption,
-            contextInfo: {
-                externalAdReply: {
-                    title: "Channel ID Detector",
-                    body: newsletterJid,
-                    thumbnailUrl: "https://i.ibb.co/31VZ8vv/avatar-contact.png",
-                    sourceUrl: null,
-                    mediaType: 1,
-                    renderLargerThumbnail: false
-                }
+            // Mendeteksi pesan yang di-reply (quoted) atau pesan saat ini
+            const quoted = m.quoted ? m.quoted : m;
+            
+            // Mengambil ID chat. Kita juga cek contextInfo seandainya pesan berasal dari forward newsletter
+            let channelId = quoted.chat || m.chat;
+            
+            if (m.quoted && m.quoted.contextInfo && m.quoted.contextInfo.forwardedNewsletterMessageInfo) {
+                channelId = m.quoted.contextInfo.forwardedNewsletterMessageInfo.newsletterJid;
             }
-        }, { quoted: m });
 
-        await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
+            // Validasi apakah ID berakhiran @newsletter
+            if (!channelId || !channelId.endsWith('@newsletter')) {
+                return m.reply("> ❌ Pesan ini bukan berasal dari Channel (Newsletter)!\nPastikan kamu me-reply salah satu pesan dari dalam channel yang ingin kamu ketahui ID-nya ya!");
+            }
+
+            // Desain teks keluaran dengan gaya Clean & Minimalist
+            let txt = `🌸 *CHANNEL ID FOUND* 🌸\n\n`;
+            txt += `📌 *ID:* \`${channelId}\`\n\n`;
+            txt += `_Silakan salin ID di atas untuk digunakan pada konfigurasi menu atau fitur broadcast channel kamu ya!_`;
+
+            // Kirim balasan hasil deteksi ID
+            await m.reply(txt);
+            await conn.sendMessage(m.chat, { react: { text: '✨', key: m.key } });
+
+        } catch (e) {
+            console.error("Error in CekID:", e);
+            m.reply("❌ Terjadi kesalahan saat mendeteksi ID Channel.");
+        }
     }
 };
