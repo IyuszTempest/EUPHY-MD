@@ -17,6 +17,7 @@ module.exports = {
                 'ai': 'MENU AI',
                 'premium': 'MENU PREMIUM',
                 'downloader': 'MENU DOWNLOADER',
+                'economic': 'MENU EKONOMI GLOBAL'
                 'fun': 'MENU FUN',
                 'group': 'MENU GROUP',
                 'game': 'MENU GAMING',
