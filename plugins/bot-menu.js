@@ -93,7 +93,7 @@ module.exports = {
                                     forwardedNewsletterMessageInfo: {
                                         newsletterJid: global.idch,
                                         serverMessageId: 143,
-                                        newsletterName: `System Online - ${global.namech}`
+                                        newsletterName: `${global.namech} - Sistem Online`
                                     }
                                 }
                             })
