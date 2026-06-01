@@ -1,4 +1,3 @@
-```javascript
 /** * Plugin Kitsu Anime Search with List Selector ⛩️
  * Style: Euphylia Magenta - "The King of UI" Style 🌸
  * API: Kitsu API (Highly Stable & No Strict Rate Limits) 🚀
