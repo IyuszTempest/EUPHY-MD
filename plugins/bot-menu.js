@@ -19,6 +19,7 @@ module.exports = {
 
             // 2. Daftar Kategori untuk List
             const allTags = {
+                'allmenu': '🔝 Semua Menu',
                 'anime': '🌸 Zona Wibu', 
                 'ai': '🤖 Menu AI',
                 'premium': '💎 Menu Premium',
@@ -48,7 +49,7 @@ module.exports = {
                 title: 'Open list!',
                 sections: [{
                     title: 'List Menu',
-                    highlight_label: 'Hot Menu',
+                    highlight_label: 'Hot Menu 🔥',
                     rows: rows
                 }]
             };
