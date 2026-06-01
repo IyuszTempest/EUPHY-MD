@@ -6,23 +6,20 @@
 const fs = require('fs');
 
 module.exports = {
-    command: ['totalfitur'],
+    command: ['totalcmd'],
     category: 'main',
     noPrefix: true,
     call: async (conn, m, { usedPrefix, command }) => {
-        // Pengecekan database user
         let user = global.db.data.users[m.sender];
         if (!user) return m.reply("Daftar dulu di database!");
 
         try {
             await conn.sendMessage(m.chat, { react: { text: '🎸', key: m.key } });
 
-            // Menghitung jumlah file plugin yang memiliki help dan tags aktif
             let totalFitur = Object.values(global.plugins)
                 .filter(v => v.help && v.tags && !v.disabled)
                 .length;
 
-            // Menghitung total seluruh perintah/alias yang terdaftar
             let totalCommand = Object.values(global.plugins)
                 .map(v => v.command)
                 .filter(v => v)
@@ -31,19 +28,26 @@ module.exports = {
 
             await conn.sendMessage(m.chat, { react: { text: '🌀', key: m.key } });
 
-            let caption = `╭ 📊 *𝚂𝚃𝙰𝚃𝙸𝚂𝚃𝙸𝙺 𝙵𝙸𝚃𝚄𝚁*\n┃\n` +
-                          `┣ 🔹 *Total Fitur:* ${totalPlugins} file\n` +
-                          `┣ 📘 *Total Command:* ${totalCommand} perintah\n┃\n` +
+            let caption = `📘 *Total Command:* ${totalCommand} perintah\n`;
 
-            await conn.sendMessage(
-                m.chat,
-                { text: caption },
-                { quoted: m }
-            );
+            await conn.sendMessage(m.chat, {
+                text: caption,
+                contextInfo: {
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: idch,
+                        newsletterName: namech,
+                        serverMessageId: 143
+                    }
+                }
+            }, { quoted: m });
+
+            await conn.sendMessage(m.chat, { react: { text: '🔥', key: m.key } });
 
         } catch (e) {
             console.error(e);
-            m.reply('> Terjadi kesalahan saat menghitung statistik fitur.');
+            await conn.sendMessage(m.chat, { react: { text: '😢', key: m.key } });
+            return m.reply('> Terjadi kesalahan saat menghitung statistik fitur.');
         }
     }
 };
