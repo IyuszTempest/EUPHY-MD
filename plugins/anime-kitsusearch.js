@@ -45,7 +45,7 @@ module.exports = {
     call: async (conn, m, { text, command, usedPrefix: _p }) => {
         try {
             if (!text) {
-                return m.reply(`> Mau cari anime apa hari ini?\nContoh: *${_p + command} Cyberpunk Edgerunners*`);
+                return m.reply(`Mau cari anime apa hari ini?\nContoh: *${_p + command} Cyberpunk Edgerunners*`);
             }
 
             // --- MODE 1: DETAIL ANIME BERDASARKAN ID (Ketukan dari List) ---
