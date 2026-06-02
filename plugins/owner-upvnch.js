@@ -13,13 +13,10 @@ module.exports = {
     category: 'owner',
     noPrefix: true,
     call: async (conn, m, { usedPrefix, command }) => {
-        // Pengecekan status Owner
-        if (!m.isOwner) return m.reply("Fitur ini khusus Owner!");
 
         let q = m.quoted ? m.quoted : m;
         let mime = (q.msg || q).mimetype || '';
 
-        // Validasi input audio
         if (!/audio/.test(mime)) return m.reply(`Reply VN atau audio yang ingin dikirim ke saluran.`);
 
         await conn.sendMessage(m.chat, { react: { text: '⏳', key: m.key } });
@@ -50,8 +47,16 @@ module.exports = {
             await conn.sendMessage(idSaluran, {
                 audio: audioData,
                 mimetype: 'audio/ogg; codecs=opus',
-                ptt: true
-            });
+                ptt: true,
+                contextInfo: {
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: idch,
+                        newsletterName: namech,
+                        serverMessageId: 143
+                    }
+                }
+            }, { quoted: m });
 
             await m.reply('✅ Berhasil dikirim ke saluran.');
             await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
