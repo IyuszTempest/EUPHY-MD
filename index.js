@@ -272,11 +272,12 @@ async function startEuphy() {
 
 
     // ── [ 6.6. BROADCAST HELPER ] ─────────────────
-    const broadcastGrup = async (teks) => {
+    const broadcastGrup = async (teks, imagePathOrUrl) => {
     const groups = Object.keys(await conn.groupFetchAllParticipating());
     for (const id of groups) {
         await conn.sendMessage(id, {
-            text: teks,
+            image: { url: global.imgreply },
+            caption: teks,
             contextInfo: {
                 forwardingScore: 999,
                 isForwarded: true,
@@ -295,15 +296,17 @@ async function startEuphy() {
 
     // Malam — jam 21:00 WIB
     cron.schedule('0 21 * * *', () => {
-        broadcastGrup(
-            `⛩️ Nighty Reminder\n\n> Already 9 PM. Waktunya turu biar besok badan tetep seger. Lanjut besok lagi ya...`
+    broadcastGrup(
+        `⛩️ **Nighty Reminder**\n\n> Already 9 PM. Waktunya turu biar besok badan tetep seger. Lanjut besok lagi ya...`,
+        global.imgNight
         );
     }, { timezone: 'Asia/Jakarta' });
-
+    
     // Pagi — jam 06:00 WIB
     cron.schedule('0 6 * * *', () => {
-        broadcastGrup(
-            `🏮 Morning Reminder\n\n> Awali pagi dengan sarapan dan senyuman. Semoga harimu menyenangkan! Have a great day`
+    broadcastGrup(
+        `🏮 **Morning Reminder**\n\n> Awali pagi dengan sarapan dan senyuman. Semoga harimu menyenangkan! Have a great day!`,
+        global.imgMorning
         );
     }, { timezone: 'Asia/Jakarta' });
 
