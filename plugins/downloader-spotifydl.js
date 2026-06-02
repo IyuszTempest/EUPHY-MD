@@ -28,29 +28,7 @@ async function getSpotifyData(url) {
                 mp3: r.mp3DownloadLink
             })
         },
-        {
-            name: 'Vreden-v1',
-            url: `https://api.vreden.my.id/api/v1/download/spotify?url=${encodeURIComponent(url)}`,
-            parse: r => ({
-                title: r.title,
-                artist: r.artist,
-                cover: r.thumbnail,
-                mp3: r.download.url
-            })
-        },
-        {
-            name: 'Vreden-v2',
-            url: `https://api.vreden.my.id/api/v1/download/spotify?url=${encodeURIComponent(url)}`,
-            parse: r => ({
-                title: r.title,
-                artist: r.artists,
-                cover: r.cover_url,
-                mp3: r.download
-            }),
-            resultKey: 'result'
-        }
-    ];
-
+        
     for (let api of apis) {
         try {
             const res = await axios.get(api.url, { headers: { accept: '*/*' }, timeout: 10000 });
