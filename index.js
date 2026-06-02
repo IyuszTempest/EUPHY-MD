@@ -297,7 +297,7 @@ async function startEuphy() {
     // Malam — jam 21:00 WIB
     cron.schedule('0 21 * * *', () => {
     broadcastGrup(
-        `⛩️ **Nighty Reminder**\n\n> Already 9 PM. Waktunya turu biar besok badan tetep seger. Lanjut besok lagi ya...`,
+        `⛩️ *Nighty Reminder*\n\n> Already 9 PM. Waktunya turu biar besok badan tetep seger. Lanjut besok lagi ya...`,
         global.imgmalam
         );
     }, { timezone: 'Asia/Jakarta' });
@@ -305,7 +305,7 @@ async function startEuphy() {
     // Pagi — jam 06:00 WIB
     cron.schedule('0 6 * * *', () => {
     broadcastGrup(
-        `🏮 **Morning Reminder**\n\n> Awali pagi dengan sarapan dan senyuman. Semoga harimu menyenangkan! Have a great day!`,
+        `🏮 *Morning Reminder*\n\n> Awali pagi dengan sarapan dan senyuman. Semoga harimu menyenangkan! Have a great day!`,
         global.imgpagi
         );
     }, { timezone: 'Asia/Jakarta' });
