@@ -67,25 +67,8 @@ module.exports = {
             }
             
 
-
-            // --- [ 4. AFK DETECTOR (FIXED) ] ---
-            let jidTag = m.mentionedJid || [];
-            jidTag.forEach(jid => {
-                let targetAfk = global.db.data.users[jid];
-                if (targetAfk && targetAfk.afk > -1) {
-                    m.reply(`Jangan tag dia ya! 🌸\n*${targetAfk.name}* lagi AFK.\n\n*Alasan:* ${targetAfk.afkReason}`);
-                }
-            });
-
-            if (user?.afk > -1) {
-                user.afk = -1;
-                user.afkReason = '';
-                m.reply(`Selamat datang kembali @${m.sender.split('@')[0]}! ✨`);
-            }
-
-
             
-            // --- [ 5. LOGIC OWNER & ADMIN DETECTOR (JID/LID SYNC) ] ---
+            // --- [ 4. LOGIC OWNER & ADMIN DETECTOR (JID/LID SYNC) ] ---
             const ownerList = Array.isArray(global.owner) ? global.owner : [global.owner];
             const cleanOwners = ownerList.map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net');
             const isOwner = m.fromMe || (m.sender === global.lidowner) || cleanOwners.includes(m.sender);
@@ -119,7 +102,7 @@ module.exports = {
 
             
             
-            // --- [ 6. COMMAND PARSING (FIX NULL & TRIM) ] ---
+            // --- [ 5. COMMAND PARSING (FIX NULL & TRIM) ] ---
             let body = m.message?.conversation || 
                 m.message?.extendedTextMessage?.text ||
                 m.message?.imageMessage?.caption ||
@@ -147,7 +130,7 @@ module.exports = {
 
 
 
-            // --- [ 7. EXECUTE COMMAND ] ---
+            // --- [ 6. EXECUTE COMMAND ] ---
             for (let name in global.plugins) {
                 let plugin = global.plugins[name];
                 if (!plugin || plugin.disabled) continue;
