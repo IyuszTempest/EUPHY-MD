@@ -12,7 +12,7 @@ module.exports = {
     noPrefix: true, 
     owner: true,    
     call: async (conn, m, { text, args, usedPrefix, command }) => {
-        if (!text) return m.reply(`Masukkan kode JS yang mau dites!`);
+        if (!text) return m.reply(`> reply chat atau kode js mu!`);
 
         global.evalCtx = {
             conn: conn,
