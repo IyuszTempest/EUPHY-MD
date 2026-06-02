@@ -1,28 +1,43 @@
 /**
- * Euphy-Bot - Plugin Tester / Evaluator
- * Jalankan kode JS langsung lewat chat!
+ * Euphy-Bot - Plugin Tester / Evaluator (Super Bypass Version) 🎀
+ * Fitur: Global Scope Injector & Anti Undefined Quoted
  */
 
 const { exec } = require('child_process');
 const util = require('util');
 
 module.exports = {
-    command: ['eval', '>'],
+    command: ['eval'],
     category: 'owner',
-    noPrefix: true, // Sebaiknya pakai prefix biar gak sembarang ke-trigger
-    owner: true,    // Pastikan bot kamu punya pengecekan status owner
+    noPrefix: true, 
+    owner: true,    
     call: async (conn, m, { text, args, usedPrefix, command }) => {
         if (!text) return m.reply(`Masukkan kode JS yang mau dites!`);
 
-        // Shortcut biar gak capek ngetik console.log
+        global.evalCtx = {
+            conn: conn,
+            m: m,
+            q: m.quoted || null,
+            msg: m.quoted ? (m.quoted.msg || m.quoted) : (m.msg || m)
+        };
+
         let evalCmd;
         try {
-            evalCmd = await eval(`(async () => { ${text} })()`);
+            evalCmd = await eval(`(async () => { 
+                // Buat alias lokal di dalam eval agar ketikan kamu tetep pendek
+                const conn = global.evalCtx.conn;
+                const m = global.evalCtx.m;
+                const q = global.evalCtx.q;
+                const msg = global.evalCtx.msg;
+                
+                return ${text}; 
+            })()`);
         } catch (e) {
             evalCmd = e;
         }
 
-        // Kirim hasil eksekusi balik ke chat
+        delete global.evalCtx;
+
         return m.reply(util.format(evalCmd));
     }
 };
