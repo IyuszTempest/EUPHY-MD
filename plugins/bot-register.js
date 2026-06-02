@@ -3,32 +3,30 @@ module.exports = {
     category: 'main',
     noPrefix: true, 
     call: async (conn, m, { text, usedPrefix, command }) => {
-        let user = global.db.data.users[m.sender]; 
-        
-        // Cek apakah sudah terdaftar
-        if (user.registered) return conn.reply(m.chat, `Kamu sudah terdaftar sebelumnya, *${user.name}*! ✨`, m);
+        let user = global.db.data.users[m.sender] || (global.db.data.users[m.sender] = {});
 
-        // Validasi input
-        if (!text) return conn.reply(m.chat, `Format salah! ❌\nContoh: *${usedPrefix + command} Natalius.18*`, m);
-        
+        if (user.registered) return m.reply(`> Kamu sudah terdaftar sebagai *${user.name}*!`);
+        if (!text?.includes('.')) return m.reply(`> Format salah!\n\n> Contoh: *${usedPrefix + command} Natalius.18*`);
+
         let [name, age] = text.split('.');
-        if (!name || !age) return conn.reply(m.chat, `Gunakan titik (.) sebagai pemisah antara nama dan umur!\nContoh: *${usedPrefix + command} Natalius.18*`, m);
-        if (isNaN(age)) return conn.reply(m.chat, `Umur harus berupa angka ya! 🔢`, m);
-        if (age > 100 || age < 5) return conn.reply(m.chat, `Umur yang dimasukkan tidak valid... 🤨`, m);
+        let parseAge = parseInt(age);
 
-        // Simpan ke database
-        user.name = name.trim();
-        user.age = parseInt(age);
-        user.regTime = + new Date();
-        user.registered = true;
+        if (!name.trim()) return m.reply(`> Nama tidak boleh kosong! 👤`);
+        if (isNaN(parseAge) || parseAge > 80 || parseAge < 5) return m.reply(`> Masukkan umur yang valid! 🔢`);
 
-        let cap = `*─── [ REGISTRASI BERHASIL ] ───*\n\n`;
-        cap += `👤 *Nama:* ${user.name}\n`;
-        cap += `🔢 *Umur:* ${user.age} Tahun\n`;
-        cap += `📅 *Waktu:* ${new Date().toLocaleString()}\n\n`;
-        cap += `Sekarang kamu sudah bisa menggunakan semua fitur Euphy! 🌸\n`;
-        cap += `Ketik *${usedPrefix}menu* untuk melihat daftar fitur.`;
+        Object.assign(user, {
+            name: name.trim(),
+            age: parseAge,
+            registered: true,
+            regTime: +new Date()
+        });
 
-        conn.reply(m.chat, cap, m);
+        let caption = `〔 ⛩️ **Registration Success** 〕\n\n`;
+        caption += ` 👤  *Nama:* ${user.name}\n`;
+        caption += ` 🔢  *Umur:* ${user.age} tahun\n\n`;
+        caption += `Sekarang kamu sudah bisa menggunakan semua fitur!\n`;
+        caption += `_Ketik *${usedPrefix}menu* untuk melihat fitur._`;
+
+        await m.reply(caption);
     }
 };
