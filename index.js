@@ -189,7 +189,7 @@ async function startEuphy() {
             }
         } else if (connection === 'open') {
             console.log(chalk.cyan.bold('\n┌─────────────────────────────────┐'));
-            console.log(chalk.cyan.bold('│   ✅  AKU BERHASIL TERHUBUNG  │'));
+            console.log(chalk.cyan.bold('│   ✅  AKU BERHASIL TERHUBUNG   │'));
             console.log(chalk.cyan.bold('└─────────────────────────────────┘\n'));
         }
     });
