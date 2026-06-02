@@ -45,7 +45,7 @@ module.exports = {
             }
 
             // Desain teks body profile yang super simpel dan clean
-            let cap += `👤 *Name:* ${userName}\n`;
+            let cap = `👤 *Name:* ${userName}\n`;
             cap += `🔢 *Age:* ${userAge} Tahun\n`;
             cap += `📱 *Number:* @${who.split('@')[0]}\n`;
             cap += `📌 *LID:* ${who.endsWith('@lid') ? 'Active ✓' : 'Standard 📱'}\n\n`;
