@@ -276,7 +276,7 @@ async function startEuphy() {
     const groups = Object.keys(await conn.groupFetchAllParticipating());
     for (const id of groups) {
         await conn.sendMessage(id, {
-            image: { url: global.imgreply },
+            image: { url: imagePathOrUrl },
             caption: teks,
             contextInfo: {
                 forwardingScore: 999,
@@ -298,7 +298,7 @@ async function startEuphy() {
     cron.schedule('0 21 * * *', () => {
     broadcastGrup(
         `⛩️ **Nighty Reminder**\n\n> Already 9 PM. Waktunya turu biar besok badan tetep seger. Lanjut besok lagi ya...`,
-        global.imgNight
+        global.imgmalam
         );
     }, { timezone: 'Asia/Jakarta' });
     
@@ -306,7 +306,7 @@ async function startEuphy() {
     cron.schedule('0 6 * * *', () => {
     broadcastGrup(
         `🏮 **Morning Reminder**\n\n> Awali pagi dengan sarapan dan senyuman. Semoga harimu menyenangkan! Have a great day!`,
-        global.imgMorning
+        global.imgpagi
         );
     }, { timezone: 'Asia/Jakarta' });
 
