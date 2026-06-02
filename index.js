@@ -241,7 +241,7 @@ async function startEuphy() {
 
                 if (action === 'add') {
                     const teks = (chat.sWelcome ||
-                        `〔 🌸 Yokoso! 〕\n\n> Selamat datang kak @user! Senang kamu bisa bergabung di grup @group. Enjoy your stay!`)
+                        `🌸 Yokoso!\n\n> Selamat datang kak @user! Senang kamu bisa bergabung di grup @group. Enjoy your stay!`)
                         .replace('@user',  tag)
                         .replace('@group', name)
                         .replace('@desc',  desc);
@@ -254,7 +254,7 @@ async function startEuphy() {
 
                 } else if (action === 'remove') {
                     const bye = (chat.sBye ||
-                        `〔 ⛩️ Sayonara 〕\n\n> Goodbye @user... Sampai jumpa lagi ya! See you next time`)
+                        `⛩️ Sayonara\n\n> Goodbye @user... Sampai jumpa lagi ya! See you next time`)
                         .replace('@user',  tag)
                         .replace('@group', name);
 
@@ -296,14 +296,14 @@ async function startEuphy() {
     // Malam — jam 21:00 WIB
     cron.schedule('0 21 * * *', () => {
         broadcastGrup(
-            `〔 ⛩️ Nighty Reminder 〕\n\n> Already 9 PM. Waktunya turu biar besok badan tetep seger. Lanjut besok lagi ya...`
+            `⛩️ Nighty Reminder\n\n> Already 9 PM. Waktunya turu biar besok badan tetep seger. Lanjut besok lagi ya...`
         );
     }, { timezone: 'Asia/Jakarta' });
 
     // Pagi — jam 06:00 WIB
     cron.schedule('0 6 * * *', () => {
         broadcastGrup(
-            `〔 🏮 Morning Reminder 〕\n\n> Awali pagi dengan sarapan dan senyuman. Semoga harimu menyenangkan! Have a great day`
+            `🏮 Morning Reminder\n\n> Awali pagi dengan sarapan dan senyuman. Semoga harimu menyenangkan! Have a great day`
         );
     }, { timezone: 'Asia/Jakarta' });
 
@@ -314,7 +314,7 @@ async function startEuphy() {
         for (const jid in chats) {
             if (chats[jid].expired && now > chats[jid].expired) {
                 await conn.sendMessage(jid, {
-                    text: `〔 ⛩️ Sewa Expired 〕\n\n> Masa sewa grup ini telah habis, saatnya aku pamit undur diri. Hubungi owner untuk perpanjang ya!`
+                    text: `⛩️ Sewa Expired\n\n> Masa sewa grup ini telah habis, saatnya aku pamit undur diri. Hubungi owner untuk perpanjang ya!`
                 });
                 await conn.groupLeave(jid);
                 chats[jid].expired = 0;
