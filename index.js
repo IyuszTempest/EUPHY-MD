@@ -1,326 +1,395 @@
 /**
- * Euphy-Bot - Index (V3.3 Optimized)
- * Fix: Global Uploader Registration & Plugin Sync
+ * ╔══════════════════════════════════════════════╗
+ * ║           𝙴𝚄𝙿𝙷𝚈 - 𝙱𝙾𝚃 𝚂𝚈𝚂𝚃𝙴𝙼  V3.3          ║
+ * ║         Optimized · Clean · Stable           ║
+ * ╚══════════════════════════════════════════════╝
  */
 
-const { 
-    useMultiFileAuthState, 
-    DisconnectReason, 
-    fetchLatestBaileysVersion 
-} = require("@whiskeysockets/baileys");
+'use strict';
 
-const pino = require("pino");
-const { Boom } = require("@hapi/boom");
-const fs = require("fs");
-const path = require("path");
-const chalk = require("chalk");
-const os = require("os");
-const express = require("express");
-const readline = require("readline");
+// ════════════════════════════════════════════════
+//  [ 1. IMPORTS & DEPENDENCIES ]
+// ════════════════════════════════════════════════
+
+const {
+    useMultiFileAuthState,
+    DisconnectReason,
+    fetchLatestBaileysVersion
+} = require('@whiskeysockets/baileys');
+
+const pino      = require('pino');
+const { Boom }  = require('@hapi/boom');
+const fs        = require('fs');
+const path      = require('path');
+const chalk     = require('chalk');
+const express   = require('express');
+const readline  = require('readline');
+const cron      = require('node-cron');
 
 require('./config');
-const { uploadImage } = require('./lib/uploadImage');
-global.uploadImage = uploadImage; 
 
-const kuroyami = require('./plugins/ai-euphy');
+const { smsg, makeWASocket }  = require('./lib/simple');
+const { uploadImage }         = require('./lib/uploadImage');
+const kuroyami                = require('./plugins/ai-euphy');
+
+global.uploadImage = uploadImage;
+
+
+// ════════════════════════════════════════════════
+//  [ 2. DIRECTORY SETUP ]
+// ════════════════════════════════════════════════
 
 const tmpDir = path.join(__dirname, 'tmp');
 if (!fs.existsSync(tmpDir)) {
     fs.mkdirSync(tmpDir);
-    console.log(chalk.green('[ SYSTEM ] Folder tmp berhasil dibuat otomatis! 📂'));
+    console.log(chalk.green('[ SYSTEM ] Folder /tmp berhasil dibuat 📂'));
 }
 
-const { smsg, makeWASocket } = require('./lib/simple');
 
-const app = express();
-const port = process.env.PORT || 3000;
-app.get('/', (req, res) => res.send('Euphy System Is Online ✨'));
-app.listen(port, () => console.log(chalk.cyan(`[ INFO ] Server active on port ${port}`)));
+// ════════════════════════════════════════════════
+//  [ 3. EXPRESS SERVER ]
+// ════════════════════════════════════════════════
 
-const question = (text) => {
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    return new Promise((resolve) => rl.question(text, (answer) => {
-        rl.close();
-        resolve(answer);
-    }));
+const app  = express();
+const PORT = process.env.PORT || 3000;
+
+app.get('/', (_req, res) => res.send('✨ System Is Online'));
+app.listen(PORT, () =>
+    console.log(chalk.cyan(`[ SERVER ] Aktif di port ${PORT}`))
+);
+
+
+// ════════════════════════════════════════════════
+//  [ 4. HELPERS ]
+// ════════════════════════════════════════════════
+
+const question = (text) =>
+    new Promise((resolve) => {
+        const rl = readline.createInterface({
+            input:  process.stdin,
+            output: process.stdout
+        });
+        rl.question(text, (answer) => {
+            rl.close();
+            resolve(answer);
+        });
+    });
+
+
+// ════════════════════════════════════════════════
+//  [ 5. DATABASE SYSTEM ]
+// ════════════════════════════════════════════════
+
+const DB_PATH = './database.json';
+
+global.db = {
+    data: {
+        users:    {},
+        chats:    {},
+        settings: {}
+    }
 };
 
-
-
-// --- [ 3. DATABASE SYSTEM ] ---
-const databasePath = './database.json';
-global.db = { data: { users: {}, chats: {}, settings: {} } };
-
-if (fs.existsSync(databasePath)) {
+if (fs.existsSync(DB_PATH)) {
     try {
-        global.db.data = JSON.parse(fs.readFileSync(databasePath, 'utf8'));
-        console.log(chalk.green('[ SUCCESS ] Database loaded!'));
-    } catch (e) {
-        console.log(chalk.red('[ ERROR ] Database korup, memuat data kosong.'));
-        fs.writeFileSync(databasePath, JSON.stringify(global.db.data, null, 2));
+        global.db.data = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+        console.log(chalk.green('[ DATABASE ] Berhasil dimuat ✅'));
+    } catch {
+        console.log(chalk.red('[ DATABASE ] Korup! Memuat data kosong...'));
+        fs.writeFileSync(DB_PATH, JSON.stringify(global.db.data, null, 2));
     }
 } else {
-    fs.writeFileSync(databasePath, JSON.stringify(global.db.data, null, 2));
-    console.log(chalk.yellow('[ SYSTEM ] Database baru berhasil dibuat!'));
+    fs.writeFileSync(DB_PATH, JSON.stringify(global.db.data, null, 2));
+    console.log(chalk.yellow('[ DATABASE ] Database baru berhasil dibuat 🗄️'));
 }
 
 setInterval(() => {
-    fs.writeFileSync(databasePath, JSON.stringify(global.db.data, null, 2));
-}, 30 * 1000);
+    fs.writeFileSync(DB_PATH, JSON.stringify(global.db.data, null, 2));
+}, 30_000);
+
+
+// ════════════════════════════════════════════════
+//  [ 6. MAIN FUNCTION ]
+// ════════════════════════════════════════════════
 
 async function startEuphy() {
-    const { state, saveCreds } = await useMultiFileAuthState("session");
-    const { version } = await fetchLatestBaileysVersion();
+
+    const { state, saveCreds } = await useMultiFileAuthState('session');
+    const { version }          = await fetchLatestBaileysVersion();
 
     const conn = makeWASocket({
         version,
-        logger: pino({ level: "silent" }),
+        logger:           pino({ level: 'silent' }),
         printQRInTerminal: false,
-        auth: state,
-        browser: ["Ubuntu", "Chrome", "20.0.04"]
+        auth:             state,
+        browser:          ['Ubuntu', 'Chrome', '20.0.04']
     });
 
 
+    // ── [ 6.1. PLUGIN LOADER ] ───────────────────
 
-// --- [ 4. UNIVERSAL PLUGIN LOADER ] ---
     global.plugins = {};
-    const pluginsFolder = path.join(__dirname, "plugins");
-    if (!fs.existsSync(pluginsFolder)) fs.mkdirSync(pluginsFolder);
+    const pluginsDir = path.join(__dirname, 'plugins');
+    if (!fs.existsSync(pluginsDir)) fs.mkdirSync(pluginsDir);
 
-    const files = fs.readdirSync(pluginsFolder);
-    for (let file of files) {
-        if (file.endsWith(".js")) {
-            try {
-                const pluginPath = path.join(pluginsFolder, file);
-                global.plugins[file] = require(pluginPath);
-            } catch (e) {
-                console.log(chalk.red(`  [ ERROR ] Gagal muat ${file}: ${e.message}`));
-            }
+    for (const file of fs.readdirSync(pluginsDir).filter(f => f.endsWith('.js'))) {
+        try {
+            global.plugins[file] = require(path.join(pluginsDir, file));
+        } catch (e) {
+            console.log(chalk.red(`[ PLUGIN ] Gagal muat "${file}": ${e.message}`));
         }
     }
 
-    fs.watch(pluginsFolder, (event, filename) => {
-        if (filename && filename.endsWith('.js')) {
-            const filePath = path.join(pluginsFolder, filename);
-            if (fs.existsSync(filePath)) {
-                try {
-                    delete require.cache[require.resolve(filePath)];
-                    global.plugins[filename] = require(filePath);
-                    console.log(chalk.green(`  [ WATCHER ] Plugin Updated: ${filename}`));
-                } catch (e) {
-                    console.log(chalk.red(`  [ WATCHER ERROR ] Gagal muat ${filename}: ${e.message}`));
-                }
-            } else {
-                delete global.plugins[filename];
-                console.log(chalk.yellow(`  [ WATCHER ] Plugin Deleted: ${filename}`));
+    fs.watch(pluginsDir, (event, filename) => {
+        if (!filename?.endsWith('.js')) return;
+        const filePath = path.join(pluginsDir, filename);
+        if (fs.existsSync(filePath)) {
+            try {
+                delete require.cache[require.resolve(filePath)];
+                global.plugins[filename] = require(filePath);
+                console.log(chalk.green(`[ WATCHER ] Plugin diperbarui: ${filename}`));
+            } catch (e) {
+                console.log(chalk.red(`[ WATCHER ] Gagal muat "${filename}": ${e.message}`));
             }
+        } else {
+            delete global.plugins[filename];
+            console.log(chalk.yellow(`[ WATCHER ] Plugin dihapus: ${filename}`));
         }
     });
 
-    
-// --- [ 5. PAIRING SYSTEM ] ---
+
+    // ── [ 6.2. PAIRING SYSTEM ] ──────────────────
+
     if (!conn.authState.creds.registered) {
-        console.log(chalk.yellow("[!] Masukkan nomor WhatsApp (628xxx):"));
-        let phoneNumber = await question(chalk.cyan("> "));
-        phoneNumber = phoneNumber.replace(/[^0-9]/g, "");
-        
+        console.log(chalk.yellow('\n[!] Masukkan nomor WhatsApp (contoh: 628xxx):'));
+        let phoneNumber = (await question(chalk.cyan('> '))).replace(/\D/g, '');
+
         setTimeout(async () => {
-            let code = await conn.requestPairingCode(phoneNumber, "EUPYMGTA");
-            code = code?.match(/.{1,4}/g)?.join("-") || code;
-            console.log(chalk.black(chalk.bgGreen("\n KODE PAIRING : ")), chalk.black(chalk.bgWhite(` ${code} `)), "\n");
+            const raw  = await conn.requestPairingCode(phoneNumber, 'EUPYMGTA');
+            const code = raw?.match(/.{1,4}/g)?.join('-') || raw;
+            console.log(
+                chalk.bgGreen.black('\n KODE PAIRING : '),
+                chalk.bgWhite.black(` ${code} `),
+                '\n'
+            );
         }, 3000);
     }
 
-    conn.ev.on("connection.update", async (update) => {
-        const { connection, lastDisconnect } = update;
-        if (connection === "close") {
-            let reason = new Boom(lastDisconnect?.error)?.output.statusCode;
-            if (reason !== DisconnectReason.loggedOut) startEuphy();
-        } else if (connection === "open") {
-            console.log(chalk.cyan.bold("--- EUPHY BERHASIL TERHUBUNG ---"));
+
+    // ── [ 6.3. CONNECTION HANDLER ] ──────────────
+
+    conn.ev.on('connection.update', ({ connection, lastDisconnect }) => {
+        if (connection === 'close') {
+            const reason = new Boom(lastDisconnect?.error)?.output.statusCode;
+            if (reason !== DisconnectReason.loggedOut) {
+                console.log(chalk.yellow('[ CONN ] Reconnecting...'));
+                startEuphy();
+            } else {
+                console.log(chalk.red('[ CONN ] Logged out. Hentikan bot & hapus sesi.'));
+            }
+        } else if (connection === 'open') {
+            console.log(chalk.cyan.bold('\n┌─────────────────────────────────┐'));
+            console.log(chalk.cyan.bold('│   ✅  AKU BERHASIL TERHUBUNG  │'));
+            console.log(chalk.cyan.bold('└─────────────────────────────────┘\n'));
         }
     });
 
-
-// --- [6.  AUTO BACKUP DATABASE] ---
-setInterval(async () => {
-    try {
-        const fs = require('fs');
-        const path = './database.json';
-        
-        if (fs.existsSync(path)) {
-            let targetJid = `${global.targetjid}`; 
-
-            await conn.sendMessage(targetJid, {
-                document: fs.readFileSync(path),
-                mimetype: 'application/json',
-                fileName: `database.json`,
-                caption: `🏮 *AUTO BACKUP DATABASE*\n\nData user aman terkirim otomatis!`
-            });
-            
-            console.log(`[ SYSTEM ] Auto backup sukses terkirim ke: ${targetJid}`);
-        }
-    } catch (e) {
-        console.log(`[ ERROR BACKUP ] Gagal kirim backup otomatis: ${e.message}`);
-    }
-}, 1000 * 60 * 60); 
+    conn.ev.on('creds.update', saveCreds);
 
 
+    // ── [ 6.4. AUTO BACKUP DATABASE ] ────────────
+    // Setiap 1 jam kirim backup ke owner
 
-// --- [ 7. GROUP PARTICIPANTS UPDATE (Welcome/Goodbye) - FIXED ] ---
-    conn.ev.on('group-participants.update', async (anu) => {
+    setInterval(async () => {
         try {
-            let chat = global.db.data.chats[anu.id] || {};
-            if (!chat.welcome) return; 
+            if (!fs.existsSync(DB_PATH)) return;
 
-            let metadata = await conn.groupMetadata(anu.id);
-            let participants = anu.participants;
+            const targetJid = `${global.targetjid}`;
+            await conn.sendMessage(targetJid, {
+                document:  fs.readFileSync(DB_PATH),
+                mimetype:  'application/json',
+                fileName:  'database.json',
+                caption:   `*AUTO BACKUP DATABASE*`
+            });
+            console.log(chalk.green(`[ BACKUP ] Sukses → ${targetJid}`));
+        } catch (e) {
+            console.log(chalk.red(`[ BACKUP ] Gagal: ${e.message}`));
+        }
+    }, 60 * 60 * 1000);
 
-            for (let num of participants) {
+
+    // ── [ 6.5. GROUP WELCOME / GOODBYE ] ─────────
+
+    conn.ev.on('group-participants.update', async ({ id, participants, action }) => {
+        try {
+            const chat = global.db.data.chats[id] || {};
+            if (!chat.welcome) return;
+
+            const metadata = await conn.groupMetadata(id);
+
+            for (const num of participants) {
                 let ppuser;
                 try {
                     ppuser = await conn.profilePictureUrl(num, 'image');
                 } catch {
-                    ppuser = 'https://i.pinimg.com/originals/f1/b9/d7/f1b9d702bae9274340cb7e9534233d32.jpg'; 
+                    ppuser = 'https://i.pinimg.com/originals/f1/b9/d7/f1b9d702bae9274340cb7e9534233d32.jpg';
                 }
 
-                if (anu.action == 'add') {
-                    let teks = chat.sWelcome || `╭━━〔 ⛩️ *𝚆𝙴𝙻𝙲𝙾𝙼𝙴* ⛩️ 〕━━┓\n┃ ✨ Selamat datang kak @user!\n┃ 🏮 Di grup: *@group*\n┗━━━━━━━━━━━━━━━┛`;
-                    
-                    let welcomeText = teks
-                        .replace('@user', `@${num.split("@")[0]}`) 
-                        .replace('@group', metadata.subject)       
-                        .replace('@desc', metadata.desc?.toString() || 'Tidak ada deskripsi'); 
-                    
-                    await conn.sendMessage(anu.id, { 
-                        image: { url: ppuser }, 
-                        caption: welcomeText, 
-                        mentions: [num] 
+                const tag  = `@${num.split('@')[0]}`;
+                const name = metadata.subject;
+                const desc = metadata.desc?.toString() || 'Tidak ada deskripsi';
+
+                if (action === 'add') {
+                    const teks = (chat.sWelcome ||
+                        `〔 🌸 Yokoso! 〕\n\n> Selamat datang kak @user! Senang kamu bisa bergabung di grup @group. Enjoy your stay!`)
+                        .replace('@user',  tag)
+                        .replace('@group', name)
+                        .replace('@desc',  desc);
+
+                    await conn.sendMessage(id, {
+                        image:    { url: ppuser },
+                        caption:  teks,
+                        mentions: [num]
                     });
 
-                } else if (anu.action == 'remove') {
-                    let bye = chat.sBye || `╭━━〔 ⛩️ *𝙶𝙾𝙾𝙳𝙱𝚈𝙴* ⛩️ 〕━━┓\n┃ 🏮 Sayonara @user...\n┃ ✨ Sampai jumpa lagi ya!\n┗━━━━━━━━━━━━━━━━┛`;
-                    
-                    let goodbyeText = bye
-                        .replace('@user', `@${num.split("@")[0]}`)
-                        .replace('@group', metadata.subject);
-                                
-                    await conn.sendMessage(anu.id, { 
-                        image: { url: ppuser }, 
-                        caption: goodbyeText, 
-                        mentions: [num] 
+                } else if (action === 'remove') {
+                    const bye = (chat.sBye ||
+                        `〔 ⛩️ Sayonara 〕\n\n> Goodbye @user... Sampai jumpa lagi ya! See you next time`)
+                        .replace('@user',  tag)
+                        .replace('@group', name);
+
+                    await conn.sendMessage(id, {
+                        image:    { url: ppuser },
+                        caption:  bye,
+                        mentions: [num]
                     });
                 }
             }
-        } catch (err) {
-            console.log(chalk.red(`[ GROUP UPDATE ERROR ] ${err.message}`));
+        } catch (e) {
+            console.log(chalk.red(`[ GROUP UPDATE ] ${e.message}`));
         }
     });
-    
-        
-    const cron = require('node-cron');
 
-            const broadcastGrup = async (teks) => {
-                let groups = Object.keys(await conn.groupFetchAllParticipating());
-                for (let id of groups) {
-                    await conn.sendMessage(id, { 
-                        text: teks,
-                        contextInfo: {
-                            externalAdReply: {
-                                title: "𝙴𝚄𝙿𝙷𝚈 𝙰𝚄𝚃𝙾-𝚁𝙴𝙼𝙸𝙽𝙳𝙴𝚁",
-                                body: "Sistem Pengingat Otomatis",
-                                thumbnailUrl: global.imgall,
-                                sourceUrl: global.idch,
-                                mediaType: 1
-                            }
-                        }
-                    });
+
+    // ── [ 6.6. BROADCAST HELPER ] ─────────────────
+    const broadcastGrup = async (teks) => {
+    const groups = Object.keys(await conn.groupFetchAllParticipating());
+    for (const id of groups) {
+        await conn.sendMessage(id, {
+            text: teks,
+            contextInfo: {
+                forwardingScore: 999,
+                isForwarded: true,
+                forwardedNewsletterMessageInfo: {
+                    newsletterJid: global.idch,
+                    serverMessageId: 143,
+                    newsletterName: `${global.namech}`
                 }
-            };
-
-
-
-// --- [8. JADWAL PENGINGAT ] ---
-
-            cron.schedule('0 0 21 * * *', () => {
-                broadcastGrup(`╭━━〔 ⛩️ *𝙽𝙸𝙶𝙷𝚃𝚈 𝚁𝙴𝙼𝙸𝙽𝙳𝙴𝚁* ⛩️ 〕━━┓\n┃ 🏮 Udah jam 9 malam uy!\n┃ 💤 Waktunya turu biar besok\n┃ ✨ Badan-nya tetep seger.\n┗━━━━━━━━━━━━━━━┛\n\n_Lanjut besok lagi ya... ✨_`);
-            }, { timezone: "Asia/Jakarta" });
-
-cron.schedule('0 0 6 * * *', () => {
-    broadcastGrup(`╭━━〔 ⛩️ *Selamat Pagi* ⛩️ 〕━━┓\n┃ 😼 Udah pagi aja nih, udh sarapan belom?\n┗━━━━━━━━━━━━━━━━┛\n\n_Tetap semangat demi masa depan yang cerah..✨_`);
-}, { timezone: "Asia/Jakarta" });
-    
-cron.schedule('0 0 0 * * *', async () => {
-    let now = Date.now();
-    let chats = global.db.data.chats;
-    for (let jid in chats) {
-        if (chats[jid].expired && now > chats[jid].expired) {
-            let caption = `╭━━〔 ⛩️ *𝚂𝙴𝚆𝙰 𝙴𝚇𝙿𝙸𝚁𝙴𝙳* ⛩️ 〕━━┓\n┃ 🏮 Masa sewa grup ini telah habis!\n┃ 🚀 Saatnya Euphy pamit undur diri.\n┗━━━━━━━━━━━━━━┛\n\n_Hubungi Owner untuk perpanjang!_`;
-            await conn.sendMessage(jid, { text: caption });
-            await conn.groupLeave(jid); 
-            chats[jid].expired = 0; 
-        }
+            }
+        });
     }
-}, { timezone: "Asia/Jakarta" });
+};
 
 
+    // ── [ 6.7. JADWAL PENGINGAT (CRON) ] ──────────
 
-// --- [9. SISTEM AUTO-CLEAN PREMIUM ] ---
-cron.schedule('0 * * * *', async () => {
-    let now = Date.now();
-    let users = global.db.data.users;
-    let count = 0;
+    // Malam — jam 21:00 WIB
+    cron.schedule('0 21 * * *', () => {
+        broadcastGrup(
+            `〔 ⛩️ Nighty Reminder 〕\n\n> Already 9 PM. Waktunya turu biar besok badan tetep seger. Lanjut besok lagi ya...`
+        );
+    }, { timezone: 'Asia/Jakarta' });
 
-    for (let jid in users) {
-        let user = users[jid];
-        if (user.premium && user.premiumTime > 0 && now >= user.premiumTime) {
-            user.premium = false;
-            user.premiumTime = 0;
-            count++;
-            
-            try {
-                await conn.sendMessage(jid, { 
-                    text: `*─── [ PREMIUM EXPIRED ] ───*\n\nMasa premium kamu sudah habis! 🌸\nTerima kasih sudah berlangganan. Hubungi owner untuk perpanjang ya!` 
+    // Pagi — jam 06:00 WIB
+    cron.schedule('0 6 * * *', () => {
+        broadcastGrup(
+            `〔 🏮 Morning Reminder 〕\n\n> Awali pagi dengan sarapan dan senyuman. Semoga harimu menyenangkan! Have a great day`
+        );
+    }, { timezone: 'Asia/Jakarta' });
+
+    cron.schedule('0 0 * * *', async () => {
+        const now   = Date.now();
+        const chats = global.db.data.chats;
+
+        for (const jid in chats) {
+            if (chats[jid].expired && now > chats[jid].expired) {
+                await conn.sendMessage(jid, {
+                    text: `〔 ⛩️ Sewa Expired 〕\n\n> Masa sewa grup ini telah habis, saatnya aku pamit undur diri. Hubungi owner untuk perpanjang ya!`
                 });
-            } catch (e) {
-                console.log(`Gagal kirim notif expired ke ${jid}`);
+                await conn.groupLeave(jid);
+                chats[jid].expired = 0;
             }
         }
-    }
-    if (count > 0) console.log(chalk.yellow(`[ SYSTEM ] Berhasil membersihkan ${count} user premium expired.`));
-}, { timezone: "Asia/Jakarta" });
+    }, { timezone: 'Asia/Jakarta' });
 
-        conn.ev.on("creds.update", saveCreds);
+    cron.schedule('0 * * * *', async () => {
+        const now   = Date.now();
+        const users = global.db.data.users;
+        let count   = 0;
 
+        for (const jid in users) {
+            const user = users[jid];
+            if (user.premium && user.premiumTime > 0 && now >= user.premiumTime) {
+                user.premium     = false;
+                user.premiumTime = 0;
+                count++;
 
-
-// --- [10. MESSAGE HANDLER & AUTO STATUS ] ---
-conn.ev.on("messages.upsert", async (chatUpdate) => {
-    try {
-        let m = chatUpdate.messages[0];
-        if (!m || !m.message) return;
-
-        m.chat = m.key.remoteJid || 'status@broadcast';
-        m.sender = m.key.participant || m.key.remoteJid;
-        m.isGroup = m.chat.endsWith('@g.us');
-        
-        if (m.message?.interactiveResponseMessage?.nativeFlowResponseMessage?.paramsJson) {
-            try {
-                let json = JSON.parse(m.message.interactiveResponseMessage.nativeFlowResponseMessage.paramsJson);
-                if (json.id) m.text = json.id;
-            } catch (e) {}
+                try {
+                    await conn.sendMessage(jid, {
+                        text: `*─── [ PREMIUM EXPIRED ] ───*\n\nMasa premium kamu sudah habis!\nTerima kasih sudah berlangganan.\nHubungi owner untuk perpanjang ya!`
+                    });
+                } catch {
+                    console.log(chalk.yellow(`[ PREMIUM ] Gagal kirim notif ke ${jid}`));
+                }
+            }
         }
-        if (!m.text) m.text = m.message?.conversation || m.message?.extendedTextMessage?.text || "";
 
-        await kuroyami.handleMessage(conn, m);
+        if (count > 0)
+            console.log(chalk.yellow(`[ PREMIUM ] ${count} user expired dibersihkan.`));
+    }, { timezone: 'Asia/Jakarta' });
 
-        const { handler } = require('./handler');
-        await handler.call(conn, chatUpdate);
 
-    } catch (e) {
-        console.log(chalk.red(`[ FATAL ERROR ] ${e.stack}`));
-    }
-});
+    // ── [ 6.8. MESSAGE HANDLER ] ──────────────────
+
+    conn.ev.on('messages.upsert', async (chatUpdate) => {
+        try {
+            let m = chatUpdate.messages[0];
+            if (!m?.message) return;
+
+            m.chat   = m.key.remoteJid || 'status@broadcast';
+            m.sender = m.key.participant || m.key.remoteJid;
+            m.isGroup = m.chat.endsWith('@g.us');
+
+            if (m.message?.interactiveResponseMessage?.nativeFlowResponseMessage?.paramsJson) {
+                try {
+                    const json = JSON.parse(
+                        m.message.interactiveResponseMessage.nativeFlowResponseMessage.paramsJson
+                    );
+                    if (json.id) m.text = json.id;
+                } catch {}
+            }
+
+            if (!m.text) {
+                m.text = m.message?.conversation
+                      || m.message?.extendedTextMessage?.text
+                      || '';
+            }
+
+            await kuroyami.handleMessage(conn, m);
+
+            const { handler } = require('./handler');
+            await handler.call(conn, chatUpdate);
+
+        } catch (e) {
+            console.log(chalk.red(`[ FATAL ] ${e.stack}`));
+        }
+    });
+
 }
+
+
+// ════════════════════════════════════════════════
+//  BOOT
+// ════════════════════════════════════════════════
 
 startEuphy();
