@@ -1,24 +1,21 @@
 {
   "name": "euphy-md",
   "version": "2.5",
-  "description": "WhatsApp Bot Multi-Device Optimized",
+  "description": "WhatsApp Bot Dependencies",
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
     "start": "node index.js"
   },
-  "keywords": [
-    "whatsapp-bot",
-    "baileys-md",
-    "euphy"
-  ],
-  "author": "IyuszTempest",
+  "keywords": [],
+  "author": "",
   "license": "MIT",
   "dependencies": {
     "@adiwajshing/keyed-db": "^0.2.4",
     "@google/generative-ai": "^0.24.1",
     "@hapi/boom": "^10.0.1",
     "@whiskeysockets/baileys": "^6.7.9",
+    "archiver": "^8.0.0",
     "axios": "^1.7.2",
     "cfonts": "^3.3.1",
     "chalk": "^4.1.2",
