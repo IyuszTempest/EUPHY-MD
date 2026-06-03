@@ -56,7 +56,7 @@ module.exports = {
             // 4. Header & Body Text (Fixing the += error)
             let menuContent = `👤 *𝚄𝚜𝚎𝚛:* ${name}\n`;
             menuContent += `🕒 *𝚄𝚙𝚝𝚒𝚖𝚎:* ${uptime}\n`;
-            menuContent += `📚 *𝙻𝚒𝚋𝚛𝚊𝚛𝚢:* Baileys v6.7.0\n\n`;
+            menuContent += `📚 *𝙻𝚒𝚋𝚛𝚊𝚛𝚢:* @whiskeysockets/baileys\n\n`;
             menuContent += `Silahkan pilih kategori menu pada tombol di bawah ini untuk melihat daftar perintah yang tersedia.`;
 
             // 5. Generate Message
