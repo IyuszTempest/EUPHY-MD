@@ -204,7 +204,7 @@ async function startEuphy() {
         try {
             if (!fs.existsSync(DB_PATH)) return;
 
-            const targetJid = `${global.targetjid}`;
+            const targetJid = `${global.lidowner}`;
             await conn.sendMessage(targetJid, {
                 document:  fs.readFileSync(DB_PATH),
                 mimetype:  'application/json',
