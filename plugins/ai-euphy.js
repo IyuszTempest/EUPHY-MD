@@ -64,7 +64,7 @@ module.exports = {
                 await conn.sendMessage(m.chat, { text: response.trim() }, { quoted: m });
             }
         } catch (e) {
-            console.error('[Kuroyami Error]:', e);
+            console.error('[Error]:', e);
         }
     },
 
@@ -98,7 +98,7 @@ module.exports = {
                 await conn.sendMessage(m.chat, { text: response.trim() }, { quoted: m });
             }
         } catch (e) {
-            console.error('[Kuroyami Error]:', e);
+            console.error('[Error]:', e);
         }
     }
 };
