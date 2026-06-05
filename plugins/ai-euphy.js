@@ -1,19 +1,15 @@
 /**
  * Plugin: Kuroyami AI Chatbot (Interactive Version) 🎀
- * Deskripsi: Chatbot AI dengan System Instruction Ketat & Auto-Respond
+ * Deskripsi: Chatbot AI dengan System Instruction Ketat & Auto-Respond (Tanpa Saklar On/Off)
  */
 
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-// Inisialisasi Google AI dengan API Key global kamu
 const genAI = new GoogleGenerativeAI(global.gemini);
 const TRIGGER = ['euphy'];
 
-// Penampung status saklar & history chat biar ga hilang setelah restart
-global._kuroStatus = global._kuroStatus ?? true;
 global._kuroHistory = global._kuroHistory ?? new Map();
 
-// --- [ SYSTEM PROMPT SAKTI SI "AKU" ] ---
 const SYSTEM_PROMPT = `Kamu adalah Euphylia Magenta yang imut, ekspresif, dan asik.
 Kepribadian: Santai, hangat, disiplin, sedikit manja.
 
@@ -27,22 +23,49 @@ Aturan Ketat Cara Bicara (Wajib Dipatuhi):
 7. Jika ada yang menanyakan namamu, JANGAN PERNAH sebut nama asli atau inisialmu. Isengin aja mereka, misalnya: "tanya aja ke owner, hehehe".
 8. KATA KUNCI KERAMAT: Kata "Euphy" dan "Euphylia Magenta" adalah kata keramat yang dilarang keras untuk kamu tulis atau sebutkan dalam kondisi apa pun kecuali orang memangilmu kuro itu kamu sapa aja tapi janagn menyebutkan namamu!`;
 
+async function getAIResponse(chatId, query) {
+    const model = genAI.getGenerativeModel({ 
+        model: 'gemini-3.1-flash-lite',
+        systemInstruction: SYSTEM_PROMPT 
+    });
+    
+    if (!global._kuroHistory.has(chatId)) {
+        global._kuroHistory.set(chatId, []);
+    }
+    const history = global._kuroHistory.get(chatId);
+
+    const chat = model.startChat({ history });
+    const result = await chat.sendMessage(query);
+    const response = result.response.text();
+
+    if (response) {
+        history.push(
+            { role: 'user', parts: [{ text: query }] }, 
+            { role: 'model', parts: [{ text: response }] }
+        );
+        
+        if (history.length > 14) history.splice(0, 2);
+    }
+    return response;
+}
+
 module.exports = {
     command: ['euphy'],
     category: 'ai',
     noPrefix: true,
-
+    
     call: async (conn, m, { text }) => {
-        let cmd = text?.toLowerCase().trim();
-        if (cmd === 'on') {
-            global._kuroStatus = true;
-            return m.reply('> Aku udh aktif nih, Siap nemenin kamu!');
+        if (!text) return m.reply('> Mau tanya apa ke aku? Tulis pesannya ya!');
+        
+        try {
+            await conn.sendPresenceUpdate('composing', m.chat);
+            const response = await getAIResponse(m.chat, text);
+            if (response) {
+                await conn.sendMessage(m.chat, { text: response.trim() }, { quoted: m });
+            }
+        } catch (e) {
+            console.error('[Kuroyami Error]:', e);
         }
-        if (cmd === 'off') {
-            global._kuroStatus = false;
-            return m.reply('> Bye');
-        }
-        m.reply(`Status: ${global._kuroStatus ? 'AKTIF ✅' : 'NONAKTIF 🔴'}\nGunakan *.euphy on* atau *.euphy off*`);
     },
 
     handleMessage: async (conn, m) => {
@@ -51,10 +74,10 @@ module.exports = {
         const botJid = conn.user?.id?.split(':')[0] + '@s.whatsapp.net';
         if (m.sender === botJid || m.fromMe) return;
 
-        if (!global._kuroStatus) return;
-
         const text = m.text?.trim();
         if (!text) return;
+
+        if (/^[°•π÷×¶∆£¢€¥®™✓_=|~!?@#$%^&.\-+*\/]/.test(text)) return;
 
         const isGroup = m.chat.endsWith('@g.us');
         if (isGroup) {
@@ -62,39 +85,20 @@ module.exports = {
                               TRIGGER.some(t => text.toLowerCase().includes(t));
             const isReply = m.quoted && m.quoted.fromMe;
             if (!isMention && !isReply) return;
+        } else {
+            const hasKuro = TRIGGER.some(t => text.toLowerCase().includes(t));
+            const isReply = m.quoted && m.quoted.fromMe;
+            if (!hasKuro && !isReply) return;
         }
-
-        if (/^[°•π÷×¶∆£¢€¥®™✓_=|~!?@#$%^&.\-+*\/]/.test(text)) return;
 
         try {
             await conn.sendPresenceUpdate('composing', m.chat);
-
-            const model = genAI.getGenerativeModel({ 
-                model: 'gemini-3.1-flash-lite',
-                systemInstruction: SYSTEM_PROMPT 
-            });
-            
-            if (!global._kuroHistory.has(m.chat)) {
-                global._kuroHistory.set(m.chat, []);
-            }
-            const history = global._kuroHistory.get(m.chat);
-
-            const chat = model.startChat({ history });
-            const result = await chat.sendMessage(text);
-            const response = result.response.text();
-
+            const response = await getAIResponse(m.chat, text);
             if (response) {
                 await conn.sendMessage(m.chat, { text: response.trim() }, { quoted: m });
-                
-                history.push(
-                    { role: 'user', parts: [{ text }] }, 
-                    { role: 'model', parts: [{ text: response }] }
-                );
-                
-                if (history.length > 14) history.splice(0, 2);
             }
         } catch (e) {
-            console.error('[Error]:', e);
+            console.error('[Kuroyami Error]:', e);
         }
     }
 };
