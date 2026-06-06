@@ -37,14 +37,12 @@ module.exports = {
     call: async (conn, m, { usedPrefix: _p, command, text }) => {
         try {
             let user = global.db.data.users[m.sender];
-            if (!user) return m.reply("Yus-senpai, kamu belum terdaftar di database! Hubungi owner atau ketik pendaftaran dulu ya~ 🥺");
+            if (!user) return m.reply("> kamu belum terdaftar di database! Hubungi owner atau ketik pendaftaran dulu ya~ 🥺");
 
-            // --- INISIALISASI DATABASE SAWIT ---
             if (typeof user.sawit === 'undefined') user.sawit = 0;
             if (typeof user.hasil_panen === 'undefined') user.hasil_panen = 0;
             if (typeof user.last_panen === 'undefined') user.last_panen = 0;
-            
-            // Level Alat (Default Level 1 / index 0)
+
             if (typeof user.sawit_egrek === 'undefined') user.sawit_egrek = 1;
             if (typeof user.sawit_pupuk === 'undefined') user.sawit_pupuk = 1;
             if (typeof user.sawit_truk === 'undefined') user.sawit_truk = 1;
@@ -58,13 +56,11 @@ module.exports = {
             const sendSawitDashboard = async () => {
                 await conn.sendMessage(m.chat, { react: { text: "🌴", key: m.key } });
 
-                // Ambil info tier saat ini
                 const egrekInfo = TIERS.egrek[user.sawit_egrek - 1] || TIERS.egrek[0];
                 const pupukInfo = TIERS.pupuk[user.sawit_pupuk - 1] || TIERS.pupuk[0];
                 const trukInfo = TIERS.truk[user.sawit_truk - 1] || TIERS.truk[0];
 
-                let desc = `🌸 *𝙾𝚗𝚒𝚒-𝚌𝚑𝚊𝚗, 𝙹𝚞𝚛𝚊𝚐𝚊𝚗 𝚂𝚊𝚠𝚒𝚝 𝚂𝚢𝚜𝚝𝚎𝚖 𝚁𝚎𝚊𝚍𝚢!* 🌸\n\n`;
-                desc += `👤 *𝙺𝚎𝚋𝚞𝚗 𝙼𝚒𝚕𝚒𝚔:* @${m.sender.split('@')[0]}\n`;
+                let desc = `👤 *𝙺𝚎𝚋𝚞𝚗 𝙼𝚒𝚕𝚒𝚔:* @${m.sender.split('@')[0]}\n`;
                 desc += `💰 *𝚄𝚊𝚗𝚐 𝚃𝚞𝚗𝚊𝚒:* Rp${(user.money || 0).toLocaleString()}\n\n`;
                 desc += `📊 *𝙻𝙾𝙶𝙸𝚂𝚃𝙸𝙺 𝙻𝙰𝙷𝙰𝙽:*\n`;
                 desc += `🌴 *𝚃𝚘𝚝𝚊𝚕 𝙿𝚘𝚑𝚘𝚗:* ${user.sawit} Pohon\n`;
@@ -93,14 +89,14 @@ module.exports = {
                         id: `${_p}sawit tanam 1`
                     },
                     {
-                        title: '🌱 Tanam 10 Pohon (Rp700.000)',
-                        description: 'Paket ekspansi sedang lahan kelapa sawit',
-                        id: `${_p}sawit tanam 10`
-                    },
-                    {
                         title: '🌱 Tanam 50 Pohon (Rp3.500.000)',
                         description: 'Skala industrialisasi kebun sawit Onii-chan!',
                         id: `${_p}sawit tanam 50`
+                    },
+                    {
+                        title: '🌱 Tanam 430 Pohon (Rp30.000.000)',
+                        description: 'Paket ekspansi sedang lahan kelapa sawit',
+                        id: `${_p}sawit tanam 430`
                     },
                     {
                         title: '🛠️ Upgrade Egrek (Alat Panen)',
@@ -144,9 +140,9 @@ module.exports = {
                                 },
                                 interactiveMessage: proto.Message.InteractiveMessage.create({
                                     header: proto.Message.InteractiveMessage.Header.create({
-                                        title: '🌴 JURAGAN SAWIT SIMULATOR v2.0 🌴',
+                                        title: '🌴 JURAGAN SAWIT SIMULATOR 🌴',
                                         hasMediaAttachment: true,
-                                        ...(await prepareWAMessageMedia({ image: { url: global.imgall || 'https://i.pinimg.com/originals/f1/b9/d7/f1b9d702bae9274340cb7e9534233d32.jpg' } }, { upload: conn.waUploadToServer }))
+                                        ...(await prepareWAMessageMedia({ image: { url: global.imgall } }, { upload: conn.waUploadToServer }))
                                     }),
                                     body: proto.Message.InteractiveMessage.Body.create({
                                         text: desc
@@ -198,27 +194,26 @@ module.exports = {
             //  ROUTING AKSI GAMEPLAY
             // ════════════════════════════════════════════════════
             
-            // 1. TANAM SAWIT
             if (action === 'tanam') {
                 const hargaBibit = 70000;
                 let jumlah = parseInt(args[1]) || 1;
-                if (jumlah < 1) return m.reply('❌ Onii-chan, jumlah pohon yang ditanam minimal 1!');
+                if (jumlah < 1) return m.reply('> Jumlah pohon yang ditanam minimal 1!');
                 
                 const totalHarga = hargaBibit * jumlah;
                 if (user.money < totalHarga) {
-                    return m.reply(`❌ Uang tidak cukup! Untuk ekspansi ${jumlah} pohon, kamu butuh Rp${totalHarga.toLocaleString()}.\n💰 Saldo kamu saat ini: Rp${user.money.toLocaleString()}`);
+                    return m.reply(`> Uang tidak cukup! Untuk ekspansi ${jumlah} pohon, kamu butuh Rp${totalHarga.toLocaleString()}.\n💰 Saldo kamu saat ini: Rp${user.money.toLocaleString()}`);
                 }
 
                 user.money -= totalHarga;
                 user.sawit += jumlah;
                 global.db.data.users[m.sender] = user;
 
-                return m.reply(`🌱 *Eks can, Penanaman Sukses!* 🌱\n\n┃ 🚜 *Ekspansi Lahan:* +${jumlah} Pohon\n┃ 💸 *Total Biaya:* Rp${totalHarga.toLocaleString()}\n┃ 🌴 *Total Sawit:* ${user.sawit} Pohon\n┃ 💰 *Sisa Saldo:* Rp${user.money.toLocaleString()}\n\n_Semoga tumbuh subur dan melimpah ya, Onii-chan!_ ✨`);
+                return m.reply(`🌱 *Eks, Penanaman Sukses!* 🌱\n\n┃ 🚜 *Ekspansi Lahan:* +${jumlah} Pohon\n┃ 💸 *Total Biaya:* Rp${totalHarga.toLocaleString()}\n┃ 🌴 *Total Sawit:* ${user.sawit} Pohon\n┃ 💰 *Sisa Saldo:* Rp${user.money.toLocaleString()}\n\n_Semoga tumbuh subur dan melimpah ya!_ ✨`);
             }
 
             // 2. PANEN SAWIT
             if (action === 'panen') {
-                if (user.sawit < 1) return m.reply("❌ Onii-chan belum punya pohon sawit! Tanam dulu gih lewat tombol di bawah. 🥺");
+                if (user.sawit < 1) return m.reply("> belum punya pohon sawit! Tanam dulu gih lewat tombol di bawah. 🥺");
                 
                 // Kalkulasi cooldown pupuk
                 const baseCooldown = 3600000; // 1 Jam default
@@ -259,7 +254,7 @@ module.exports = {
 
             // 3. JUAL SAWIT
             if (action === 'jual') {
-                if (user.hasil_panen < 50) return m.reply("❌ Gudang masih kosong, Onii-chan! Minimal kumpulkan 50 Kg TBS dulu baru bisa diangkut truk ke pabrik pengepul! 🚛");
+                if (user.hasil_panen < 50) return m.reply("> Gudang masih kosong! Minimal kumpulkan 50 Kg TBS dulu baru bisa diangkut truk ke pabrik pengepul! 🚛");
 
                 const baseHarga = Math.floor(Math.random() * 500) + 2200; // Rp2.200 - Rp2.700
                 const trukInfo = TIERS.truk[user.sawit_truk - 1] || TIERS.truk[0];
@@ -283,36 +278,34 @@ module.exports = {
                 if (bonusTruk > 0) nota += `⚡ *Bonus Truk (${trukInfo.name}):* +Rp${bonusTruk.toLocaleString()}\n`;
                 nota += `💰 *Dana Cair:* *Rp${totalCair.toLocaleString()}*\n\n`;
                 nota += `━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-                nota += `_Duit sawit sudah ditransfer ke saldo utama kamu! Beliin aku merchan anime ya Onii-chan!_ 😉👑`;
+                nota += `_Duit sawit sudah ditransfer ke saldo utama kamu! Beliin aku merchan anime ya!_ 😉👑`;
 
                 return conn.sendMessage(m.chat, { text: nota, edit: key });
             }
 
-            // 4. UPGRADE PERALATAN
             if (action === 'upgrade') {
                 const item = args[1];
-                if (!['egrek', 'pupuk', 'truk'].includes(item)) return m.reply('❌ Pilih item upgrade yang valid: `egrek`, `pupuk`, atau `truk`!');
+                if (!['egrek', 'pupuk', 'truk'].includes(item)) return m.reply('> Pilih item upgrade yang valid: `egrek`, `pupuk`, atau `truk`!');
 
                 const currentLevel = user[`sawit_${item}`];
                 const tierList = TIERS[item];
 
                 if (currentLevel >= tierList.length) {
-                    return m.reply(`❌ *Peralatan Maksimal!* \n${item.toUpperCase()} Onii-chan sudah mencapai tingkat kejayaan tertinggi: *${tierList[currentLevel - 1].name}*! 👑💎`);
+                    return m.reply(`*Peralatan Maksimal!* \n${item.toUpperCase()} Kamu sudah mencapai tingkat kejayaan tertinggi: *${tierList[currentLevel - 1].name}*! 👑💎`);
                 }
 
                 const nextTier = tierList[currentLevel];
                 if (user.money < nextTier.price) {
-                    return m.reply(`❌ Saldo tidak cukup untuk upgrade! \n🛒 *Upgrade:* ${tierList[currentLevel - 1].name} ➡️ *${nextTier.name}*\n💸 *Biaya:* Rp${nextTier.price.toLocaleString()}\n💰 Saldo kamu saat ini: Rp${user.money.toLocaleString()}`);
+                    return m.reply(`Saldo tidak cukup untuk upgrade! \n🛒 *Upgrade:* ${tierList[currentLevel - 1].name} ➡️ *${nextTier.name}*\n💸 *Biaya:* Rp${nextTier.price.toLocaleString()}\n💰 Saldo kamu saat ini: Rp${user.money.toLocaleString()}`);
                 }
 
                 user.money -= nextTier.price;
                 user[`sawit_${item}`] += 1;
                 global.db.data.users[m.sender] = user;
 
-                return m.reply(`🛠️ *UPGRADE PERALATAN SUKSES!* 🛠️\n\n┃ 🔧 *Item:* ${item.toUpperCase()}\n┃ 📈 *Tingkat Baru:* *${nextTier.name}*\n┃ 💸 *Biaya Upgrade:* Rp${nextTier.price.toLocaleString()}\n┃ 💰 *Sisa Saldo:* Rp${user.money.toLocaleString()}\n\n_Sekarang efisiensi kerja kebun Onii-chan naik berkali-kali lipat! 🔥_`);
+                return m.reply(`*UPGRADE PERALATAN SUKSES!*\n\n┃ 🔧 *Item:* ${item.toUpperCase()}\n┃ 📈 *Tingkat Baru:* *${nextTier.name}*\n┃ 💸 *Biaya Upgrade:* Rp${nextTier.price.toLocaleString()}\n┃ 💰 *Sisa Saldo:* Rp${user.money.toLocaleString()}\n\n_Sekarang efisiensi kerja kebun kamu naik berkali-kali lipat! 🔥_`);
             }
 
-            // 5. LEADERBOARD JURAGAN SAWIT
             if (action === 'leaderboard' || action === 'lb') {
                 const users = global.db.data.users;
                 const sorted = Object.entries(users)
@@ -330,12 +323,11 @@ module.exports = {
                     lbText += `   ┃ 🌴 *Lahan:* ${u.sawit} Pohon\n\n`;
                 });
 
-                lbText += `_Ayo Onii-chan, kerja keras lagi biar namamu nampang di atas!_ 🔥🪓`;
+                lbText += `_Ayo, kerja keras lagi biar namamu nampang di atas!_ 🔥🪓`;
 
                 return conn.sendMessage(m.chat, { text: lbText, mentions: sorted.map(u => u.jid) });
             }
 
-            // DEFAULT: Tampilkan Dashboard Utama
             await sendSawitDashboard();
 
         } catch (e) {
