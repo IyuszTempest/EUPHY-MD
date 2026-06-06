@@ -17,6 +17,11 @@ const cron     = require('node-cron');
 const https    = require('https');
 const { exec } = require('child_process');
 
+let gradient = require('gradient-string');
+if (gradient && gradient.default) {
+    gradient = gradient.default;
+}
+
 require('./config');
 
 const { smsg, makeWASocket } = require('./lib/simple');
@@ -24,61 +29,71 @@ const { uploadImage }        = require('./lib/uploadImage');
 
 global.uploadImage = uploadImage;
 
+
+
+
 // ════════════════════════════════════════════════════
-//  LOGGER (Minimalist & Aesthetic Synthwave Theme)
+//  LOGGER (Ultra Aesthetic Anime & Synthwave Theme)
 // ════════════════════════════════════════════════════
 
+// Gradasi warna kustom bergaya Vaporwave & Cyberpunk
+const pinkBlue  = gradient('#ff79c6', '#8be9fd');
+const cyanNeon  = gradient('#00f2fe', '#4facfe');
+const sakura    = gradient('#ff9a9e', '#fecfef');
+const fireglow  = gradient('#ff8c42', '#ff3e3e');
+const toxicLime = gradient('#00ff87', '#60efff');
+
 const BADGES = {
-    SYSTEM:  chalk.bgHex('#1a1a2e').hex('#00ffcc').bold('  SYS   '),
-    INFO:    chalk.bgHex('#1a1a2e').hex('#61afef').bold('  INFO  '),
-    WARN:    chalk.bgHex('#1a1a2e').hex('#e5c07b').bold('  WARN  '),
-    ERROR:   chalk.bgHex('#1a1a2e').hex('#e06c75').bold('  ERR   '),
-    PLUGIN:  chalk.bgHex('#1a1a2e').hex('#c678dd').bold(' PLUGIN '),
-    CRON:    chalk.bgHex('#1a1a2e').hex('#ff8c42').bold('  CRON  '),
-    DB:      chalk.bgHex('#1a1a2e').hex('#56b6c2').bold('   DB   '),
-    BACKUP:  chalk.bgHex('#1a1a2e').hex('#e5c07b').bold(' BACKUP '),
-    SESSION: chalk.bgHex('#1a1a2e').hex('#ff79c6').bold('  SESS  '),
-    CONN:    chalk.bgHex('#1a1a2e').hex('#98c379').bold('  CONN  '),
-    GROUP:   chalk.bgHex('#1a1a2e').hex('#61afef').bold(' GROUP  '),
-    MSG:     chalk.bgHex('#1a1a2e').hex('#d19a66').bold('  MSG   '),
+    SYSTEM:  ` ${chalk.hex('#00ffcc')('⧉')} ${chalk.hex('#00ffcc').bold('SYSTEM')}  `,
+    INFO:    ` ${chalk.hex('#61afef')('✦')} ${chalk.hex('#61afef').bold('INFO')}    `,
+    WARN:    ` ${chalk.hex('#e5c07b')('⚠️')} ${chalk.hex('#e5c07b').bold('WARNING')} `,
+    ERROR:   ` ${chalk.hex('#e06c75')('🚨')} ${chalk.hex('#e06c75').bold('ERROR')}   `,
+    PLUGIN:  ` ${chalk.hex('#c678dd')('⚙')} ${chalk.hex('#c678dd').bold('PLUGIN')}  `,
+    CRON:    ` ${chalk.hex('#ff8c42')('⏰')} ${chalk.hex('#ff8c42').bold('SCHED')}   `,
+    DB:      ` ${chalk.hex('#56b6c2')('🗄')} ${chalk.hex('#56b6c2').bold('DATABASE')}`,
+    BACKUP:  ` ${chalk.hex('#e5c07b')('💾')} ${chalk.hex('#e5c07b').bold('BACKUP')}  `,
+    SESSION: ` ${chalk.hex('#ff79c6')('🔑')} ${chalk.hex('#ff79c6').bold('SESSION')} `,
+    CONN:    ` ${chalk.hex('#98c379')('📡')} ${chalk.hex('#98c379').bold('CONNECT')} `,
+    GROUP:   ` ${chalk.hex('#61afef')('👥')} ${chalk.hex('#61afef').bold('GROUP')}   `,
+    MSG:     ` ${chalk.hex('#d19a66')('💬')} ${chalk.hex('#d19a66').bold('MESSAGE')} `,
 };
 
 const dim  = (t) => chalk.hex('#555555')(t);
 const bold = (t) => chalk.bold(t);
-
-const cyanNeon    = chalk.hex('#00ffcc');
-const purpleDim   = chalk.hex('#3d3d5c');
-const purpleMuted = chalk.hex('#2a2a4a');
-const blueSoft    = chalk.hex('#61afef');
-const grayDim     = chalk.hex('#5c6370');
+const grayDim = chalk.hex('#3e4452');
 
 const log = (level, msg) => {
-    const badge = BADGES[level] ?? chalk.bgGray.white(` ${level.toUpperCase().padEnd(5)} `);
+    const badge = BADGES[level] ?? ` ${chalk.bgGray.white(` ${level.toUpperCase().padEnd(5)} `)} `;
     console.log(` ${badge} ${grayDim('│')} ${msg}`);
 };
 
-const divider = (char = '─', color = '#2a2a4a') => {
-    console.log(chalk.hex(color)(char.repeat(60)));
+const divider = (char = '─', gradientColors = ['#bd93f9', '#ff79c6']) => {
+    console.log(gradient(gradientColors)(char.repeat(68)));
 };
 
-const truncate = (str, max = 60) => {
+const truncate = (str, max = 50) => {
     if (!str) return '';
     return str.length > max ? str.slice(0, max - 3) + '...' : str;
 };
 
 const printBanner = () => {
     console.clear();
-    divider('─', '#1e1e3f');
-    console.log(cyanNeon([
-        '    ┌────────────────────────────────────────────────────┐',
-        '    │          ★   W A   B O T   S Y S T E M   ★          │',
-        '    │          v4.1  •  Efficient  •  Stable             │',
-        '    └────────────────────────────────────────────────────┘'
-    ].join('\n')));
+    const bannerGradient = gradient(['#ff79c6', '#8be9fd', '#50fa7b']);
+    const borderGradient = gradient(['#bd93f9', '#ff79c6']);
 
-    divider('─', '#1e1e3f');
+    console.log(borderGradient("╭────────────────────────────────────────────╮"));
+    console.log(bannerGradient("│  ██████╗██╗   ██╗██████╗ ██╗  ██╗██╗   ██╗ │"));
+    console.log(bannerGradient("│  ██╔═══╝██║   ██║██╔══██╗██║  ██║╚██╗ ██╔╝ │"));
+    console.log(bannerGradient("│  █████╗ ██║   ██║██████╔╝███████║ ╚████╔╝  │"));
+    console.log(bannerGradient("│  ██╔══╝ ██║   ██║██╔═══╝ ██╔══██║  ╚██╔╝   │"));
+    console.log(bannerGradient("│  ██████╗╚██████╔╝██║     ██║  ██║   ██║    │"));
+    console.log(bannerGradient("│  ╚═════╝ ╚═════╝ ╚═╝     ╚═╝  ╚═╝   ╚═╝    │"));
+    console.log(borderGradient("├────────────────────────────────────────────┤"));
+    console.log("│ " + chalk.hex('#00ffcc').bold('System version:') + " v3.3.0  " + grayDim('│') + "  " + chalk.hex('#ff79c6').bold('Theme:') + " Sakura Synthwave");
     console.log();
 };
+
+
 
 // ════════════════════════════════════════════════════
 //  DIRS
@@ -92,6 +107,9 @@ for (const dir of ['tmp', 'plugins', 'session', 'backups']) {
     }
 }
 
+
+
+
 // ════════════════════════════════════════════════════
 //  EXPRESS
 // ════════════════════════════════════════════════════
@@ -101,6 +119,9 @@ const PORT = process.env.PORT || 3000;
 
 app.get('/', (_req, res) => res.json({ status: 'online', bot: 'Active', version: 'v4.1', uptime: process.uptime().toFixed(0) + 's' }));
 app.listen(PORT, () => log('SYSTEM', 'Express server aktif di port ' + bold(PORT)));
+
+
+
 
 // ════════════════════════════════════════════════════
 //  DATABASE
@@ -137,6 +158,9 @@ const saveDatabase = () => {
 loadDatabase();
 setInterval(saveDatabase, 30_000);
 
+
+
+
 // ════════════════════════════════════════════════════
 //  WHATSAPP OWNER BACKUP (TAR.GZ to global.lidowner)
 // ════════════════════════════════════════════════════
@@ -168,7 +192,7 @@ const runBackup = async (conn) => {
         const zipName = 'backup-sc-' + stamp + '.tar.gz';
         const zipPath = path.join(__dirname, 'backups', zipName);
 
-        const cmd = `tar --exclude='node_modules' --exclude='session' --exclude='backups' --exclude='.git' -czf "${zipPath}" -C "${__dirname}" .`;
+        const cmd = `tar --exclude='node_modules' --exclude='session' --exclude='backups' --exclude='tmp' --exclude='.git' -czf "${zipPath}" -C "${__dirname}" .`;
 
         exec(cmd, async (err) => {
             if (err) {
@@ -217,6 +241,9 @@ const runBackup = async (conn) => {
     }
 };
 
+
+
+
 // ════════════════════════════════════════════════════
 //  SESSION CLEANER
 // ════════════════════════════════════════════════════
@@ -251,6 +278,9 @@ const cleanSession = () => {
     }
 };
 
+
+
+
 // ════════════════════════════════════════════════════
 //  HELPER
 // ════════════════════════════════════════════════════
@@ -261,6 +291,9 @@ const question = (text) =>
         rl.question(text, (ans) => { rl.close(); resolve(ans); });
     });
 
+
+
+
 // ════════════════════════════════════════════════════
 //  MAIN
 // ════════════════════════════════════════════════════
@@ -270,7 +303,7 @@ async function startBot() {
     const { state, saveCreds } = await useMultiFileAuthState('session');
     const { version }          = await fetchLatestBaileysVersion();
 
-    log('INFO', 'Baileys ' + bold(version.join('.')));
+    log('INFO', 'Baileys engine version ' + bold(version.join('.')));
 
     const conn = makeWASocket({
         version,
@@ -284,6 +317,7 @@ async function startBot() {
         retryRequestDelayMs:   2_000
     });
 
+    
     // Plugin Loader
     global.plugins = {};
     const pluginsDir = path.join(__dirname, 'plugins');
@@ -314,26 +348,33 @@ async function startBot() {
         }
     });
 
+    
     // Pairing
     if (!conn.authState.creds.registered) {
-        divider('-', '#2a2a4a');
+        divider('─', ['#bd93f9', '#ff79c6']);
         log('SYSTEM', 'Sesi belum terdaftar, mulai pairing...');
         console.log('\n   ' + chalk.hex('#e5c07b')('Masukkan nomor WhatsApp') + ' ' + dim('(contoh: 628xxx)'));
         const phoneNumber = (await question('   ' + chalk.hex('#00ffcc')('> '))).replace(/\D/g, '');
 
         setTimeout(async () => {
             try {
-                const raw  = await conn.requestPairingCode(phoneNumber, 'BOTSYSTEM');
+                const raw  = await conn.requestPairingCode(phoneNumber, 'EUPHYMGTA');
                 const code = raw && raw.match(/.{1,4}/g) ? raw.match(/.{1,4}/g).join('-') : raw;
-                divider('-', '#2a2a4a');
-                console.log('\n   ' + chalk.bgHex('#00ffcc').black(' PAIRING CODE ') + '  ' + chalk.bgWhite.black(' ' + code + ' ') + '\n');
-                divider('-', '#2a2a4a');
+                
+                console.log('\n' + cyanNeon.bold('   ┏━━━━━━━━━━━━━━━ PAIRING CODE ━━━━━━━━━━━━━━━┓'));
+                console.log('   ┃                                            ┃');
+                console.log(`   ┃              ${chalk.bgHex('#1a1a2e').hex('#ff79c6').bold(' ' + code + ' ')}              ┃`);
+                console.log('   ┃                                            ┃');
+                console.log(cyanNeon.bold('   ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛') + '\n');
+                
+                divider('─', ['#00f2fe', '#4facfe']);
             } catch (e) {
                 log('ERROR', 'Pairing gagal: ' + e.message);
             }
         }, 3000);
     }
 
+    
     // Connection Handler
     let reconnectCount = 0;
 
@@ -355,29 +396,29 @@ async function startBot() {
             setTimeout(() => startBot(), delay);
 
         } else if (connection === 'connecting') {
-            log('CONN', 'Menghubungkan...');
+            log('CONN', 'Menghubungkan ke server WhatsApp...');
 
         } else if (connection === 'open') {
             reconnectCount = 0;
             const name = (conn.user && conn.user.name) || (conn.user && conn.user.id && conn.user.id.split(':')[0]) || '—';
             const jid  = (conn.user && conn.user.id)   || '—';
             
-            divider('=', '#1e1e3f');
-            console.log(chalk.hex('#98c379').bold([
-                '',
+            console.log();
+            divider('═', ['#00ff87', '#60efff']);
+            console.log(toxicLime.bold([
                 '    ┌──────────────────────────────────────────────────────┐',
                 '    │  [OK] TERHUBUNG : ' + name.padEnd(35) + '│',
                 '    │  [JID] ' + jid.padEnd(46) + '│',
-                '    └──────────────────────────────────────────────────────┘',
-                ''
+                '    └──────────────────────────────────────────────────────┘'
             ].join('\n')));
-            divider('=', '#1e1e3f');
+            divider('═', ['#00ff87', '#60efff']);
             console.log();
         }
     });
 
     conn.ev.on('creds.update', saveCreds);
 
+    
     // Group Welcome / Goodbye
     conn.ev.on('group-participants.update', async ({ id, participants, action }) => {
         try {
@@ -449,6 +490,9 @@ async function startBot() {
         }
     };
 
+
+
+
     // ── CRON JOBS ──────────────────────────────────────────────
 
     // Backup source code tiap 1 jam (Mengirim ke Owner WA via LID)
@@ -517,6 +561,8 @@ async function startBot() {
         log('DB', 'Auto-save ' + dim('-- ' + u + ' users, ' + c + ' chats'));
     }, { timezone: 'Asia/Jakarta' });
 
+
+    
     // ── MESSAGE HANDLER ────────────────────────────────────────
 
     conn.ev.on('messages.upsert', async (chatUpdate) => {
@@ -547,7 +593,7 @@ async function startBot() {
                 const chatTag = m.isGroup
                     ? dim('[grp:' + m.chat.split('@')[0] + ']')
                     : dim('[dm]');
-                const preview = truncate(m.text, 55);
+                const preview = truncate(m.text, 40);
                 log('MSG', chalk.hex('#d19a66')(sender) + ' ' + chatTag + ' ' + dim('->') + ' ' + preview);
             }
 
@@ -559,8 +605,8 @@ async function startBot() {
         }
     });
 
-    log('SYSTEM', 'Bot siap -- menunggu koneksi...');
-    divider('-', '#2a2a4a');
+    log('SYSTEM', 'Bot siap dan aktif -- menunggu koneksi...');
+    divider('─', ['#bd93f9', '#ff79c6']);
     console.log();
 }
 
