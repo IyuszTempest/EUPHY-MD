@@ -17,7 +17,7 @@
 ## 🌸 Overview
 **Euphylia Magenta** (Euphy) adalah bot WhatsApp berbasis Node.js yang dikembangkan dari **Base Botcahx** dan dioptimasi secara mendalam oleh **IyuszTempest**. Versi V2.5 ini fokus pada efisiensi penggunaan sumber daya (RAM Monitoring) dan integrasi **Dual-ID System (JID & LID)**.
 
-## 🚀 Fitur Unggulan (V2.0 Update)
+## 🚀 Fitur Unggulan (V2.5 Update)
 
 * 🔄 **Auto-Reload Plugins:** Sistem deteksi file otomatis (`fs.watch`) yang memungkinkan update fitur tanpa perlu restart bot.
 * 🎞️ **Optimized Sticker:** Mesin pengolah stiker video dengan *Hard Compression* (< 1MB) untuk menjamin stabilitas pengiriman.
@@ -30,9 +30,8 @@
 
 > [!NOTE]
 > - Proyek ini sekarang dioptimasi untuk dijalankan pada **Environment Laptop/PC** untuk performa FFmpeg yang maksimal.
-> - Gunakan **npm install --legacy-peer-deps --production** untuk menginstall modul.
+> - Gunakan **npm install --legacy-peer-deps --production** untuk menginstall modul jika gagal menginstall.
 
 ### Prasyarat Sistem
-- **Node.js:** wajib node 22 agar stabil
 - **FFmpeg:** Terinstall secara global (untuk proses stiker & converter)
 - **RAM:** Minimal 1GB (Disarankan, meskipun bot berjalan stabil di resource rendah)
