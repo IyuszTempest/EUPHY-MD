@@ -33,7 +33,7 @@ global.wm = '© Euphylia Magenta';
 global.imgall = 'https://cdn.rafled.com/anime-icons/images/671ffdc4d51f91f0f3be809b6a38bb78597c77f539737c8e22efcd633f9c48ec.jpg';
 global.imgreply = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXHFJP9VXUiUz_U1QVB_9ZLyYDGQ5flkJXBFTOoSaDOaIgkv5X3I8nyxo&s=10';
 global.imgpagi = 'https://i.pinimg.com/736x/8c/ee/3f/8cee3f659c5881b8695ac4ca30cd2ba7.jpg';
-global.imgmalam - 'https://i.pinimg.com/736x/6c/5d/8e/6c5d8e3a34c98479a4f6f0e3b585c6f0.jpg';
+global.imgmalam = 'https://i.pinimg.com/736x/6c/5d/8e/6c5d8e3a34c98479a4f6f0e3b585c6f0.jpg';
 global.qris = 'https://i.postimg.cc/50yLyRSb/1773194117754.png';
 global.adReply = {
     title: 'Euphylia Magenta',
