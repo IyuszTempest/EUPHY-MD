@@ -99,6 +99,16 @@ module.exports = {
                         id: `${_p}sawit tanam 430`
                     },
                     {
+                        title: '🌱 Tanam 2500 Pohon (Rp175.000.000)',
+                        description: 'Paket ekspansi sedang lahan kelapa sawit',
+                        id: `${_p}sawit tanam 2500`
+                    },
+                    {
+                        title: '🌱 Tanam 10000 Pohon (Rp7.000.000.000)',
+                        description: 'Paket ekspansi sedang lahan kelapa sawit',
+                        id: `${_p}sawit tanam 100000`
+                    },
+                    {
                         title: '🛠️ Upgrade Egrek (Alat Panen)',
                         description: 'Meningkatkan produktivitas panen per pohon',
                         id: `${_p}sawit upgrade egrek`
@@ -142,13 +152,13 @@ module.exports = {
                                     header: proto.Message.InteractiveMessage.Header.create({
                                         title: '🌴 JURAGAN SAWIT SIMULATOR 🌴',
                                         hasMediaAttachment: true,
-                                        ...(await prepareWAMessageMedia({ image: { url: global.imgall } }, { upload: conn.waUploadToServer }))
+                                        ...(await prepareWAMessageMedia({ image: { url: 'https://i.pinimg.com/236x/cf/8c/38/cf8c38cfc2aab7f70e96b0133c064bf4.jpg' } }, { upload: conn.waUploadToServer }))
                                     }),
                                     body: proto.Message.InteractiveMessage.Body.create({
                                         text: desc
                                     }),
                                     footer: proto.Message.InteractiveMessage.Footer.create({
-                                        text: global.wm || 'Euphy MD system'
+                                        text: global.wm
                                     }),
                                     nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
                                         messageVersion: 1,
@@ -164,7 +174,7 @@ module.exports = {
                                         forwardedNewsletterMessageInfo: {
                                             newsletterJid: global.idch,
                                             serverMessageId: 143,
-                                            newsletterName: `${global.namech} - Sistem Kebun Online`
+                                            newsletterName: `${global.namech} - PT. Indonesia Maju`
                                         }
                                     }
                                 })
