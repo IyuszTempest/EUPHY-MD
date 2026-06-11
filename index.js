@@ -358,14 +358,11 @@ async function startBot() {
 
         setTimeout(async () => {
             try {
-                const raw  = await conn.requestPairingCode(phoneNumber, 'EUPHYMGTA');
+                const raw  = await conn.requestPairingCode(phoneNumber, 'EUPYMGTA');
                 const code = raw && raw.match(/.{1,4}/g) ? raw.match(/.{1,4}/g).join('-') : raw;
                 
-                console.log('\n' + cyanNeon.bold('   ┏━━━━━━━━━━━━━━━ PAIRING CODE ━━━━━━━━━━━━━━━┓'));
-                console.log('   ┃                                            ┃');
-                console.log(`   ┃              ${chalk.bgHex('#1a1a2e').hex('#ff79c6').bold(' ' + code + ' ')}              ┃`);
-                console.log('   ┃                                            ┃');
-                console.log(cyanNeon.bold('   ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛') + '\n');
+                console.log('\n ┏━━━━━━━━━━━━━━━ PAIRING CODE ━━━━━━━━━━━━━━━┓');
+                console.log(`\n   ${chalk.bgHex('#1a1a2e').hex('#ff79c6').bold(' ' + code + ' ')}`);
                 
                 divider('─', ['#00f2fe', '#4facfe']);
             } catch (e) {
