@@ -192,7 +192,7 @@ const runBackup = async (conn) => {
         const zipName = 'backup-sc-' + stamp + '.tar.gz';
         const zipPath = path.join(__dirname, 'backups', zipName);
 
-        const cmd = `tar --exclude='node_modules' --exclude='session' --exclude='backups' --exclude='tmp' --exclude='.git' -czf "${zipPath}" -C "${__dirname}" .`;
+        const cmd = `tar --exclude='node_modules' --exclude='.npm' --exclude='session' --exclude='backups' --exclude='tmp' --exclude='.git' -czf "${zipPath}" -C "${__dirname}" .`;
 
         exec(cmd, async (err) => {
             if (err) {
