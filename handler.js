@@ -48,6 +48,7 @@ module.exports = {
                     }
                 }, { quoted: fkontak, ...options }); 
             };
+            if (m.sender == global.lidbot) return
 
 
 
