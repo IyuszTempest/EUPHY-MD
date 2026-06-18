@@ -14,7 +14,6 @@ global.targetjid = '6282255810534@s.whatsapp.net'
 global.nameowner = 'IyuszTempest';
 global.namebot = 'Bot Euphy';
 global.numberowner = '6282255810534';
-global.gemini = 'Isi Apikeynya' // dapetin https://aistudio.google.com
 global.wait = '_🌸 Sabar yah, lagi diproses..._';
 global.eror = '_🙄 Yah lagi error nih, coba lagi nanti_';
 global.packname = 'Euphylia Magenta';
@@ -22,6 +21,10 @@ global.author = 'By IyzTempest';
 global.waifufav = 'Euphylia Magenta';
 global.titleowner = 'Information Systems Student';
 global.orgowner = '日本人';
+
+// --- [ APIkey ] ---
+global.gemini = 'Isi Apikeynya'; // dapetin https://aistudio.google.com
+global.thrsevapi = 'Isi Apikeynya'; // https://api.theresav.biz.id
 
 // --- [ Settings Newsletter & Channel ] ---
 global.idch = '120363260084721539@newsletter'; // ID Saluran kamu
