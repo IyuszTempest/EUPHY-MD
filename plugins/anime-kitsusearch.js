@@ -39,7 +39,7 @@ const handleKitsuDetail = async (id) => {
 };
 
 module.exports = {
-    command: ['kitsu', 'anime', 'kitsuinfo'],
+    command: ['anime', 'kitsuinfo', 'kitsu'],
     category: 'anime',
     noPrefix: true, 
     call: async (conn, m, { text, command, usedPrefix: _p }) => {
