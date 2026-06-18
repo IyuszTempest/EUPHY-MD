@@ -53,7 +53,7 @@ const wangyImageUrls = [
 
 module.exports = {
     command: ['wangy'],
-    category: 'anime',
+    category: 'nsfw',
     premium: true,
     noPrefix: true,
     call: async (conn, m) => {
