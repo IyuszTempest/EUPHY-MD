@@ -14,10 +14,8 @@ module.exports = {
     noPrefix: true,
     call: async (conn, m, { usedPrefix, command }) => {
         const quoted = m.quoted ? m.quoted : m;
-
-        const mime = (quoted.msg || quoted).mimetype || '';
-        
-        const messageType = quoted.message ? Object.keys(quoted.message)[0] : m.mtype;
+        const msg = quoted.msg || quoted;
+        const mime = msg.mimetype || '';
 
         if (!/image\/(jpe?g|png)/i.test(mime)) {
             await conn.sendMessage(m.chat, { react: { text: '❗', key: m.key } });
@@ -27,17 +25,19 @@ module.exports = {
         try {
             await conn.sendMessage(m.chat, { react: { text: '⏳', key: m.key } });
 
-            const stream = await downloadContentFromMessage(
-                quoted.msg || quoted,
-                messageType.replace('Message', '')
-            );
-            
+            const mediaType = /image\/(jpe?g|png)/i.test(mime) ? 'image' : null;
+            if (!mediaType) throw new Error('Tipe media tidak didukung');
+
+            const stream = await downloadContentFromMessage(msg, mediaType);
+
             let media = Buffer.alloc(0);
             for await (const chunk of stream) {
                 media = Buffer.concat([media, chunk]);
             }
 
-            const ext = mime.split('/')[1] || 'jpg';
+            if (!media || media.length === 0) throw new Error('Gagal mengunduh media dari pesan.');
+
+            const ext = mime.split('/')[1]?.replace('jpeg', 'jpg') || 'jpg';
             const filename = `image_${Date.now()}.${ext}`;
 
             const form = new FormData();
