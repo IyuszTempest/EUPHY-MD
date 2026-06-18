@@ -19,7 +19,6 @@ module.exports = {
                 'main': 'MENU UTAMA',
                 'anime': 'MENU WIBU',
                 'ai': 'MENU AI',
-                'premium': 'MENU PREMIUM',
                 'downloader': 'MENU DOWNLOADER',
                 'economic': 'MENU EKONOMI GLOBAL', // <-- Sudah ditambahkan koma yang hilang!
                 'fun': 'MENU FUN',
