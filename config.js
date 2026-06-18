@@ -46,7 +46,8 @@ global.social = {
     instagram: 'https://instagram.com/iyusztempest',
     youtube: 'https://youtube.com/@iyusztempest',
     website: 'https://iyusztempest.my.id',
-    github: 'https://github.com/iyusztempest'
+    github: 'https://github.com/iyusztempest',
+    tiktok: 'https://tiktok.com/@yushima_fujiwara'
 }
 
 
