@@ -1,6 +1,6 @@
 {
   "name": "euphy-md",
-  "version": "3.3.0",
+  "version": "2.5",
   "description": "WhatsApp Bot Multi-Device Optimized",
   "main": "index.js",
   "type": "commonjs",
