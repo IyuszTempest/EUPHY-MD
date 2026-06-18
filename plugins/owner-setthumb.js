@@ -7,9 +7,6 @@ const fs = require('fs');
 const FormData = require('form-data');
 const axios = require('axios');
 
-/**
- * Fungsi upload untuk mendapatkan URL permanen
- */
 async function uploadToCDN(buffer) {
     try {
         const form = new FormData();
@@ -28,9 +25,6 @@ module.exports = {
     category: 'owner',
     noPrefix: true,
     call: async (conn, m, { usedPrefix, command }) => {
-        // Pengecekan status Owner
-        if (!m.isOwner) return m.reply("Fitur ini khusus Owner!");
-
         let q = m.quoted ? m.quoted : m;
         let mime = (q.msg || q).mimetype || '';
 
