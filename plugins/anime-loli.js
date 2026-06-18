@@ -7,7 +7,7 @@
 const fetch = require('node-fetch');
 
 module.exports = {
-    command: ['loli', 'rdloli', 'randomloli'],
+    command: ['loli'],
     category: 'anime',
     noPrefix: true,
     call: async (conn, m, { command }) => {
