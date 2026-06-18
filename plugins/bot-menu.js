@@ -21,7 +21,6 @@ module.exports = {
             const allTags = {
                 'anime': '🌸 Zona Wibu', 
                 'ai': '🤖 Menu AI',
-                'premium': '💎 Menu Premium',
                 'downloader': '📥 Menu Downloader',
                 'economic': '💵 Menu Ekonomi Global',
                 'fun': '😁 Menu Fun',
@@ -54,9 +53,9 @@ module.exports = {
             };
 
             // 4. Header & Body Text (Fixing the += error)
-            let menuContent = `👤 *𝚄𝚜𝚎𝚛:* ${name}\n`;
-            menuContent += `🕒 *𝚄𝚙𝚝𝚒𝚖𝚎:* ${uptime}\n`;
-            menuContent += `📚 *𝙻𝚒𝚋𝚛𝚊𝚛𝚢:* @whiskeysockets/baileys\n\n`;
+            let menuContent = `👤 *User:* ${name}\n`;
+            menuContent += `🕒 *Uptime:* ${uptime}\n`;
+            menuContent += `🔰 *App: WhatsApp*\n\n`;
             menuContent += `Silahkan pilih kategori menu pada tombol di bawah ini untuk melihat daftar perintah yang tersedia.`;
 
             // 5. Generate Message
