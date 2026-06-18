@@ -14,7 +14,6 @@ global.targetjid = '6282255810534@s.whatsapp.net'
 global.nameowner = 'IyuszTempest';
 global.namebot = 'Bot Euphy';
 global.numberowner = '6282255810534';
-global.apiyus = 'yusz123';
 global.gemini = 'Isi Apikeynya' // dapetin https://aistudio.google.com
 global.wait = '_🌸 Sabar yah, lagi diproses..._';
 global.eror = '_🙄 Yah lagi error nih, coba lagi nanti_';
