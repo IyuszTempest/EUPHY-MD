@@ -1,23 +1,23 @@
 <div align="center">
 
-# 🎭 Euphylia Magenta Script
-<img src="https://i.ibb.co/YF9vK9NK/IMG-20260218-WA0085.jpg" width="280" style="border-radius: 50%; box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);" alt="Euphylia Magenta">
+# 🥀 Euphylia Magenta Script
+<img src="https://i.pinimg.com/1200x/fb/a9/46/fba946ea023dce63516c370110263299.jpg" width="280" style="border-radius: 50%; box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);" alt="Euphylia Magenta">
 
 **Modern WhatsApp Bot Engine with Hybrid AI & High-Efficiency Tools**
 
-[![Node.js](https://img.shields.io/badge/Node.js-24+-68a063?style=for-the-badge&logo=nodedotjs)](https://nodejs.org)
-[![Library](https://img.shields.io/badge/Library-Baileys_Unofficial-00a884?style=for-the-badge&logo=whatsapp)](#)
-<img src="https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=for-the-badge" alt="Maintained">
-<img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="License MIT">
+[![Node.js](https://img.shields.io/badge/Node.js-24+-800000?style=for-the-badge&logo=nodedotjs)](https://nodejs.org)
+[![Library](https://img.shields.io/badge/Library-neodevxsadmd/baileys-800000?style=for-the-badge&logo=whatsapp)](#)
+<img src="https://img.shields.io/badge/Maintained%3F-yes-maroon.svg?style=for-the-badge" alt="Maintained">
+<img src="https://img.shields.io/badge/license-MIT-maroon.svg?style=for-the-badge" alt="License MIT">
 
 </div>
 
 ---
 
-## 🌸 Overview
+## 📌 Overview
 **Euphylia Magenta** (Euphy) adalah bot WhatsApp berbasis Node.js yang dikembangkan dari **Base Botcahx** dan dioptimasi secara mendalam oleh **IyuszTempest**. Versi V2.5 ini fokus pada efisiensi penggunaan sumber daya (RAM Monitoring) dan integrasi **Dual-ID System (JID & LID)**.
 
-## 🚀 Fitur Unggulan (V2.5 Update)
+## 🚩 Fitur Unggulan (V2.5 Update)
 
 * 🔄 **Auto-Reload Plugins:** Sistem deteksi file otomatis (`fs.watch`) yang memungkinkan update fitur tanpa perlu restart bot.
 * 🎞️ **Optimized Sticker:** Mesin pengolah stiker video dengan *Hard Compression* (< 1MB) untuk menjamin stabilitas pengiriman.
@@ -26,7 +26,7 @@
 
 ---
 
-## 🛠️ Requirements & Installation
+## 🚨 Requirements & Installation
 
 > [!NOTE]
 > - Proyek ini sekarang dioptimasi untuk dijalankan pada **Environment Laptop/PC** untuk performa FFmpeg yang maksimal.
