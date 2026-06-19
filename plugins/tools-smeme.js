@@ -1,72 +1,100 @@
 /**
- * Euphy-Bot - Smeme Maker V3.1 (Clean Mode) 🎨⛩️
- * Fokus: Render lokal Sharp tanpa External Ad Reply.
+ * Plugin: Smeme (Sticker Meme) Maker V3.2 🎨😂
+ * Deskripsi: Membuat stiker meme tulisan atas-bawah menggunakan Theresav API.
+ * Style: Clean, Fast & Modern ✨
  */
 
-const sharp = require('sharp');
+const fetch = require('node-fetch');
+const FormData = require('form-data');
+const { downloadContentFromMessage } = require('@whiskeysockets/baileys');
 
 module.exports = {
     command: ['smeme', 'sm'],
     category: 'tools',
-    noPrefix: true, 
+    noPrefix: true,
     call: async (conn, m, { text, usedPrefix, command }) => {
         let q = m.quoted ? m.quoted : m;
         let mime = (q.msg || q).mimetype || '';
 
-        if (!/image|sticker/.test(mime)) return m.reply(`Kirim/Reply foto atau stiker dengan caption:\n*${usedPrefix + command} teks atas | teks bawah* 🌸`);
-        if (!text) return m.reply(`Teksnya mana?\nContoh: *${usedPrefix + command} teks atas | teks bawah*`);
+        // 1. Validasi Media: Harus berupa gambar atau stiker
+        const isImage = /image/i.test(mime);
+        const isSticker = /webp/i.test(mime);
 
-        await conn.sendMessage(m.chat, { react: { text: "✍️", key: m.key } });
+        if (!isImage && !isSticker) {
+            await conn.sendMessage(m.chat, { react: { text: '❗', key: m.key } });
+            return m.reply(`Kirim atau balas foto/stiker dengan caption:\n*${usedPrefix + command} teks atas | teks bawah* 🌸`);
+        }
 
+        // 2. Validasi Teks
+        if (!text) {
+            await conn.sendMessage(m.chat, { react: { text: '❗', key: m.key } });
+            return m.reply(`Teks memenya mana, senpai?\nContoh: *${usedPrefix + command} woylah | cik*`);
+        }
+
+        await conn.sendMessage(m.chat, { react: { text: '✍️', key: m.key } });
+
+        // Pemisahan teks atas & bawah
         let [t1, t2] = text.split('|');
-        t1 = (t1 || '').trim().toUpperCase();
-        t2 = (t2 || '').trim().toUpperCase();
+        t1 = (t1 || '').trim();
+        t2 = (t2 || '').trim();
 
         try {
-            let media = await q.download();
-            if (!media) return m.reply('Gagal download media! ❌');
+            // 3. Unduh Media (Mendukung custom function .download() atau fallback ke stream Baileys murni)
+            let mediaBuffer;
+            if (typeof q.download === 'function') {
+                mediaBuffer = await q.download();
+            } else {
+                const stream = await downloadContentFromMessage(q.msg || q, isImage ? 'image' : 'sticker');
+                let buffer = Buffer.alloc(0);
+                for await (const chunk of stream) {
+                    buffer = Buffer.concat([buffer, chunk]);
+                }
+                mediaBuffer = buffer;
+            }
 
-            const image = sharp(media);
-            const metadata = await image.metadata();
-            const width = metadata.width || 512;
-            const height = metadata.height || 512;
+            if (!mediaBuffer || mediaBuffer.length === 0) throw new Error('Gagal mengunduh berkas media.');
 
-            const fontSize = Math.floor(width / 10);
-            const strokeWidth = Math.floor(width / 150);
+            // 4. Bangun Multi-Part Form Data untuk API
+            const form = new FormData();
+            form.append('bg', mediaBuffer, { 
+                filename: `smeme_${Date.now()}.png`, 
+                contentType: mime || 'image/png' 
+            });
+            form.append('top', t1);
+            form.append('bottom', t2);
+            form.append('apikey', global.thrsavapi);
 
-            const svgText = `
-            <svg width="${width}" height="${height}">
-                <style>
-                    .title { 
-                        fill: white; 
-                        font-size: ${fontSize}px; 
-                        font-weight: bold; 
-                        font-family: sans-serif; 
-                        stroke: black; 
-                        stroke-width: ${strokeWidth}px; 
-                    }
-                </style>
-                ${t1 ? `<text x="50%" y="15%" text-anchor="middle" class="title">${t1}</text>` : ''}
-                ${t2 ? `<text x="50%" y="90%" text-anchor="middle" class="title">${t2}</text>` : ''}
-            </svg>`;
+            // 5. Kirim data ke API Maker Smeme Theresav
+            const res = await fetch('https://api.theresav.biz.id/maker/smeme', {
+                method: 'POST',
+                body: form,
+                headers: form.getHeaders(),
+                timeout: 25000
+            });
 
-            const stikerBuffer = await image
-                .composite([{ input: Buffer.from(svgText), top: 0, left: 0 }])
-                .webp({ quality: 80 })
-                .resize(512, 512, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
-                .toBuffer();
+            if (!res.ok) throw new Error(`Server API Error: ${res.status} ${res.statusText}`);
 
-            // PENGIRIMAN BIASA (CLEAN)
+            const resultStickerBuffer = await res.buffer();
+
+            // Proteksi pembacaan pesan error berbentuk JSON kecil
+            if (resultStickerBuffer.length < 500) {
+                const textCheck = resultStickerBuffer.toString('utf-8');
+                if (textCheck.includes('"status"') || textCheck.includes('"message"')) {
+                    throw new Error(textCheck);
+                }
+            }
+
+            // 6. Kirim stiker hasil render murni tanpa embel-embel ad/iklan
             await conn.sendMessage(m.chat, { 
-                sticker: stikerBuffer 
+                sticker: resultStickerBuffer 
             }, { quoted: m });
 
-            await conn.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
+            await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
 
         } catch (e) {
-            console.error(e);
-            m.reply(`❌ *Error:* ${e.message}`);
-            await conn.sendMessage(m.chat, { react: { text: "❌", key: m.key } });
+            console.error("Smeme API Error:", e);
+            await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } });
+            m.reply(`❌ *Proses gagal:* ${e.message || "Terjadi kesalahan pada sistem pembuat stiker."}`);
         }
     }
 };
