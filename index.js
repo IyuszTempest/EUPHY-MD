@@ -81,14 +81,14 @@ const printBanner = () => {
     const bannerGradient = gradient(['#ff79c6', '#8be9fd', '#50fa7b']);
     const borderGradient = gradient(['#bd93f9', '#ff79c6']);
 
-    console.log(borderGradient("╭────────────────────────────────────────────╮"));
+    console.log(borderGradient("╭──────────────────────────────────╮"));
     console.log(bannerGradient("│  ██████╗██╗   ██╗██████╗ ██╗  ██╗██╗   ██╗ │"));
     console.log(bannerGradient("│  ██╔═══╝██║   ██║██╔══██╗██║  ██║╚██╗ ██╔╝ │"));
     console.log(bannerGradient("│  █████╗ ██║   ██║██████╔╝███████║ ╚████╔╝  │"));
     console.log(bannerGradient("│  ██╔══╝ ██║   ██║██╔═══╝ ██╔══██║  ╚██╔╝   │"));
     console.log(bannerGradient("│  ██████╗╚██████╔╝██║     ██║  ██║   ██║    │"));
     console.log(bannerGradient("│  ╚═════╝ ╚═════╝ ╚═╝     ╚═╝  ╚═╝   ╚═╝    │"));
-    console.log(borderGradient("├────────────────────────────────────────────┤"));
+    console.log(borderGradient("├──────────────────────────────────┤"));
     console.log("│ " + chalk.hex('#00ffcc').bold('System version:') + " v3.3.0  " + grayDim('│') + "  " + chalk.hex('#ff79c6').bold('Theme:') + " Sakura Synthwave");
     console.log();
 };
@@ -361,7 +361,7 @@ async function startBot() {
                 const raw  = await conn.requestPairingCode(phoneNumber, 'EUPYMGTA');
                 const code = raw && raw.match(/.{1,4}/g) ? raw.match(/.{1,4}/g).join('-') : raw;
                 
-                console.log('\n ┏━━━━━━━━━━━━━━━ PAIRING CODE ━━━━━━━━━━━━━━━┓');
+                console.log('\n ┏ PAIRING CODENYA: ┓');
                 console.log(`\n   ${chalk.bgHex('#1a1a2e').hex('#ff79c6').bold(' ' + code + ' ')}`);
                 
                 divider('─', ['#00f2fe', '#4facfe']);
@@ -403,10 +403,10 @@ async function startBot() {
             console.log();
             divider('═', ['#00ff87', '#60efff']);
             console.log(toxicLime.bold([
-                '    ┌──────────────────────────────────────────────────────┐',
+                '    ┌─────────────────────────┐',
                 '    │  [OK] TERHUBUNG : ' + name.padEnd(35) + '│',
                 '    │  [JID] ' + jid.padEnd(46) + '│',
-                '    └──────────────────────────────────────────────────────┘'
+                '     ─────────────────────────┘'
             ].join('\n')));
             divider('═', ['#00ff87', '#60efff']);
             console.log();
