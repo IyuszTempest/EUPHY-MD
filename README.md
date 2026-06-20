@@ -31,6 +31,7 @@
 > [!NOTE]
 > - Proyek ini sekarang dioptimasi untuk dijalankan pada **Environment Laptop/PC** untuk performa FFmpeg yang maksimal.
 > - Gunakan **npm install --legacy-peer-deps --production** untuk menginstall modul jika gagal menginstall.
+> - Gunakan **node index.js** jika npm start gagal
 
 ### Prasyarat Sistem
 - **FFmpeg:** Terinstall secara global (untuk proses stiker & converter)
