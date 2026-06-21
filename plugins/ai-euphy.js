@@ -1,12 +1,6 @@
 /**
- * Plugin: Kuroyami AI Chatbot v2.0 (dengan Command Toggle & Session Management) 🎀
- * Fitur: Auto-respond toggle, session persistence, dual handler system
- * 
- * ⚠️ FIX NOTES:
- * - Typo: gloabl → global
- * - Regex: /mao/ig → /kuro/ig (consistent dengan trigger)
- * - Session naming: mao → euphy (consistent)
- * - Missing quote: error message fixed
+ * Plugin: AI Chatbot v2.2 (Clean Chat & Smart Context Detection) 🎀
+ * Fitur: Auto-respond, membaca media (Gambar, Video, Audio, Stiker), deteksi context reply.
  */
 
 const { GoogleGenerativeAI } = require('@google/generative-ai');
@@ -21,8 +15,6 @@ const moment = require('moment-timezone');
 // ===============================
 const genAI = new GoogleGenerativeAI(global.gemini); 
 const TRIGGER_REGEX = /\beuphy\b/i;
-const DEVELOPER_NAME = global.aliasowner;
-const OWNER_LID = global.lidowner; // ✅ FIX: gloabl → global
 
 global._kuroHistory = global._kuroHistory ?? new Map();
 
@@ -34,10 +26,6 @@ const SYSTEM_PROMPT = global.geminiprompt;
 // ===============================
 // HELPERS
 // ===============================
-function isOwner(sender) {
-  return sender === OWNER_LID;
-}
-
 function initUserSession(sender) {
   let user = global.db.data.users[sender];
   if (typeof user !== 'object') {
@@ -48,8 +36,7 @@ function initUserSession(sender) {
       premiumTime: 0,
       afk: -1,
       afkReason: '',
-      euphy: {
-        auto: false,
+      kuro: {
         session: [],
         lastUsed: 0
       }
@@ -57,21 +44,30 @@ function initUserSession(sender) {
     user = global.db.data.users[sender];
   }
   
-  // Ensure euphy session exists ✅ FIX: mao → euphy (consistent)
-  if (!user.euphy) {
-    user.euphy = { auto: false, session: [], lastUsed: 0 };
+  if (!user.kuro) {
+    user.kuro = { session: [], lastUsed: 0 };
   }
   
   return user;
 }
 
-function getQuotedInfo(m) {
+function getQuotedInfo(m, conn) {
   if (!m.quoted) return null;
   const text = m.quoted.text || m.quoted.caption || m.quoted.conversation || "";
-  if (!text) return null;
   const sender = m.quoted.sender || "";
-  const isDevQuoted = isOwner(sender);
-  return { text, sender, isDevQuoted };
+  
+  let senderName = "User";
+  if (sender) {
+    const botJid = conn.user?.id?.split(':')[0] + '@s.whatsapp.net';
+    if (sender === botJid) {
+      senderName = "Kamu (Kuro)";
+    } else {
+      const u = global.db?.data?.users?.[sender];
+      senderName = u?.name || "User";
+    }
+  }
+  
+  return { text, sender, senderName };
 }
 
 async function saveTemp(buffer, mime) {
@@ -92,30 +88,33 @@ function clean(file) {
 }
 
 // ===============================
-// FINALPROMPT BUILDER
+// FINALPROMPT BUILDER (WITH MEDIA & QUOTED DETECT)
 // ===============================
-async function buildFinalPrompt(text, m) {
-  let finalPrompt = text;
+async function buildFinalPrompt(text, m, conn) {
+  let finalPrompt = text || "";
   
-  const quotedInfo = getQuotedInfo(m);
-  if (quotedInfo) {
-    const quotedContext = quotedInfo.isDevQuoted 
-      ? "Pesan ini berasal dari suami kamu. Balas dengan nada super lembut dan penuh perhatian.\n"
-      : "User biasa yang reply ke pesan sebelumnya. Respons sesuai dengan prompt.\n";
-    
-    finalPrompt = `\n[Pesan yang direply]\n"${quotedInfo.text}"\n${quotedContext}` + text;
+  const quotedInfo = getQuotedInfo(m, conn);
+  if (quotedInfo && quotedInfo.text) {
+    finalPrompt = `\n[Konteks: Membalas pesan dari ${quotedInfo.senderName}]\n> "${quotedInfo.text}"\n\nRespon/Pertanyaan user saat ini: ` + finalPrompt;
   }
 
   let mediaData = null;
-  let q = m.quoted ? m.quoted : m;
-  let mime = (q.msg || q).mimetype || "";
+  // Deteksi media pada pesan langsung ATAU pada pesan yang di-reply
+  let q = (m.msg || m).mimetype ? m : (m.quoted && (m.quoted.msg || m.quoted).mimetype ? m.quoted : null);
 
-  if (mime) {
-    const media = await q.download();
-    const file = await saveTemp(media, mime);
-    const base64 = fs.readFileSync(file).toString("base64");
-    mediaData = { base64, mime };
-    clean(file);
+  if (q) {
+    let mime = (q.msg || q).mimetype || "";
+    if (mime && /image|video|audio|webp/i.test(mime)) {
+      try {
+        const media = await q.download();
+        const file = await saveTemp(media, mime);
+        const base64 = fs.readFileSync(file).toString("base64");
+        mediaData = { base64, mime };
+        clean(file);
+      } catch (err) {
+        console.error("Gagal memproses berkas media:", err);
+      }
+    }
   }
 
   return { finalPrompt, mediaData };
@@ -135,24 +134,16 @@ async function getAIResponse(chatId, query, sender, mediaData = null) {
   }
   const history = global._kuroHistory.get(chatId);
 
-  const isDeveloper = isOwner(sender);
   const now = moment().tz("Asia/Jakarta");
-  
-  let userContext = isDeveloper 
-    ? `\n[PENTING - PRIORITAS UTAMA]\nPesan ini berasal dari suamimu sekaligus penciptamu (${DEVELOPER_NAME}).\nAturan: Balas dengan nada super hangat dan perhatian!\n` 
-    : `\n[INFO USER]\nIni adalah user biasa. Respons dengan cara normal sesuai prompt.\n`;
-  
   let timeContext = `\n[Waktu Sekarang]\nHari: ${now.format("dddd")}\nTanggal: ${now.format("D MMMM YYYY")}\nJam: ${now.format("HH.mm")} WIB\n`;
   
-  let processedQuery = userContext + query.replace(/kuro/ig, "").trim() + timeContext; // ✅ FIX: mao → kuro
+  let processedQuery = query.replace(/kuro/ig, "").trim() + timeContext;
 
   const chat = model.startChat({ history });
   let result;
 
   if (mediaData) {
-    let mediaContextText = isDeveloper 
-      ? `\n[INFO TAMBAHAN]\nMedia ini dikirim oleh suami kamu.\nJenis media: ${mediaData.mime.split("/")[0]}\nGunakan respons hangat, dan jelaskan dengan lembut.\n` 
-      : `\n[INFO MEDIA]\nUser mengirim media (${mediaData.mime.split("/")[0]}). Respons sesuai dengan prompt\n`;
+    let mediaContextText = `\n[INFO MEDIA]\nUser mengirim/melampirkan file media (${mediaData.mime.split("/")[0]}). Tolong analisis medianya, lalu jawab pesan atau pertanyaan user dengan mengaitkannya secara alami sesuai prompt utama kamu.\n`;
     
     result = await chat.sendMessage([
       { inlineData: { data: mediaData.base64, mimeType: mediaData.mime } },
@@ -178,60 +169,15 @@ async function getAIResponse(chatId, query, sender, mediaData = null) {
 // PLUGIN MODULE EXPORTS
 // ===============================
 module.exports = {
-  command: ['euphy', 'reseteuphy'],
+  command: ['reseteuphy'],
   category: 'ai',
   noPrefix: true,
   register: true,
   
-  call: async (conn, m, { text, args, isOwner }) => {
-    const cleanText = m.text || "";
-    const user = initUserSession(m.sender);
-    
-    // --- COMMAND: reset ---
-    if (/^reseteuphy$/i.test(cleanText.trim())) {
-      global._kuroHistory.delete(m.sender);
-      return m.reply("> Riwayat obrolan euphy udah direset ya");
-    }
-
-    // --- COMMAND: on/off (TOGGLE AUTO-RESPOND) ---
-    const mode = args[0]?.toLowerCase();
-    if (mode === 'on' || mode === 'off') {
-      if (mode === 'on') {
-        if (user.euphy.auto === true) {
-          return m.reply('> ⚠️ Auto Euphy sudah aktif dari tadi!');
-        }
-        user.euphy.auto = true;
-        user.euphy.lastUsed = Date.now();
-        return m.reply('> 🎀 Auto Euphy berhasil diaktifkan! Sekarang aku akan respond otomatis kalau ada yang panggil "euphy" atau mention.');
-      } else if (mode === 'off') {
-        if (user.euphy.auto === false) {
-          return m.reply('> ⚠️ Auto Euphy tidak ada yang aktif!');
-        }
-        user.euphy.auto = false;
-        return m.reply('> 🗑️ Auto Euphy dimatikan. Gunakan `.euphy` untuk chat manual.');
-      }
-    }
-
-    // --- REGULAR CHAT (MANUAL) ---
-    if (!text) return m.reply('> Mau tanya apa ke aku? Tulis pesannya ya!');
-    
-    try {
-      await conn.sendPresenceUpdate('composing', m.chat);
-      
-      const response = await getAIResponse(m.chat, text, m.sender, null);
-      
-      if (response) {
-        user.euphy.lastUsed = Date.now();
-        user.euphy.session.push({ role: 'user', text });
-        user.euphy.session.push({ role: 'assistant', text: response });
-        if (user.euphy.session.length > 20) user.euphy.session.splice(0, 2);
-        
-        await conn.sendMessage(m.chat, { text: response.trim() }, { quoted: m });
-      }
-    } catch (e) {
-      console.error('[Error Inside Call]:', e);
-      return m.reply("> ❌ Kuro error nih… coba lagi ya");
-    }
+  call: async (conn, m) => {
+    // Menu call hanya merespon perintah reset agar tidak terjadi respon ganda saat chat biasa
+    global._kuroHistory.delete(m.sender);
+    return m.reply("Riwayat obrolan kita sudah dibersihkan ya! Mari mulai percakapan baru.");
   },
 
   handleMessage: async (conn, m) => {
@@ -240,33 +186,34 @@ module.exports = {
     const botJid = conn.user?.id?.split(':')[0] + '@s.whatsapp.net';
     if (m.sender === botJid || m.fromMe) return;
 
-    const text = m.text?.trim();
-    if (!text) return;
+    const text = (m.text || m.caption || "").trim();
+    let q = m.quoted ? m.quoted : m;
+    let mime = (q.msg || q).mimetype || "";
 
+    if (!text && !mime) return;
+
+    // Abaikan jika pesan diawali dengan prefix command umum agar tidak bentrok dengan plugin lain
     if (/^[°•π÷×¶∆£¢€¥®™✓_=|~!?@#$%^&.\-+*\/]/.test(text)) return;
 
-    if (/^reseteuphy$/i.test(text)) {
-      global._kuroHistory.delete(m.sender);
-      return conn.sendMessage(m.chat, { text: "> Riwayat obrolan euphy udah direset ya" }, { quoted: m });
-    }
+    // Abaikan handleMessage jika user mengetik resetkuro, biarkan 'call' yang memprosesnya
+    if (/^reseteuphy$/i.test(text)) return;
 
     const user = initUserSession(m.sender);
     
-    // --- CHECK AUTO-RESPOND STATUS ---
-    if (!user.euphy.auto) return;
-
-    const hasTrigger = TRIGGER_REGEX.test(text);
     const isGroup = m.chat.endsWith('@g.us');
-    const isReplyToBot = m.quoted && m.quoted.fromMe;
+    const isReplyToBot = m.quoted && m.quoted.sender === botJid;
+    const isMention = m.mentionedJid && m.mentionedJid.includes(botJid);
+    const hasTrigger = TRIGGER_REGEX.test(text);
 
-    // --- TRIGGER LOGIC (Simplified) ---
+    // --- TRIGGER LOGIC ---
     let shouldRespond = false;
 
     if (isGroup) {
-      const isMention = m.mentionedJid && m.mentionedJid.includes(botJid);
+      // Di Group: respon hanya jika dipanggil namanya, dimention, atau direply pesan bot-nya
       shouldRespond = hasTrigger || isMention || isReplyToBot;
     } else {
-      shouldRespond = hasTrigger || isReplyToBot;
+      // Di Private Chat: respon semua pesan secara langsung biar kayak chat biasa!
+      shouldRespond = true;
     }
 
     if (!shouldRespond) return;
@@ -274,13 +221,14 @@ module.exports = {
     try {
       await conn.sendPresenceUpdate('composing', m.chat);
 
-      const response = await getAIResponse(m.chat, text, m.sender, null);
+      const { finalPrompt, mediaData } = await buildFinalPrompt(text, m, conn);
+      const response = await getAIResponse(m.chat, finalPrompt, m.sender, mediaData);
       
       if (response) {
-        user.euphy.lastUsed = Date.now();
-        user.euphy.session.push({ role: 'user', text });
-        user.euphy.session.push({ role: 'assistant', text: response });
-        if (user.euphy.session.length > 20) user.euphy.session.splice(0, 2);
+        user.kuro.lastUsed = Date.now();
+        user.kuro.session.push({ role: 'user', text });
+        user.kuro.session.push({ role: 'assistant', text: response });
+        if (user.kuro.session.length > 20) user.kuro.session.splice(0, 2);
 
         await conn.sendMessage(m.chat, { text: response.trim() }, { quoted: m });
       }
