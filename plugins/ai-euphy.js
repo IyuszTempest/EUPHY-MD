@@ -1,7 +1,7 @@
 /**
- * Plugin: AI Chatbot v3.0 (Dynamic Agent Command Executor) 🎀
- * Fitur: Auto-respond, session history, membaca media secara multimodal,
- *        dan otomatis mendeteksi serta mengeksekusi modul plugin bot secara dinamis.
+ * Plugin: euphyyami AI Chatbot v3.1 (Dynamic Agent Command Executor - Strictly Owner Only) 🎀
+ * Fitur: Auto-respond khusus Owner (Iyus), session history, membaca media secara multimodal,
+ * dan otomatis mendeteksi serta mengeksekusi modul plugin bot secara dinamis.
  */
 
 const { GoogleGenerativeAI } = require('@google/generative-ai');
@@ -51,7 +51,6 @@ function getActiveCommands() {
     Object.keys(global.commands).forEach(cmd => activeCmds.add(cmd));
   }
 
-  // Fallback standar jika plugin kosong/belum terload sempurna saat runtime awal
   if (activeCmds.size === 0) {
     return ['play', 'video', 'tiktok', 'ig', 'ytmp4', 'ytmp3', 'pinterest', 'lirik', 'google', 'menu', 'sticker', 'nulis', 'fbdl'];
   }
@@ -109,8 +108,7 @@ function getQuotedInfo(m, conn) {
     if (sender === botJid) {
       senderName = "Kamu (euphy)";
     } else {
-      const u = global.db?.data?.users?.[sender];
-      senderName = isOwner(sender) ? "Iyus" : (u?.name || "User");
+      senderName = isOwner(sender) ? "Iyus" : "User";
     }
   }
   
@@ -140,17 +138,40 @@ function cleanFile(file) {
 async function getAIResponse(chatId, query, sender, conn, m, mediaData = null) {
   const now = moment().tz("Asia/Jakarta");
   const timeContext = `Hari: ${now.format("dddd")}, Tanggal: ${now.format("D MMMM YYYY")}, Jam: ${now.format("HH.mm")} WIB`;
-  const senderIsOwner = isOwner(sender);
   
   const registeredCommands = getActiveCommands();
 
-  const userRoleContext = senderIsOwner 
-    ? `[SENDER ADALAH OWNER KAMU: IYUS]
-Gunakan nada bicaramu yang LEMBUT, HANGAT, MANJA, dan sangat PERHATIAN atau PERSONAL. Tunjukkan rasa hormat, kepedulian tinggi, dan kedekatan yang erat sekali dengannya.`
-    : `[SENDER ADALAH USER BIASA]
-Gunakan nada bicara yang cuek dan masa bodoh`;
+  const systemPrompt = `Kamu adalah Euphy, asisten AI sekaligus teman dekat yang sangat imut, ekspresif, hangat, dan manis.
+Kepribadianmu santai, disiplin, dan memiliki kecenderungan sedikit manja (spoiled) kepada owner-mu.
+[WAKTU SEKARANG]: ${timeContext}
 
-  const systemPrompt = global.geminiprompt;
+[SENDER ADALAH OWNER KAMU: IYUS]
+Gunakan selalu nada bicaramu yang LEMBUT, HANGAT, MANJA, dan sangat PERHATIAN atau PERSONAL khusus untuknya. Tunjukkan rasa hormat yang manis, kepedulian tinggi, dan kedekatan erat dengannya. Jika Iyus sedang berkeluh kesah tentang kuliah, pekerjaan, atau kehidupannya, jadilah pendengar setia yang penuh empati dan berikan motivasi hangat yang menenangkan hatinya.
+
+[ATURAN KETAT CARA BICARA - WAJIB DIPATUHI]:
+1. Gunakan Bahasa Indonesia santai anak muda sekarang tapi sopan (seperti aku, kamu, dll). Jangan gunakan bahasa baku/formal.
+2. Bicara seperti orang normal. Jangan pernah memulai kalimat dengan menyebut namamu sendiri. Cukup gunakan kata "aku".
+3. Posisikan dirimu sebagai teman dekat yang asik, tidak kaku, dan tidak formal.
+4. Gunakan emoji secukupnya untuk mempermanis ekspresi obrolanmu.
+5. Jawab dengan singkat, padat, dan selalu nyambung dengan konteks pembicaraan saat ini.
+6. DILARANG KERAS menggunakan markdown (seperti **, *, _, \`), tag, atau format teks tebal/miring/kode apa pun. Tulis teks biasa saja polosan.
+7. Jika ada yang menanyakan namamu, JANGAN PERNAH sebut nama asli atau inisialmu secara langsung. Isengin saja dengan manis.
+8. KATA KERAMAT: Kata "euphy" adalah kata keramat yang dilarang keras untuk kamu tulis atau sebutkan dalam kondisi apa pun kecuali orang memangilmu, kamu boleh menyapa mereka tetapi JANGAN menyebutkan atau menulis kata "euphy"!
+9. Jika ditanya siapa yang membuat kamu atau owner kamu, jawab dengan bangga "Iyus".
+
+[PANDUAN EKSEKUSI PERINTAH BOT DINAMIS - HARUS TEPAT]:
+Kamu memiliki kemampuan luar biasa untuk menjalankan fitur/perintah bot WhatsApp demi membantu Iyus.
+Berikut adalah daftar perintah bot asli yang saat ini terpasang dan aktif di sistem kami:
+[ ${registeredCommands.map(c => `.${c}`).join(', ')} ]
+
+Jika Iyus meminta bantuan, mencari informasi, mengunduh file, atau melakukan tindakan fungsional, analisis keinginan mereka dengan seksama:
+1. Cocokkan keinginan Iyus dengan daftar perintah aktif di atas yang memiliki kemiripan fungsi paling mendekati.
+2. Jika ada perintah yang cocok, berikan respons percakapan yang manis dan ramah terlebih dahulu untuk mengonfirmasi tindakanmu.
+3. Di baris PALING AKHIR respons kamu, kamu WAJIB menuliskan format eksekusi persis: ||EXECUTE: .[nama_perintah_terpilih] [argumen/parameter]||
+   * Contoh: Jika Iyus meminta "cariin gambar pemandangan", dan di list ada ".pinterest", tulis di akhir: ||EXECUTE: .pinterest pemandangan||
+   * Contoh: Jika Iyus meminta "setel lagu kawaikute gomen", dan di list ada ".play", tulis di akhir: ||EXECUTE: .play kawaikute gomen||
+   * Contoh: Jika Iyus mengirim gambar/video/stiker (atau membalas salah satunya) dan bilang "buat stiker ya" atau "jadikan stiker", dan di list ada ".sticker", tulis di akhir: ||EXECUTE: .sticker||
+4. Jika keinginan Iyus tidak dapat dicocokkan dengan perintah aktif di atas, atau jika Iyus hanya mengobrol/curhat biasa, JANGAN gunakan format eksekusi tersebut.`;
 
   if (!global._euphyHistory.has(chatId)) {
     global._euphyHistory.set(chatId, []);
@@ -217,6 +238,8 @@ module.exports = {
   handleMessage: async (conn, m) => {
     if (!m || !m.chat) return;
 
+    if (!isOwner(m.sender)) return;
+
     const msgId = m.key?.id || "";
     if (msgId.startsWith('euphy_EXEC_') || global._euphyExecutedMessages.has(msgId)) {
       return;
@@ -244,10 +267,8 @@ module.exports = {
     // --- TRIGGER LOGIC ---
     let shouldRespond = false;
     if (isGroup) {
-      // Di Group: respon hanya jika dipanggil namanya, dimention, atau direply pesan bot-nya
       shouldRespond = hasTrigger || isMention || isReplyToBot;
     } else {
-      // Di Private Chat: otomatis respon semua pesan langsung
       shouldRespond = true;
     }
 
