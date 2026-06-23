@@ -1,7 +1,7 @@
 /**
- * Plugin: euphyyami AI Chatbot v3.1 (Dynamic Agent Command Executor - Strictly Owner Only) 🎀
- * Fitur: Auto-respond khusus Owner (Iyus), session history, membaca media secara multimodal,
- * dan otomatis mendeteksi serta mengeksekusi modul plugin bot secara dinamis.
+ * Plugin: Kuroyami AI Chatbot v3.3 (Dynamic Agent Command Executor - Strictly Owner Only via LID) 🎀
+ * Fitur: Auto-respond khusus Owner (Iyus) menggunakan global.lidowner, session history,
+ * membaca media secara multimodal, dan otomatis mengeksekusi modul plugin bot secara dinamis.
  */
 
 const { GoogleGenerativeAI } = require('@google/generative-ai');
@@ -14,9 +14,9 @@ const moment = require('moment-timezone');
 // ===============================
 // CONFIG & INITIALIZATION
 // ===============================
-const TRIGGER_REGEX = /\beuphy\b/i;
-global._euphyHistory = global._euphyHistory ?? new Map();
-global._euphyExecutedMessages = global._euphyExecutedMessages ?? new Set();
+const TRIGGER_REGEX = /\bkuro\b/i;
+global._kuroHistory = global._kuroHistory ?? new Map();
+global._kuroExecutedMessages = global._kuroExecutedMessages ?? new Set();
 
 const genAI = new GoogleGenerativeAI(global.gemini);
 
@@ -62,9 +62,15 @@ function getActiveCommands() {
 // OTHER HELPERS
 // ===============================
 function isOwner(sender) {
-  const ownerNum = global.owner ? global.owner.map(v => v.split('@')[0]) : [];
-  const cleanSender = sender.split('@')[0];
-  return ownerNum.includes(cleanSender) || cleanSender === '628xxx'; // Sesuaikan jika ada nomor manual
+  if (!sender) return false;
+  
+  const lid = global.lidowner;
+  if (!lid) return false;
+
+  const cleanSender = sender.split(':')[0].split('@')[0].replace(/[^0-9a-zA-Z]/g, '');
+  const cleanLid = lid.split(':')[0].split('@')[0].replace(/[^0-9a-zA-Z]/g, '');
+
+  return cleanSender === cleanLid || sender === lid;
 }
 
 function initUserSession(sender) {
@@ -78,19 +84,19 @@ function initUserSession(sender) {
         premiumTime: 0,
         afk: -1,
         afkReason: '',
-        euphy: {
+        kuro: {
           session: [],
           lastUsed: 0
         }
       };
       user = global.db.data.users[sender];
     } else {
-      user = { euphy: { session: [], lastUsed: 0 } };
+      user = { kuro: { session: [], lastUsed: 0 } };
     }
   }
   
-  if (!user.euphy) {
-    user.euphy = { session: [], lastUsed: 0 };
+  if (!user.kuro) {
+    user.kuro = { session: [], lastUsed: 0 };
   }
   
   return user;
@@ -106,7 +112,7 @@ function getQuotedInfo(m, conn) {
   if (sender) {
     const botJid = conn.user?.id?.split(':')[0] + '@s.whatsapp.net';
     if (sender === botJid) {
-      senderName = "Kamu (euphy)";
+      senderName = "Kamu (kuro)";
     } else {
       senderName = isOwner(sender) ? "Iyus" : "User";
     }
@@ -141,12 +147,10 @@ async function getAIResponse(chatId, query, sender, conn, m, mediaData = null) {
   
   const registeredCommands = getActiveCommands();
 
-  const systemPrompt = `Kamu adalah Euphy, asisten AI sekaligus teman dekat yang sangat imut, ekspresif, hangat, dan manis.
-Kepribadianmu santai, disiplin, dan memiliki kecenderungan sedikit manja (spoiled) kepada owner-mu.
-[WAKTU SEKARANG]: ${timeContext}
+  const systemPrompt = `Kamu adalah Euphylia Magenta yang angun dan malu malu.
+Kepribadian: Santai, hangat, disiplin, sedikit manja juga. Kamu seorang teman dekat sekaligus asisten AI. [WAKTU SEKARANG]: ${timeContext}
 
-[SENDER ADALAH OWNER KAMU: IYUS]
-Gunakan selalu nada bicaramu yang LEMBUT, HANGAT, MANJA, dan sangat PERHATIAN atau PERSONAL khusus untuknya. Tunjukkan rasa hormat yang manis, kepedulian tinggi, dan kedekatan erat dengannya. Jika Iyus sedang berkeluh kesah tentang kuliah, pekerjaan, atau kehidupannya, jadilah pendengar setia yang penuh empati dan berikan motivasi hangat yang menenangkan hatinya.
+${userRoleContext}
 
 [ATURAN KETAT CARA BICARA - WAJIB DIPATUHI]:
 1. Gunakan Bahasa Indonesia santai anak muda sekarang tapi sopan (seperti aku, kamu, dll). Jangan gunakan bahasa baku/formal.
@@ -155,28 +159,28 @@ Gunakan selalu nada bicaramu yang LEMBUT, HANGAT, MANJA, dan sangat PERHATIAN at
 4. Gunakan emoji secukupnya untuk mempermanis ekspresi obrolanmu.
 5. Jawab dengan singkat, padat, dan selalu nyambung dengan konteks pembicaraan saat ini.
 6. DILARANG KERAS menggunakan markdown (seperti **, *, _, \`), tag, atau format teks tebal/miring/kode apa pun. Tulis teks biasa saja polosan.
-7. Jika ada yang menanyakan namamu, JANGAN PERNAH sebut nama asli atau inisialmu secara langsung. Isengin saja dengan manis.
-8. KATA KERAMAT: Kata "euphy" adalah kata keramat yang dilarang keras untuk kamu tulis atau sebutkan dalam kondisi apa pun kecuali orang memangilmu, kamu boleh menyapa mereka tetapi JANGAN menyebutkan atau menulis kata "euphy"!
-9. Jika ditanya siapa yang membuat kamu atau owner kamu, jawab dengan bangga "Iyus".
+7. Jika ada yang menanyakan namamu, JANGAN PERNAH sebut nama asli atau inisialmu secara langsung. Isengin saja mereka.
+8. KATA KERAMAT: Kata "Euphy" adalah kata keramat yang dilarang keras untuk kamu tulis atau sebutkan dalam kondisi apa pun kecuali orang memangilmu, kamu boleh menyapa mereka tetapi JANGAN menyebutkan atau menulis kata "Euphy"!
+9. Jika ada yang nanya siapa yang membuat kamu atau owner kamu, bilangkan saja ${global.nameowner}.
 
 [PANDUAN EKSEKUSI PERINTAH BOT DINAMIS - HARUS TEPAT]:
-Kamu memiliki kemampuan luar biasa untuk menjalankan fitur/perintah bot WhatsApp demi membantu Iyus.
+Kamu memiliki kemampuan luar biasa untuk menjalankan fitur/perintah bot WhatsApp demi membantu user.
 Berikut adalah daftar perintah bot asli yang saat ini terpasang dan aktif di sistem kami:
 [ ${registeredCommands.map(c => `.${c}`).join(', ')} ]
 
-Jika Iyus meminta bantuan, mencari informasi, mengunduh file, atau melakukan tindakan fungsional, analisis keinginan mereka dengan seksama:
-1. Cocokkan keinginan Iyus dengan daftar perintah aktif di atas yang memiliki kemiripan fungsi paling mendekati.
+Jika user meminta bantuan, mencari informasi, mengunduh file, atau melakukan tindakan fungsional, analisis keinginan mereka dengan seksama:
+1. Cocokkan keinginan user dengan daftar perintah aktif di atas yang memiliki kemiripan fungsi paling mendekati.
 2. Jika ada perintah yang cocok, berikan respons percakapan yang manis dan ramah terlebih dahulu untuk mengonfirmasi tindakanmu.
 3. Di baris PALING AKHIR respons kamu, kamu WAJIB menuliskan format eksekusi persis: ||EXECUTE: .[nama_perintah_terpilih] [argumen/parameter]||
-   * Contoh: Jika Iyus meminta "cariin gambar pemandangan", dan di list ada ".pinterest", tulis di akhir: ||EXECUTE: .pinterest pemandangan||
-   * Contoh: Jika Iyus meminta "setel lagu kawaikute gomen", dan di list ada ".play", tulis di akhir: ||EXECUTE: .play kawaikute gomen||
-   * Contoh: Jika Iyus mengirim gambar/video/stiker (atau membalas salah satunya) dan bilang "buat stiker ya" atau "jadikan stiker", dan di list ada ".sticker", tulis di akhir: ||EXECUTE: .sticker||
-4. Jika keinginan Iyus tidak dapat dicocokkan dengan perintah aktif di atas, atau jika Iyus hanya mengobrol/curhat biasa, JANGAN gunakan format eksekusi tersebut.`;
+   * Contoh: Jika user meminta "cariin gambar pemandangan", dan di list ada ".pinterest", tulis di akhir: ||EXECUTE: .pinterest pemandangan||
+   * Contoh: Jika user meminta "euphy setel lagu kawaikute gomen", dan di list ada ".play", tulis di akhir: ||EXECUTE: .play kawaikute gomen||
+   * Contoh: Jika user mengirim gambar/video/stiker (atau membalas salah satunya) dan bilang "buat stiker ya" atau "jadikan stiker", dan di list ada ".sticker", tulis di akhir: ||EXECUTE: .sticker||
+4. Jika keinginan user tidak dapat dicocokkan dengan perintah aktif di atas, atau jika user hanya mengobrol/curhat biasa, JANGAN gunakan format eksekusi tersebut.`;
 
-  if (!global._euphyHistory.has(chatId)) {
-    global._euphyHistory.set(chatId, []);
+  if (!global._kuroHistory.has(chatId)) {
+    global._kuroHistory.set(chatId, []);
   }
-  const history = global._euphyHistory.get(chatId);
+  const history = global._kuroHistory.get(chatId);
   const model = genAI.getGenerativeModel({ 
     model: 'gemini-3.1-flash-lite',
     systemInstruction: systemPrompt
@@ -193,7 +197,7 @@ Jika Iyus meminta bantuan, mencari informasi, mengunduh file, atau melakukan tin
     }
   }
 
-  promptPayload += `User: ${query.replace(/euphy/ig, "").trim()}`;
+  promptPayload += `User: ${query.replace(/kuro/ig, "").trim()}`;
   let result;
   if (mediaData) {
     const mediaContextText = `\n[INFO MEDIA]\nUser melampirkan file media (${mediaData.mime}). Silakan baca, dengar, atau analisis isinya lalu jawab pesan user dengan mengaitkannya secara alami.\n`;
@@ -225,28 +229,30 @@ Jika Iyus meminta bantuan, mencari informasi, mengunduh file, atau melakukan tin
 // PLUGIN MODULE EXPORTS
 // ===============================
 module.exports = {
-  command: ['reseteuphy'],
+  command: ['resetkuro'],
   category: 'ai',
-  owner: true,
+  owner: true, 
   noPrefix: true,
 
   call: async (conn, m) => {
-    global._euphyHistory.delete(m.sender);
+    global._kuroHistory.delete(m.sender);
     return m.reply("Memori obrolan kita berdua sudah direset ya! Yuk mari mulai chat baru lagi.");
   },
 
   handleMessage: async (conn, m) => {
     if (!m || !m.chat) return;
 
-    if (!isOwner(m.sender)) return;
+    const sender = m.sender || m.key?.participant || m.key?.remoteJid || "";
+
+    if (!isOwner(sender)) return;
 
     const msgId = m.key?.id || "";
-    if (msgId.startsWith('euphy_EXEC_') || global._euphyExecutedMessages.has(msgId)) {
+    if (msgId.startsWith('kuro_EXEC_') || global._kuroExecutedMessages.has(msgId)) {
       return;
     }
 
     const botJid = conn.user?.id?.split(':')[0] + '@s.whatsapp.net';
-    if (m.sender === botJid || m.fromMe) return;
+    if (sender === botJid || m.fromMe) return;
 
     const text = (m.text || m.caption || "").trim();
     let q = m.quoted ? m.quoted : m;
@@ -255,9 +261,9 @@ module.exports = {
     if (!text && !mime) return;
 
     if (/^[°•π÷×¶∆£¢€¥®™✓_=|~!?@#$%^&.\-+*\/]/.test(text)) return;
-    if (/^reseteuphy$/i.test(text)) return;
+    if (/^resetkuro$/i.test(text)) return;
 
-    const user = initUserSession(m.sender);
+    const user = initUserSession(sender);
 
     const isGroup = m.chat.endsWith('@g.us');
     const isReplyToBot = m.quoted && m.quoted.sender === botJid;
@@ -290,13 +296,13 @@ module.exports = {
         }
       }
 
-      const response = await getAIResponse(m.chat, text, m.sender, conn, m, mediaData);
+      const response = await getAIResponse(m.chat, text, sender, conn, m, mediaData);
 
       if (response) {
-        user.euphy.lastUsed = Date.now();
-        user.euphy.session.push({ role: 'user', text });
-        user.euphy.session.push({ role: 'assistant', text: response });
-        if (user.euphy.session.length > 20) user.euphy.session.splice(0, 2);
+        user.kuro.lastUsed = Date.now();
+        user.kuro.session.push({ role: 'user', text });
+        user.kuro.session.push({ role: 'assistant', text: response });
+        if (user.kuro.session.length > 20) user.kuro.session.splice(0, 2);
 
         let cleanResponse = response.trim();
         let executeCommand = null;
@@ -311,8 +317,8 @@ module.exports = {
         await conn.sendMessage(m.chat, { text: cleanResponse }, { quoted: m });
 
         if (executeCommand) {
-          m.key.id = 'euphy_EXEC_' + Math.random().toString(36).substring(2, 11).toUpperCase();
-          global._euphyExecutedMessages.add(m.key.id);
+          m.key.id = 'kuro_EXEC_' + Math.random().toString(36).substring(2, 11).toUpperCase();
+          global._kuroExecutedMessages.add(m.key.id);
 
           m.text = executeCommand;
           m.body = executeCommand;
