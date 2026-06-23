@@ -1,7 +1,8 @@
 module.exports = {
-    command: ['swgroup', 'swgc', 'upswgc'],
-    category: 'group',
+    command: ['swgc'],
+    category: 'owner',
     noPrefix: true, 
+    owner: true,
     call: async (conn, m, { text, isAdmin, isOwner }) => {
         if (!m.isGroup) return m.reply('❌ Fitur ini hanya bisa dipakai di grup.')
         if (!isAdmin && !isOwner) return m.reply('❌ Fitur khusus admin grup atau owner bot.')
