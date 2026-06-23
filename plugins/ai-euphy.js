@@ -206,8 +206,8 @@ Gunakan nada bicara yang cuek dan masa bodoh`;
 module.exports = {
   command: ['reseteuphy'],
   category: 'ai',
+  owner: true,
   noPrefix: true,
-  register: true,
 
   call: async (conn, m) => {
     global._euphyHistory.delete(m.sender);
