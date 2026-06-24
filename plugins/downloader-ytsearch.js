@@ -1,11 +1,12 @@
 /** * Plugin YouTube Search with List Selector 🎥⛩️
  * Style: Euphylia Magenta - "The King of UI" Style 🌸
- * Features: High-accuracy YT Search, Thumbnail Preview, Auto Command Chaining, and Download Shortcuts
+ * Features: High-accuracy YT Search, Thumbnail Preview, Info Card, and Direct Audio Sender
  * Adopted from Kuroyami Menu Structure
  */
 
 const { proto, generateWAMessageFromContent, prepareWAMessageMedia } = require('@whiskeysockets/baileys');
 const yts = require('yt-search');
+const axios = require('axios');
 
 // --- [ HELPER: MENGAMBIL ID VIDEO YOUTUBE ] ---
 function getYouTubeId(url) {
@@ -21,15 +22,16 @@ module.exports = {
     call: async (conn, m, { text, command, usedPrefix: _p }) => {
         try {
             if (!text) {
-                return m.reply(`Mau cari lagu atau video apa?\nContoh: *${_p + command} Renai Circulation*`);
+                return m.reply(`Mau cari apa?\nContoh: *${_p + command} Renai Circulation*`);
             }
 
-            // --- MODE 1: DETAIL VIDEO & AUTOMATIC DOWNLOAD TRIGGER (Diketuk dari List) ---
+            // --- MODE 1: DETAIL VIDEO + AUDIO SENDER (Diketuk dari List Selector) ---
             const ytId = getYouTubeId(text.trim());
             if (command === 'ytinfo' || ytId) {
                 await conn.sendMessage(m.chat, { react: { text: "⚡", key: m.key } });
 
                 const targetId = ytId || text.trim();
+                const videoUrl = ytId ? `https://www.youtube.com/watch?v=${targetId}` : targetId;
                 const video = await yts({ videoId: targetId });
 
                 if (!video) {
@@ -52,7 +54,7 @@ module.exports = {
                 detailContent += `⏱️ *Durasi:* ${video.timestamp}\n`;
                 detailContent += `👁️ *Views:* ${video.views.toLocaleString()} kali\n`;
                 detailContent += `📅 *Rilis:* ${video.ago || 'N/A'}\n\n`;
-                detailContent += `📝 *Deskripsi:*\n${video.description ? video.description.slice(0, 150) + '...' : 'Tidak ada deskripsi.'}`;
+                detailContent += `✨ _Aku sedang memproses pengiriman audionya, mohon tunggu..._`;
 
                 // Membuat Pesan Interaktif Detail Video (CTA Watch on YT)
                 const msg = generateWAMessageFromContent(
@@ -66,7 +68,7 @@ module.exports = {
                                 },
                                 interactiveMessage: proto.Message.InteractiveMessage.create({
                                     header: proto.Message.InteractiveMessage.Header.create({
-                                        title: 'Youtube Info',
+                                        title: 'Youtube Info & Player',
                                         hasMediaAttachment: true,
                                         ...media
                                     }),
@@ -119,21 +121,36 @@ module.exports = {
                     ]
                 });
 
-                // --- [ PROSES AUTO-DOWNLOAD: LANGSUNG MANFAATKAN COMMAND INTERNAL BOT ] ---
-                try {
-                    // Beri reaksi unduh/loading
-                    await conn.sendMessage(m.chat, { react: { text: "📥", key: m.key } });
+                // --- [ PROSES DIRECT AUDIO SENDER ] ---
+                await conn.sendMessage(m.chat, { react: { text: '🎶', key: m.key } });
 
-                    // Bot otomatis mengetikkan perintah .ytmp3 untuk memicu plugin downloader lokal kamu
+                try {
+                    const res = await axios.get(
+                        `https://neotex.my.id/download/ytplay?q=${encodeURIComponent(videoUrl)}`,
+                        { timeout: 30000 }
+                    );
+
+                    if (!res.data?.status || !res.data?.result) throw new Error("Gagal mengambil data dari API.");
+
+                    const data = res.data.result;
+                    const audioUrl = data.download?.audio;
+
+                    if (!audioUrl) throw new Error("Audio tidak ditemukan.");
+
+                    // Mengirimkan audio langsung di bawah teks detail info
                     await conn.sendMessage(m.chat, {
-                        text: `${_p}ytmp3 ${video.url}`
+                        audio: { url: audioUrl },
+                        mimetype: "audio/mp4",
+                        fileName: `${video.title}.mp3`
                     }, { quoted: m });
 
-                } catch (audioError) {
-                    console.error("Gagal memicu perintah ytmp3 otomatis:", audioError);
-                }
+                    return await conn.sendMessage(m.chat, { react: { text: '👍🏻', key: m.key } });
 
-                return await conn.sendMessage(m.chat, { react: { text: "✨", key: m.key } });
+                } catch (audioErr) {
+                    console.error("Gagal mengirim audio otomatis:", audioErr);
+                    await conn.sendMessage(m.chat, { react: { text: '🚫', key: m.key } });
+                    return m.reply(`> Gagal mengirim audio otomatis. Server Neotex sedang sibuk atau link bermasalah.`);
+                }
             }
 
 
@@ -154,7 +171,7 @@ module.exports = {
                     header: '',
                     title: `${idx + 1}. ${video.title.slice(0, 35)}`,
                     description: `Durasi: ${video.timestamp} | Ch: ${video.author.name}`,
-                    id: `${_p}ytinfo ${video.url}` // Menyimpan link video ke ID tombol yang akan memicu Mode 1 ketika ditekan
+                    id: `${_p}ytinfo ${video.url}`
                 });
             });
 
@@ -173,7 +190,6 @@ module.exports = {
             searchContent += `┃ 🏮 *Hasil:* ${videos.length} Video Teratas\n\n`;
             searchContent += `Halo @${m.sender.split`@`[0]}! Berikut adalah hasil pencarian video YouTube. Silakan klik tombol di bawah untuk memilih video, bot akan langsung mengirimkan detail info beserta audionya! 🌸`;
 
-            // Gunakan thumbnail video pertama sebagai preview header list menu agar makin interaktif
             let headerMedia;
             try {
                 const topVideoThumb = videos[0].thumbnail || videos[0].image || global.imgall;
@@ -182,7 +198,6 @@ module.exports = {
                 headerMedia = await prepareWAMessageMedia({ image: { url: global.imgall } }, { upload: conn.waUploadToServer });
             }
 
-            // Generate List Select Message
             const msg = generateWAMessageFromContent(
                 m.chat,
                 {
@@ -228,7 +243,6 @@ module.exports = {
                 { userJid: conn.user.id, quoted: m }
             );
 
-            // Relay Message
             await conn.relayMessage(m.chat, msg.message, {
                 messageId: msg.key.id,
                 additionalNodes: [
