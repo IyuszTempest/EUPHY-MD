@@ -98,10 +98,7 @@ module.exports = {
             const finalImage = result.type === 'url' ? { url: result.data } : result.data;
 
             // Kirim balik gambar anime dengan layout caption Euphylia Magenta Style 🌸 (Tanpa External Ad Reply)
-            let successMessage = `┃ ⛩️ *𝙰𝙽𝙸𝙼𝙴 𝙵𝙸𝙻𝚃𝙴𝚁 𝚂𝚄𝙲𝙲𝙴𝚂𝚂*\n`;
-            successMessage += `┃ 🌸 *Style:* Anime Realistic\n`;
-            successMessage += `┃ ✨ *Request by:* @${m.sender.split`@`[0]}\n\n`;
-            successMessage += `Tadaaa! Foto kamu berhasil disulap menjadi karakter anime yang super estetik! Gimana, mirip karakter anime kesukaanmu gak? 💫`;
+            let successMessage = `> Done`;
 
             await conn.sendMessage(m.chat, {
                 image: finalImage,
