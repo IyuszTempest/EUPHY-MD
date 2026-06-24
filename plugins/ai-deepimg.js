@@ -11,6 +11,7 @@ const FormData = require('form-data');
 module.exports = {
     command: ['deepimg'],
     category: 'ai',
+    premium: true,
     noPrefix: true,
     call: async (conn, m, { text, usedPrefix, command }) => {
         let q = m.quoted ? m.quoted : m;
