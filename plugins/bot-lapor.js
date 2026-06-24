@@ -7,12 +7,11 @@
 module.exports = {
     command: ['lapor', 'report', 'request', 'req'],
     category: 'main',
-    noPrefix: true,
+    noPrefix: false,
     call: async (conn, m, { usedPrefix, command, text }) => {
         const ownerNomor = (global.owner && global.owner[0] ? global.owner[0] : conn.user.id.split(':')[0]) + '@s.whatsapp.net';
         const cmd = command.toLowerCase();
 
-        // 1. Panduan penggunaan jika input kosong
         if (!text) {
             return m.reply(
                 `✨ *REPORT & REQUEST HUB* ✨\n\n` +
@@ -22,11 +21,9 @@ module.exports = {
             );
         }
 
-        // 2. Validasi panjang teks
         if (text.length < 5) return m.reply('❌ Pesan terlalu pendek! Berikan keterangan minimal 5 karakter.');
         if (text.length > 1000) return m.reply('❌ Pesan terlalu panjang! Batas maksimal adalah 1000 karakter.');
 
-        // Penentuan tipe kategori laporan
         const isRequest = cmd === 'request' || cmd === 'req';
         const label = isRequest ? '💡 REQUEST FITUR' : '⚠️ LAPORAN ERROR';
         
@@ -36,10 +33,8 @@ module.exports = {
                            + `💬 *Isi Pesan:* ${text.trim()}`;
 
         try {
-            // Kirim pesan ke nomor Owner
             await conn.sendMessage(ownerNomor, { text: laporanToOwner }, { quoted: m });
             
-            // Memberikan feedback reaksi emoji pada pesan user
             await conn.sendMessage(m.chat, { react: { text: '🚀', key: m.key } });
             
             return m.reply(
