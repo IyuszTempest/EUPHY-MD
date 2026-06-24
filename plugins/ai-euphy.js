@@ -1,5 +1,5 @@
 /**
- * Plugin: Kuroyami AI Chatbot v3.3 (Dynamic Agent Command Executor - Strictly Owner Only via LID) 🎀
+ * Plugin: AI Chatbot v3.3 (Dynamic Agent Command Executor - Strictly Owner Only via LID) 🎀
  * Fitur: Auto-respond khusus Owner (Iyus) menggunakan global.lidowner, session history,
  * membaca media secara multimodal, dan otomatis mengeksekusi modul plugin bot secara dinamis.
  */
@@ -14,9 +14,9 @@ const moment = require('moment-timezone');
 // ===============================
 // CONFIG & INITIALIZATION
 // ===============================
-const TRIGGER_REGEX = /\bkuro\b/i;
-global._kuroHistory = global._kuroHistory ?? new Map();
-global._kuroExecutedMessages = global._kuroExecutedMessages ?? new Set();
+const TRIGGER_REGEX = /\beuphy\b/i;
+global._euphyHistory = global._euphyHistory ?? new Map();
+global._euphyExecutedMessages = global._euphyExecutedMessages ?? new Set();
 
 const genAI = new GoogleGenerativeAI(global.gemini);
 
@@ -84,19 +84,19 @@ function initUserSession(sender) {
         premiumTime: 0,
         afk: -1,
         afkReason: '',
-        kuro: {
+        euphy: {
           session: [],
           lastUsed: 0
         }
       };
       user = global.db.data.users[sender];
     } else {
-      user = { kuro: { session: [], lastUsed: 0 } };
+      user = { euphy: { session: [], lastUsed: 0 } };
     }
   }
   
-  if (!user.kuro) {
-    user.kuro = { session: [], lastUsed: 0 };
+  if (!user.euphy) {
+    user.euphy = { session: [], lastUsed: 0 };
   }
   
   return user;
@@ -112,7 +112,7 @@ function getQuotedInfo(m, conn) {
   if (sender) {
     const botJid = conn.user?.id?.split(':')[0] + '@s.whatsapp.net';
     if (sender === botJid) {
-      senderName = "Kamu (kuro)";
+      senderName = "Kamu (euphy)";
     } else {
       senderName = isOwner(sender) ? "Iyus" : "User";
     }
@@ -177,10 +177,10 @@ Jika user meminta bantuan, mencari informasi, mengunduh file, atau melakukan tin
    * Contoh: Jika user mengirim gambar/video/stiker (atau membalas salah satunya) dan bilang "buat stiker ya" atau "jadikan stiker", dan di list ada ".sticker", tulis di akhir: ||EXECUTE: .sticker||
 4. Jika keinginan user tidak dapat dicocokkan dengan perintah aktif di atas, atau jika user hanya mengobrol/curhat biasa, JANGAN gunakan format eksekusi tersebut.`;
 
-  if (!global._kuroHistory.has(chatId)) {
-    global._kuroHistory.set(chatId, []);
+  if (!global._euphyHistory.has(chatId)) {
+    global._euphyHistory.set(chatId, []);
   }
-  const history = global._kuroHistory.get(chatId);
+  const history = global._euphyHistory.get(chatId);
   const model = genAI.getGenerativeModel({ 
     model: 'gemini-3.1-flash-lite',
     systemInstruction: systemPrompt
@@ -197,7 +197,7 @@ Jika user meminta bantuan, mencari informasi, mengunduh file, atau melakukan tin
     }
   }
 
-  promptPayload += `User: ${query.replace(/kuro/ig, "").trim()}`;
+  promptPayload += `User: ${query.replace(/euphy/ig, "").trim()}`;
   let result;
   if (mediaData) {
     const mediaContextText = `\n[INFO MEDIA]\nUser melampirkan file media (${mediaData.mime}). Silakan baca, dengar, atau analisis isinya lalu jawab pesan user dengan mengaitkannya secara alami.\n`;
@@ -229,13 +229,13 @@ Jika user meminta bantuan, mencari informasi, mengunduh file, atau melakukan tin
 // PLUGIN MODULE EXPORTS
 // ===============================
 module.exports = {
-  command: ['resetkuro'],
+  command: ['reseteuphy'],
   category: 'ai',
   owner: true, 
   noPrefix: true,
 
   call: async (conn, m) => {
-    global._kuroHistory.delete(m.sender);
+    global._euphyHistory.delete(m.sender);
     return m.reply("Memori obrolan kita berdua sudah direset ya! Yuk mari mulai chat baru lagi.");
   },
 
@@ -247,7 +247,7 @@ module.exports = {
     if (!isOwner(sender)) return;
 
     const msgId = m.key?.id || "";
-    if (msgId.startsWith('kuro_EXEC_') || global._kuroExecutedMessages.has(msgId)) {
+    if (msgId.startsWith('euphy_EXEC_') || global._euphyExecutedMessages.has(msgId)) {
       return;
     }
 
@@ -261,7 +261,7 @@ module.exports = {
     if (!text && !mime) return;
 
     if (/^[°•π÷×¶∆£¢€¥®™✓_=|~!?@#$%^&.\-+*\/]/.test(text)) return;
-    if (/^resetkuro$/i.test(text)) return;
+    if (/^reseteuphy$/i.test(text)) return;
 
     const user = initUserSession(sender);
 
@@ -299,10 +299,10 @@ module.exports = {
       const response = await getAIResponse(m.chat, text, sender, conn, m, mediaData);
 
       if (response) {
-        user.kuro.lastUsed = Date.now();
-        user.kuro.session.push({ role: 'user', text });
-        user.kuro.session.push({ role: 'assistant', text: response });
-        if (user.kuro.session.length > 20) user.kuro.session.splice(0, 2);
+        user.euphy.lastUsed = Date.now();
+        user.euphy.session.push({ role: 'user', text });
+        user.euphy.session.push({ role: 'assistant', text: response });
+        if (user.euphy.session.length > 20) user.euphy.session.splice(0, 2);
 
         let cleanResponse = response.trim();
         let executeCommand = null;
@@ -317,8 +317,8 @@ module.exports = {
         await conn.sendMessage(m.chat, { text: cleanResponse }, { quoted: m });
 
         if (executeCommand) {
-          m.key.id = 'kuro_EXEC_' + Math.random().toString(36).substring(2, 11).toUpperCase();
-          global._kuroExecutedMessages.add(m.key.id);
+          m.key.id = 'euphy_EXEC_' + Math.random().toString(36).substring(2, 11).toUpperCase();
+          global._euphyExecutedMessages.add(m.key.id);
 
           m.text = executeCommand;
           m.body = executeCommand;
