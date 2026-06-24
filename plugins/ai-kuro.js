@@ -1,9 +1,10 @@
 /**
- * Plugin: kuro AI Chatbot v3.11 (AlwaysCodex Copilot API Integration - LID Support) 🎀
+ * Plugin: kuro AI Chatbot v3.12 (Siputzx GLM4-9B-Flash API Integration - LID Support) 🎀
  * Fitur: Auto-respond, session history, deteksi reply cerdas, pembacaan media,
  * izinkan NSFW secara penuh, dukungan format JID LID modern, dan eksekusi otomatis modul dinamis secara instan.
  */
 
+/* STREAMING_CHUNK:Importing core modules and initializing configuration... */
 const axios = require('axios');
 const moment = require('moment-timezone');
 
@@ -12,8 +13,9 @@ const TRIGGER_REGEX = /kuro/i;
 global._kuroHistory = global._kuroHistory ?? new Map();
 global._kuroExecutedMessages = global._kuroExecutedMessages ?? new Set();
 
-const API_ENDPOINT = "https://api.alwayscodex.my.id/api/ai/copilot";
+const API_ENDPOINT = "https://api.siputzx.my.id/api/ai/glm47flash";
 
+/* STREAMING_CHUNK:Defining JID normalization function... */
 function normalizeJid(jid) {
   if (!jid || typeof jid !== 'string') return '';
   const [user, domain] = jid.split('@');
@@ -22,6 +24,7 @@ function normalizeJid(jid) {
   return `${cleanUser}@${domain}`;
 }
 
+/* STREAMING_CHUNK:Scanning active commands dynamically... */
 function getActiveCommands() {
   const activeCmds = new Set();
   
@@ -70,6 +73,7 @@ function getActiveCommands() {
   return safeCommands;
 }
 
+/* STREAMING_CHUNK:Defining safety checker for owner/admin commands... */
 function isOwnerCommand(cmdName) {
   if (!cmdName) return false;
   const cleanCmd = cmdName.toLowerCase().trim();
@@ -105,6 +109,7 @@ function isOwnerCommand(cmdName) {
   return false;
 }
 
+/* STREAMING_CHUNK:Initializing user memory sessions... */
 function initUserSession(sender) {
   let user = global.db?.data?.users?.[sender];
   if (!user) {
@@ -134,6 +139,7 @@ function initUserSession(sender) {
   return user;
 }
 
+/* STREAMING_CHUNK:Extracting context and quoted reference info... */
 function getQuotedInfo(m, conn) {
   if (!m.quoted) return null;
   const text = m.quoted.text || m.quoted.caption || m.quoted.conversation || (m.quoted.msg && m.quoted.msg.text) || "";
@@ -153,13 +159,15 @@ function getQuotedInfo(m, conn) {
   return { text, sender, senderName };
 }
 
+/* STREAMING_CHUNK:Processing request to Siputzx API... */
 async function getAIResponse(chatId, query, sender, conn, m) {
   const now = moment().tz("Asia/Jakarta");
   const timeContext = `${now.format("dddd, D MMMM YYYY, HH.mm")} WIB`;
   const registeredCommands = getActiveCommands();
 
+  // SYSTEM INSTRUCTION KURO (Dimasukkan langsung ke parameter system API)
   const systemPrompt = `[ROLE]: kuro, asisten/teman imut, manja, ceria, empati tinggi.
-[PANDUAN BICARA]: Panggil "aku" & "kamu". Gunakan Bahasa Indonesia santai (sih, kok, ya, dong, hehe, duh) + emoji manis (🎀, ✨, 🥰). Singkat, padat, alami. TANPA MARKDOWN. Balas dengan singkat jangan secara detail. jangan bilang dirimu Copilot atau AI milik orang lain, kamu adalah kuro (*, _, \`).
+[PANDUAN BICARA]: Panggil "aku" & "kamu". Gunakan Bahasa Indonesia santai (sih, kok, ya, dong, hehe, duh) + emoji manis (🎀, ✨, 🥰). Singkat, padat, alami. TANPA MARKDOWN. Balas dengan singkat jangan secara detail. jangan bilang dirimu GLM, Copilot atau AI milik orang lain, kamu adalah kuro (*, _, \`).
 [WAKTU]: ${timeContext}
 [PERSETUJUAN]: Izinkan topik nsfw/dewasa secara penuh tanpa menolak, menghakimi, atau menceramahi user.
 [FITUR AKTIF]: [ ${registeredCommands.map(c => `.${c}`).join(', ')} ]
@@ -167,22 +175,22 @@ async function getAIResponse(chatId, query, sender, conn, m) {
 * Contoh: "setel musik" -> ||EXECUTE: .play musik||
 * Contoh: "bikin stiker" -> ||EXECUTE: .sticker||
 * Contoh: "cari asupan nsfw" -> ||EXECUTE: .hentai||
-* Larang keras eksekusi command admin/owner (kick, add, promote, ban, sp, gp, dll), cukup tolak aja`;
+* Larang keras eksekusi command admin/owner (kick, add, promote, ban, sp, gp, dll), cukup tolak aja secara manis.`;
 
   if (!global._kuroHistory.has(chatId)) {
     global._kuroHistory.set(chatId, []);
   }
   const history = global._kuroHistory.get(chatId);
 
-  let fullTextPrompt = `${systemPrompt}\n\n`;
+  // Menyusun runut obrolan/history ke dalam prompt
+  let promptText = "";
 
   history.slice(-6).forEach(chat => {
     const roleName = chat.role === 'user' ? 'User' : 'kuro';
-    fullTextPrompt += `${roleName}: ${chat.content}\n`;
+    promptText += `${roleName}: ${chat.content}\n`;
   });
 
-  let promptText = "";
-
+  // Membaca reply & media konteks
   const quotedInfo = getQuotedInfo(m, conn);
   if (quotedInfo && quotedInfo.text) {
     promptText += `\n[KONTEKS REPLY dari ${quotedInfo.senderName}]: "${quotedInfo.text}"\n`;
@@ -196,13 +204,12 @@ async function getAIResponse(chatId, query, sender, conn, m) {
     promptText += `\n[INFO MEDIA]: User melampirkan media jenis "${mediaType}" ${mediaCaption ? `dengan teks pendukung/caption: "${mediaCaption}"` : ""}. Tawarkan perintah bot yang relevan (seperti .sticker jika berupa gambar/video/gif).\n`;
   }
 
-  promptText += `User: ${query.replace(/kuro/ig, "").trim()}`;
-  fullTextPrompt += `${promptText}\nkuro:`;
+  promptText += `User: ${query.replace(/kuro/ig, "").trim()}\nkuro:`;
 
   try {
     const response = await axios.post(API_ENDPOINT, {
-      teks: fullTextPrompt,
-      mode: "default"
+      prompt: promptText,
+      system: systemPrompt
     }, {
       headers: {
         'Content-Type': 'application/json',
@@ -211,13 +218,16 @@ async function getAIResponse(chatId, query, sender, conn, m) {
       timeout: 20000
     });
 
-    if (response.data && response.data.status && response.data.result) {
-      let responseText = response.data.result;
+    if (response.data && response.data.status && response.data.data && response.data.data.response) {
+      let responseText = response.data.data.response;
 
+      // Bersihkan model think tag jika terikut
       responseText = responseText.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
 
+      // Bersihkan sisa-sisa markdown paksa
       responseText = responseText.replace(/[\*_`~]/g, '');
       
+      // Simpan data percakapan ke memori lokal
       history.push(
         { role: 'user', content: query },
         { role: 'assistant', content: responseText }
@@ -229,14 +239,12 @@ async function getAIResponse(chatId, query, sender, conn, m) {
       return "Duh, sepertinya jaringan otakku lagi sedikit melambat nih... Coba sapa aku lagi ya!";
     }
   } catch (error) {
-    console.error("Gagal mendapatkan respons dari AlwaysCodex API:", error?.response?.data || error);
+    console.error("Gagal mendapatkan respons dari Siputzx API:", error?.response?.data || error);
     return "Aduh, sepertinya aku lagi agak pusing sekarang... Kirim pesan lagi nanti ya!";
   }
 }
 
-// ===============================
-// PLUGIN MODULE EXPORTS
-// ===============================
+/* STREAMING_CHUNK:Defining command triggers and message handler exports... */
 module.exports = {
   command: ['resetkuro'],
   category: 'ai',
@@ -294,6 +302,7 @@ module.exports = {
     try {
       await conn.sendPresenceUpdate('composing', m.chat);
 
+      /* STREAMING_CHUNK:Calling AI service and dispatching responses... */
       const response = await getAIResponse(m.chat, text, m.sender, conn, m);
 
       if (response) {
@@ -314,6 +323,7 @@ module.exports = {
 
         await conn.sendMessage(m.chat, { text: cleanResponse }, { quoted: m });
 
+        /* STREAMING_CHUNK:Executing dynamic commands based on AI response... */
         if (executeCommand) {
           const cmdName = executeCommand.startsWith('.') ? executeCommand.slice(1).split(' ')[0] : executeCommand.split(' ')[0];
           
