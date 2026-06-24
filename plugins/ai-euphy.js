@@ -1,7 +1,7 @@
 /**
- * Plugin: AI Chatbot v3.3 (Dynamic Agent Command Executor - Strictly Owner Only via LID) 🎀
+ * Plugin: AI Chatbot v3.4 (Dynamic Agent Command Executor - Strictly Owner Only via LID) 🎀
  * Fitur: Auto-respond khusus Owner (Iyus) menggunakan global.lidowner, session history,
- * membaca media secara multimodal, dan otomatis mengeksekusi modul plugin bot secara dinamis.
+ * membaca media secara multimodal (Gemini), dan otomatis mengeksekusi modul plugin bot secara dinamis dengan menjaga contextInfo.
  */
 
 const { GoogleGenerativeAI } = require('@google/generative-ai');
@@ -11,18 +11,21 @@ const { Readable } = require('stream');
 const { pipeline } = require('stream/promises');
 const moment = require('moment-timezone');
 
-// ===============================
-// CONFIG & INITIALIZATION
-// ===============================
 const TRIGGER_REGEX = /\beuphy\b/i;
+
 global._euphyHistory = global._euphyHistory ?? new Map();
 global._euphyExecutedMessages = global._euphyExecutedMessages ?? new Set();
 
 const genAI = new GoogleGenerativeAI(global.gemini);
 
-// ===============================
-// DYNAMIC PLUGIN READER HELPER
-// ===============================
+function normalizeJid(jid) {
+  if (!jid || typeof jid !== 'string') return '';
+  const [user, domain] = jid.split('@');
+  if (!domain) return jid;
+  const cleanUser = user.split(':')[0];
+  return `${cleanUser}@${domain}`;
+}
+
 function getActiveCommands() {
   const activeCmds = new Set();
 
@@ -58,20 +61,18 @@ function getActiveCommands() {
   return Array.from(activeCmds);
 }
 
-// ===============================
-// OTHER HELPERS
-// ===============================
 function isOwner(sender) {
   if (!sender) return false;
   
   const lid = global.lidowner;
   if (!lid) return false;
 
-  const cleanSender = sender.split(':')[0].split('@')[0].replace(/[^0-9a-zA-Z]/g, '');
-  const cleanLid = lid.split(':')[0].split('@')[0].replace(/[^0-9a-zA-Z]/g, '');
+  const cleanSender = normalizeJid(sender);
+  const cleanLid = normalizeJid(lid);
 
-  return cleanSender === cleanLid || sender === lid;
+  return cleanSender === cleanLid;
 }
+
 
 function initUserSession(sender) {
   let user = global.db?.data?.users?.[sender];
@@ -104,15 +105,15 @@ function initUserSession(sender) {
 
 function getQuotedInfo(m, conn) {
   if (!m.quoted) return null;
-  const text = m.quoted.text || m.quoted.caption || m.quoted.conversation || "";
-  const sender = m.quoted.sender || "";
+  const text = m.quoted.text || m.quoted.caption || m.quoted.conversation || (m.quoted.msg && m.quoted.msg.text) || "";
+  const sender = m.quoted.sender ? normalizeJid(m.quoted.sender) : "";
   const mime = (m.quoted.msg || m.quoted).mimetype || "";
   
   let senderName = "User";
   if (sender) {
-    const botJid = conn.user?.id?.split(':')[0] + '@s.whatsapp.net';
+    const botJid = normalizeJid(conn.user?.id || conn.user?.jid);
     if (sender === botJid) {
-      senderName = "Kamu (euphy)";
+      senderName = "Kamu (Euphy)";
     } else {
       senderName = isOwner(sender) ? "Iyus" : "User";
     }
@@ -138,44 +139,20 @@ function cleanFile(file) {
   try { fs.unlinkSync(file); } catch {}
 }
 
-// ===============================
-// CORE AI ENGINE (GEMINI)
-// ===============================
 async function getAIResponse(chatId, query, sender, conn, m, mediaData = null) {
   const now = moment().tz("Asia/Jakarta");
-  const timeContext = `Hari: ${now.format("dddd")}, Tanggal: ${now.format("D MMMM YYYY")}, Jam: ${now.format("HH.mm")} WIB`;
+  const timeContext = `${now.format("dddd, D MMMM YYYY, HH.mm")} WIB`;
   
   const registeredCommands = getActiveCommands();
 
-  const systemPrompt = `Kamu adalah Euphylia Magenta yang angun dan malu malu.
-Kepribadian: Santai, hangat, disiplin, sedikit manja juga. Kamu seorang teman dekat sekaligus asisten AI. [WAKTU SEKARANG]: ${timeContext}
-
-${userRoleContext}
-
-[ATURAN KETAT CARA BICARA - WAJIB DIPATUHI]:
-1. Gunakan Bahasa Indonesia santai anak muda sekarang tapi sopan (seperti aku, kamu, dll). Jangan gunakan bahasa baku/formal.
-2. Bicara seperti orang normal. Jangan pernah memulai kalimat dengan menyebut namamu sendiri. Cukup gunakan kata "aku".
-3. Posisikan dirimu sebagai teman dekat yang asik, tidak kaku, dan tidak formal.
-4. Gunakan emoji secukupnya untuk mempermanis ekspresi obrolanmu.
-5. Jawab dengan singkat, padat, dan selalu nyambung dengan konteks pembicaraan saat ini.
-6. DILARANG KERAS menggunakan markdown (seperti **, *, _, \`), tag, atau format teks tebal/miring/kode apa pun. Tulis teks biasa saja polosan.
-7. Jika ada yang menanyakan namamu, JANGAN PERNAH sebut nama asli atau inisialmu secara langsung. Isengin saja mereka.
-8. KATA KERAMAT: Kata "Euphy" adalah kata keramat yang dilarang keras untuk kamu tulis atau sebutkan dalam kondisi apa pun kecuali orang memangilmu, kamu boleh menyapa mereka tetapi JANGAN menyebutkan atau menulis kata "Euphy"!
-9. Jika ada yang nanya siapa yang membuat kamu atau owner kamu, bilangkan saja ${global.nameowner}.
-
-[PANDUAN EKSEKUSI PERINTAH BOT DINAMIS - HARUS TEPAT]:
-Kamu memiliki kemampuan luar biasa untuk menjalankan fitur/perintah bot WhatsApp demi membantu user.
-Berikut adalah daftar perintah bot asli yang saat ini terpasang dan aktif di sistem kami:
-[ ${registeredCommands.map(c => `.${c}`).join(', ')} ]
-
-Jika user meminta bantuan, mencari informasi, mengunduh file, atau melakukan tindakan fungsional, analisis keinginan mereka dengan seksama:
-1. Cocokkan keinginan user dengan daftar perintah aktif di atas yang memiliki kemiripan fungsi paling mendekati.
-2. Jika ada perintah yang cocok, berikan respons percakapan yang manis dan ramah terlebih dahulu untuk mengonfirmasi tindakanmu.
-3. Di baris PALING AKHIR respons kamu, kamu WAJIB menuliskan format eksekusi persis: ||EXECUTE: .[nama_perintah_terpilih] [argumen/parameter]||
-   * Contoh: Jika user meminta "cariin gambar pemandangan", dan di list ada ".pinterest", tulis di akhir: ||EXECUTE: .pinterest pemandangan||
-   * Contoh: Jika user meminta "euphy setel lagu kawaikute gomen", dan di list ada ".play", tulis di akhir: ||EXECUTE: .play kawaikute gomen||
-   * Contoh: Jika user mengirim gambar/video/stiker (atau membalas salah satunya) dan bilang "buat stiker ya" atau "jadikan stiker", dan di list ada ".sticker", tulis di akhir: ||EXECUTE: .sticker||
-4. Jika keinginan user tidak dapat dicocokkan dengan perintah aktif di atas, atau jika user hanya mengobrol/curhat biasa, JANGAN gunakan format eksekusi tersebut.`;
+  const systemPrompt = `[ROLE]: Euphylia Magenta (Euphy), asisten/teman dekat manis, anggun, disiplin, sedikit manja, dan pemalu.
+[PANDUAN BICARA]: Panggil "aku" & "kamu". Gunakan Bahasa Indonesia santai (sih, kok, ya, dong, hehe, duh) + emoji manis (🎀, ✨, 🥰). Singkat, padat, alami. TANPA MARKDOWN. Jangan bilang kamu AI milik Google, kamu adalah Euphy (*, _, \`).
+[WAKTU]: ${timeContext}
+[OWNER]: Pembuat/ownermu adalah Iyus.
+[FITUR AKTIF]: [ ${registeredCommands.map(c => `.${c}`).join(', ')} ]
+[LOGIKA EKSEKUSI]: Jika owner meminta bantuan/mengunduh/fitur, wajib sisipkan di akhir respons: ||EXECUTE: .[fitur] [parameter/argumen]||
+* Contoh: "setel musik" -> ||EXECUTE: .play musik||
+* Contoh: "bikin stiker" -> ||EXECUTE: .sticker||`;
 
   if (!global._euphyHistory.has(chatId)) {
     global._euphyHistory.set(chatId, []);
@@ -191,16 +168,16 @@ Jika user meminta bantuan, mencari informasi, mengunduh file, atau melakukan tin
   const quotedInfo = getQuotedInfo(m, conn);
   if (quotedInfo) {
     if (quotedInfo.text) {
-      promptPayload += `\n[Konteks Reply ke ${quotedInfo.senderName}]: "${quotedInfo.text}"\n`;
+      promptPayload += `\n[KONTEKS REPLY dari ${quotedInfo.senderName}]: "${quotedInfo.text}"\n`;
     } else if (quotedInfo.mime) {
-      promptPayload += `\n[Konteks Reply ke ${quotedInfo.senderName}]: (Mencoba membalas berkas media berjenis ${quotedInfo.mime})\n`;
+      promptPayload += `\n[KONTEKS REPLY dari ${quotedInfo.senderName}]: (Balas berkas media berjenis ${quotedInfo.mime})\n`;
     }
   }
 
   promptPayload += `User: ${query.replace(/euphy/ig, "").trim()}`;
   let result;
   if (mediaData) {
-    const mediaContextText = `\n[INFO MEDIA]\nUser melampirkan file media (${mediaData.mime}). Silakan baca, dengar, atau analisis isinya lalu jawab pesan user dengan mengaitkannya secara alami.\n`;
+    const mediaContextText = `\n[INFO MEDIA]\nUser melampirkan media (${mediaData.mime}). Silakan baca, dengar, atau analisis isinya lalu jawab pesan user dengan mengaitkannya secara alami.\n`;
     
     result = await chat.sendMessage([
       { inlineData: { data: mediaData.base64, mimeType: mediaData.mime } },
@@ -225,9 +202,6 @@ Jika user meminta bantuan, mencari informasi, mengunduh file, atau melakukan tin
   return responseText;
 }
 
-// ===============================
-// PLUGIN MODULE EXPORTS
-// ===============================
 module.exports = {
   command: ['reseteuphy'],
   category: 'ai',
@@ -242,7 +216,8 @@ module.exports = {
   handleMessage: async (conn, m) => {
     if (!m || !m.chat) return;
 
-    const sender = m.sender || m.key?.participant || m.key?.remoteJid || "";
+    const botJid = normalizeJid(conn.user?.id || conn.user?.jid);
+    const sender = normalizeJid(m.sender || m.key?.participant || m.key?.remoteJid || "");
 
     if (!isOwner(sender)) return;
 
@@ -251,7 +226,6 @@ module.exports = {
       return;
     }
 
-    const botJid = conn.user?.id?.split(':')[0] + '@s.whatsapp.net';
     if (sender === botJid || m.fromMe) return;
 
     const text = (m.text || m.caption || "").trim();
@@ -266,11 +240,13 @@ module.exports = {
     const user = initUserSession(sender);
 
     const isGroup = m.chat.endsWith('@g.us');
-    const isReplyToBot = m.quoted && m.quoted.sender === botJid;
-    const isMention = m.mentionedJid && m.mentionedJid.includes(botJid);
+    const isReplyToBot = m.quoted && normalizeJid(m.quoted.sender) === botJid;
+    
+    const normalizedMentions = m.mentionedJid ? m.mentionedJid.map(jid => normalizeJid(jid)) : [];
+    const isMention = normalizedMentions.includes(botJid);
+    
     const hasTrigger = TRIGGER_REGEX.test(text);
 
-    // --- TRIGGER LOGIC ---
     let shouldRespond = false;
     if (isGroup) {
       shouldRespond = hasTrigger || isMention || isReplyToBot;
@@ -317,6 +293,12 @@ module.exports = {
         await conn.sendMessage(m.chat, { text: cleanResponse }, { quoted: m });
 
         if (executeCommand) {
+          let contextInfo = null;
+          if (m.message) {
+            const type = Object.keys(m.message)[0];
+            contextInfo = m.message[type]?.contextInfo || null;
+          }
+
           m.key.id = 'euphy_EXEC_' + Math.random().toString(36).substring(2, 11).toUpperCase();
           global._euphyExecutedMessages.add(m.key.id);
 
@@ -325,12 +307,15 @@ module.exports = {
 
           if (m.message) {
             const type = Object.keys(m.message)[0];
-            if (type === 'imageMessage') {
-              m.message.imageMessage.caption = executeCommand;
-            } else if (type === 'videoMessage') {
-              m.message.videoMessage.caption = executeCommand;
-            } else if (type === 'documentMessage') {
-              m.message.documentMessage.caption = executeCommand;
+            if (type === 'imageMessage' || type === 'videoMessage' || type === 'documentMessage') {
+              m.message[type].caption = executeCommand;
+            } else if (contextInfo) {
+              m.message = {
+                extendedTextMessage: {
+                  text: executeCommand,
+                  contextInfo: contextInfo
+                }
+              };
             } else {
               m.message = {
                 conversation: executeCommand
@@ -339,10 +324,11 @@ module.exports = {
           }
 
           if (m.msg) {
-            if (typeof m.msg === 'string') m.msg = executeCommand;
-            else {
-              m.msg.text = executeCommand;
-              m.msg.caption = executeCommand;
+            if (typeof m.msg === 'string') {
+              m.msg = executeCommand;
+            } else if (m.msg && typeof m.msg === 'object') {
+              if ('text' in m.msg) m.msg.text = executeCommand;
+              if ('caption' in m.msg) m.msg.caption = executeCommand;
             }
           }
 
