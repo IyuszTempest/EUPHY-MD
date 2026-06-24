@@ -4,7 +4,7 @@ const path = require('path');
 module.exports = {
     command: ['df'],
     category: 'owner',
-    noPrefix: true,
+    noPrefix: false,
     owner: true,
     call: async (conn, m, { args }) => {
         if (!args[0]) return m.reply('Sebutkan nama file yang mau dihapus!\nContoh: .df tiktok');
