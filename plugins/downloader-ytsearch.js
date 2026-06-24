@@ -1,6 +1,6 @@
 /** * Plugin YouTube Search with List Selector 🎥⛩️
  * Style: Euphylia Magenta - "The King of UI" Style 🌸
- * Features: High-accuracy YT Search, Thumbnail Preview, and Download Shortcuts
+ * Features: High-accuracy YT Search, Thumbnail Preview, Auto Command Chaining, and Download Shortcuts
  * Adopted from Kuroyami Menu Structure
  */
 
@@ -24,7 +24,7 @@ module.exports = {
                 return m.reply(`Mau cari lagu atau video apa?\nContoh: *${_p + command} Renai Circulation*`);
             }
 
-            // --- MODE 1: DETAIL VIDEO & TOMBOL UNDUH (Diketuk dari List) ---
+            // --- MODE 1: DETAIL VIDEO & AUTOMATIC DOWNLOAD TRIGGER (Diketuk dari List) ---
             const ytId = getYouTubeId(text.trim());
             if (command === 'ytinfo' || ytId) {
                 await conn.sendMessage(m.chat, { react: { text: "⚡", key: m.key } });
@@ -52,9 +52,6 @@ module.exports = {
                 detailContent += `⏱️ *Durasi:* ${video.timestamp}\n`;
                 detailContent += `👁️ *Views:* ${video.views.toLocaleString()} kali\n`;
                 detailContent += `📅 *Rilis:* ${video.ago || 'N/A'}\n\n`;
-                detailContent += `💬 *Pintasan Download:*\n`;
-                detailContent += `» Ketik *${_p}ytmp3 ${video.url}* (Download Audio 🎧)\n`;
-                detailContent += `» Ketik *${_p}ytmp4 ${video.url}* (Download Video 🎬)\n\n`;
                 detailContent += `📝 *Deskripsi:*\n${video.description ? video.description.slice(0, 150) + '...' : 'Tidak ada deskripsi.'}`;
 
                 // Membuat Pesan Interaktif Detail Video (CTA Watch on YT)
@@ -84,7 +81,7 @@ module.exports = {
                                         buttons: [{
                                             name: "cta_url",
                                             buttonParamsJson: JSON.stringify({ 
-                                                display_text: "Tonton di YouTube", 
+                                                display_text: "Tonton di YouTube ⛩️", 
                                                 url: video.url 
                                             })
                                         }]
@@ -106,7 +103,7 @@ module.exports = {
                     { userJid: conn.user.id, quoted: m }
                 );
 
-                // Kirim pesan detail
+                // Kirim pesan detail informasi video
                 await conn.relayMessage(m.chat, msg.message, {
                     messageId: msg.key.id,
                     additionalNodes: [
@@ -121,6 +118,20 @@ module.exports = {
                         }
                     ]
                 });
+
+                // --- [ PROSES AUTO-DOWNLOAD: LANGSUNG MANFAATKAN COMMAND INTERNAL BOT ] ---
+                try {
+                    // Beri reaksi unduh/loading
+                    await conn.sendMessage(m.chat, { react: { text: "📥", key: m.key } });
+
+                    // Bot otomatis mengetikkan perintah .ytmp3 untuk memicu plugin downloader lokal kamu
+                    await conn.sendMessage(m.chat, {
+                        text: `${_p}ytmp3 ${video.url}`
+                    }, { quoted: m });
+
+                } catch (audioError) {
+                    console.error("Gagal memicu perintah ytmp3 otomatis:", audioError);
+                }
 
                 return await conn.sendMessage(m.chat, { react: { text: "✨", key: m.key } });
             }
@@ -143,7 +154,7 @@ module.exports = {
                     header: '',
                     title: `${idx + 1}. ${video.title.slice(0, 35)}`,
                     description: `Durasi: ${video.timestamp} | Ch: ${video.author.name}`,
-                    id: `${_p}ytinfo ${video.url}` // Menyimpan link video ke ID tombol
+                    id: `${_p}ytinfo ${video.url}` // Menyimpan link video ke ID tombol yang akan memicu Mode 1 ketika ditekan
                 });
             });
 
@@ -160,7 +171,7 @@ module.exports = {
             let searchContent = `┃ ⛩️ *𝚈𝙾𝚄𝚃𝚄𝙱𝙴 𝚂𝙴𝙰𝚁𝙲𝙷*\n`;
             searchContent += `┃ ✨ *Query:* ${text}\n`;
             searchContent += `┃ 🏮 *Hasil:* ${videos.length} Video Teratas\n\n`;
-            searchContent += `Halo @${m.sender.split`@`[0]}! Berikut adalah hasil pencarian video YouTube. Silakan klik tombol di bawah untuk melihat detail atau men-download-nya!`;
+            searchContent += `Halo @${m.sender.split`@`[0]}! Berikut adalah hasil pencarian video YouTube. Silakan klik tombol di bawah untuk memilih video, bot akan langsung mengirimkan detail info beserta audionya! 🌸`;
 
             // Gunakan thumbnail video pertama sebagai preview header list menu agar makin interaktif
             let headerMedia;
@@ -241,4 +252,3 @@ module.exports = {
         }
     }
 };
-    
