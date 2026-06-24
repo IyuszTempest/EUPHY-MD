@@ -1,87 +1,120 @@
+/** * Plugin Auto Backup Source Code 🗄️⚡
+ * Style: Euphylia Magenta / Kuroyami Module
+ * Features: Compressing Source Code to .tar.gz, Auto Sent to Owner, and Auto-Rotate Backups
+ */
+
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
 
+function log(type, msg) {
+    console.log(`[${type}] ${msg}`);
+}
+function dim(msg) {
+    return `\x1b[2m${msg}\x1b[0m`;
+}
+
 module.exports = {
-    command: ['backupsc', 'backup'],
+    command: ['backup', 'backupsc'],
     category: 'owner',
-    noPrefix: true,
-    call: async (conn, m, { usedPrefix }) => {
+    owner: true, 
+
+    call: async (conn, m, ctx) => {
         try {
-            const ownerJid = global.lidowner || m.sender;
-            
-            if (m.sender !== ownerJid) {
-                return m.reply("> Maaf, perintah ini sangat rahasia dan hanya bisa digunakan oleh Owner bot!");
+            if (!conn) {
+                log('WARN', 'Koneksi WA belum siap, backup ditunda!');
+                return m.reply('Koneksi belum siap!');
             }
 
-            await conn.sendMessage(m.chat, { react: { text: '📦', key: m.key } });
-            await m.reply("> ⏳ Sedang mencadangkan berkas source code menggunakan utilitas sistem, mohon tunggu...");
+            if (typeof saveDatabase === 'function') {
+                saveDatabase();
+            } else if (global.db && typeof global.db.write === 'function') {
+                await global.db.write();
+            }
 
-            const zipPath = './bot_backup.zip';
-            const tarPath = './bot_backup.tar.gz';
+            let ownerLid = global.lidowner;
+            if (!ownerLid && global.owner) {
+                const firstOwner = Array.isArray(global.owner) ? global.owner[0] : global.owner;
+                if (firstOwner) {
+                    const rawNumber = firstOwner.split('@')[0];
+                    ownerLid = `${rawNumber}@lid`; 
+                }
+            }
 
-            if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
-            if (fs.existsSync(tarPath)) fs.unlinkSync(tarPath);
+            const targetJid = ownerLid || m.sender;
 
-            const zipCommand = `zip -r ${zipPath} . -x "node_modules/*" "session/*" "sessions/*" "bot_backup.zip" "bot_backup.tar.gz" ".git/*" ".npm/*" "package-lock.json"`;
+            await conn.sendMessage(m.chat, { react: { text: "⏳", key: m.key } });
+            
+            const rootDir = process.cwd(); 
+            const backupDir = path.join(rootDir, 'backups');
 
-            exec(zipCommand, async (error, stdout, stderr) => {
-                const zipExists = fs.existsSync(zipPath);
-                const zipSize = zipExists ? fs.statSync(zipPath).size : 0;
+            if (!fs.existsSync(backupDir)) {
+                fs.mkdirSync(backupDir, { recursive: true });
+            }
 
-                if (!error && zipExists && zipSize > 0) {
-                    try {
-                        const fileSizeMB = (zipSize / 1024 / 1024).toFixed(2);
-                        
-                        await conn.sendMessage(ownerJid, { 
-                            document: fs.readFileSync(zipPath), 
-                            fileName: 'Kuroyami_Backup.zip',
-                            mimetype: 'application/zip',
-                            caption: `🌸 *BACKUP COMPLETED (ZIP)* 🌸\n\n📄 *File:* Kuroyami_Backup.zip\n📦 *Size:* ${fileSizeMB} MB\n📅 *Date:* ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB\n\n_Simpan backup ini baik-baik ya!_`
-                        });
-                        
-                        await m.reply("> 🚀 Selesai! Berkas backup ZIP sukses dikirim langsung ke chat pribadi kamu!");
-                        
-                        if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
-                    } catch (sendError) {
-                        console.error("Gagal mengirim berkas zip:", sendError);
-                        m.reply(`❌ Gagal mengirim berkas backup: ${sendError.message}`);
-                    }
-                } else {
-                    const tarCommand = `tar -czf ${tarPath} --exclude="node_modules" --exclude="session" --exclude="sessions" --exclude="bot_backup.zip" --exclude="bot_backup.tar.gz" --exclude=".git" --exclude=".npm" --exclude="package-lock.json" .`;
-                    
-                    exec(tarCommand, async (tarError, tarStdout, tarStderr) => {
-                        const tarExists = fs.existsSync(tarPath);
-                        const tarSize = tarExists ? fs.statSync(tarPath).size : 0;
-                      
-                        if (tarExists && tarSize > 0) {
-                            try {
-                                const fileSizeMB = (tarSize / 1024 / 1024).toFixed(2);
-                                
-                                await conn.sendMessage(ownerJid, { 
-                                    document: fs.readFileSync(tarPath), 
-                                    fileName: 'Kuroyami_Backup.tar.gz',
-                                    mimetype: 'application/gzip',
-                                    caption: `🌸 *BACKUP COMPLETED (TAR.GZ)* 🌸\n\n📄 *File:* Kuroyami_Backup.tar.gz\n📦 *Size:* ${fileSizeMB} MB\n📅 *Date:* ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB\n\n_Catatan: Pencadangan sukses dialihkan ke kompresi Gzip tarball. Simpan baik-baik ya!_`
-                                });
-                                
-                                await m.reply("> 🚀 Selesai! Berkas backup TAR.GZ sukses dikirim langsung ke chat pribadi kamu!");
-                                
-                                if (fs.existsSync(tarPath)) fs.unlinkSync(tarPath);
-                            } catch (sendError) {
-                                console.error("Gagal mengirim berkas tarball:", sendError);
-                                m.reply(`❌ Gagal mengirim berkas backup tar.gz: ${sendError.message}`);
-                            }
-                        } else {
-                            m.reply(`❌ Gagal melakukan backup dengan utilitas sistem!\n\n• ZIP Error: ${error ? error.message : 'Unknown'}\n• TAR Error: ${tarError ? tarError.message : 'Unknown'}`);
-                        }
+            const stamp = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }).replace(/[/:, ]/g, '-');
+            const zipName = 'backup-sc-' + stamp + '.tar.gz';
+            const zipPath = path.join(backupDir, zipName);
+
+            const cmd = `tar --exclude='node_modules' --exclude='.npm' --exclude='session' --exclude='backups' --exclude='tmp' --exclude='.git' -czf "${zipPath}" -C "${rootDir}" .`;
+
+            exec(cmd, async (err) => {
+                if (err) {
+                    log('ERROR', 'Gagal kompresi tar.gz: ' + err.message);
+                    return m.reply(`❌ Gagal membuat kompresi berkas backup: ${err.message}`);
+                }
+
+                log('BACKUP', 'Bundle tar.gz dibuat ' + dim('-> ' + zipName));
+
+                const u = global.db?.data?.users ? Object.keys(global.db.data.users).length : 0;
+                const c = global.db?.data?.chats ? Object.keys(global.db.data.chats).length : 0;
+
+                const caption = '🗄️ *AUTO BACKUP SOURCE CODE — BOT SYSTEM*\n\n' +
+                                '📅 ' + new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }) + '\n' +
+                                '👥 Users  : ' + u + '\n' +
+                                '💬 Chats  : ' + c + '\n' +
+                                '📦 Format : Tar Gzip (.tar.gz)\n\n' +
+                                `🌸 _${global.wm}_`;
+
+                try {
+                    await conn.sendMessage(targetJid, {
+                        document: fs.readFileSync(zipPath),
+                        mimetype: 'application/gzip',
+                        fileName: zipName,
+                        caption: caption
                     });
+
+                    log('BACKUP', 'Terkirim ke WA Owner');
+                    
+                    if (m.chat !== targetJid) {
+                        m.reply(`✅ *Backup Berhasil!* Berkas sukses dikirim langsung ke chat pribadi Owner.`);
+                    }
+                    await conn.sendMessage(m.chat, { react: { text: "👍", key: m.key } });
+
+                } catch (sendErr) {
+                    log('ERROR', 'Gagal kirim dokumen backup: ' + sendErr.message);
+                    m.reply(`❌ Gagal mengirimkan file dokumen backup ke WA: ${sendErr.message}`);
+                }
+                
+                try {
+                    const allBackups = fs.readdirSync(backupDir)
+                        .filter(f => f.startsWith('backup-sc-') && f.endsWith('.tar.gz'))
+                        .map(f => ({ f, t: fs.statSync(path.join(backupDir, f)).mtimeMs }))
+                        .sort((a, b) => a.t - b.t);
+
+                    while (allBackups.length > 24) {
+                        const old = allBackups.shift();
+                        fs.unlinkSync(path.join(backupDir, old.f));
+                        log('BACKUP', 'Rotate hapus: ' + dim(old.f));
+                    }
+                } catch (rotateErr) {
+                    log('ERROR', 'Gagal rotasi backup: ' + rotateErr.message);
                 }
             });
 
         } catch (e) {
-            console.error('[BackupSC Error]', e.message);
-            m.reply('❌ Gagal melakukan backup: ' + e.message);
+            log('ERROR', 'runBackup gagal: ' + e.message);
+            m.reply(`Error Script Backup: ${e.message}`);
         }
     }
 };
