@@ -5,7 +5,7 @@
 const fetch = require('node-fetch');
 
 module.exports = {
-    command: ['cecancina'],
+    command: ['cecina'],
     category: 'anime',
     noPrefix: true,
     call: async (conn, m, { command }) => {
