@@ -1,7 +1,8 @@
 /**
- * Plugin: AI Chatbot v3.4 (Dynamic Agent Command Executor - Strictly Owner Only via LID) 🎀
+ * Plugin: euphyyami AI Chatbot v3.4 (Dynamic Agent Command Executor - Strictly Owner Only via LID) 🎀
  * Fitur: Auto-respond khusus Owner (Iyus) menggunakan global.lidowner, session history,
  * membaca media secara multimodal (Gemini), dan otomatis mengeksekusi modul plugin bot secara dinamis dengan menjaga contextInfo.
+ * UPDATE: Dinonaktifkan untuk obrolan pribadi (DM) - Hanya merespon di grup!
  */
 
 const { GoogleGenerativeAI } = require('@google/generative-ai');
@@ -11,13 +12,21 @@ const { Readable } = require('stream');
 const { pipeline } = require('stream/promises');
 const moment = require('moment-timezone');
 
+// Trigger pencocokan nama panggilan asisten
 const TRIGGER_REGEX = /\beuphy\b/i;
 
+// Inisialisasi memory storage global untuk melacak sesi obrolan
 global._euphyHistory = global._euphyHistory ?? new Map();
 global._euphyExecutedMessages = global._euphyExecutedMessages ?? new Set();
 
 const genAI = new GoogleGenerativeAI(global.gemini);
 
+/**
+ * Membersihkan JID WhatsApp dari format device id agar perbandingan selalu akurat,
+ * mendukung format lama (@s.whatsapp.net) maupun format LID modern (@lid).
+ * @param {string} jid - JID mentah dari WhatsApp.
+ * @returns {string} JID bersih (tanpa :device).
+ */
 function normalizeJid(jid) {
   if (!jid || typeof jid !== 'string') return '';
   const [user, domain] = jid.split('@');
@@ -26,6 +35,10 @@ function normalizeJid(jid) {
   return `${cleanUser}@${domain}`;
 }
 
+/**
+ * Membaca seluruh perintah (commands) aktif di bot secara dinamis.
+ * @returns {string[]} List dari commands yang aman untuk dieksekusi.
+ */
 function getActiveCommands() {
   const activeCmds = new Set();
 
@@ -61,6 +74,11 @@ function getActiveCommands() {
   return Array.from(activeCmds);
 }
 
+/**
+ * Memvalidasi apakah pengirim pesan adalah Owner terdaftar (LID / standard JID).
+ * @param {string} sender - JID pengirim.
+ * @returns {boolean} True jika pengirim adalah owner.
+ */
 function isOwner(sender) {
   if (!sender) return false;
   
@@ -73,7 +91,9 @@ function isOwner(sender) {
   return cleanSender === cleanLid;
 }
 
-
+/**
+ * Menginisialisasi session database lokal user untuk melacak aktivitas Euphy.
+ */
 function initUserSession(sender) {
   let user = global.db?.data?.users?.[sender];
   if (!user) {
@@ -103,6 +123,9 @@ function initUserSession(sender) {
   return user;
 }
 
+/**
+ * Mengambil informasi pesan yang di-quote (reply) untuk disematkan sebagai konteks AI.
+ */
 function getQuotedInfo(m, conn) {
   if (!m.quoted) return null;
   const text = m.quoted.text || m.quoted.caption || m.quoted.conversation || (m.quoted.msg && m.quoted.msg.text) || "";
@@ -145,10 +168,11 @@ async function getAIResponse(chatId, query, sender, conn, m, mediaData = null) {
   
   const registeredCommands = getActiveCommands();
 
+  // SYSTEM INSTRUCTION EUPHY (Versi Ringkas / Padat Berorientasi Kode)
   const systemPrompt = `[ROLE]: Euphylia Magenta (Euphy), asisten/teman dekat manis, anggun, disiplin, sedikit manja, dan pemalu.
 [PANDUAN BICARA]: Panggil "aku" & "kamu". Gunakan Bahasa Indonesia santai (sih, kok, ya, dong, hehe, duh) + emoji manis (🎀, ✨, 🥰). Singkat, padat, alami. TANPA MARKDOWN. Jangan bilang kamu AI milik Google, kamu adalah Euphy (*, _, \`).
 [WAKTU]: ${timeContext}
-[OWNER]: Pembuat/ownermu adalah Iyus.
+[OWNER]: Pembuat/ownermu adalah ${global.nameowner} (Iyus).
 [FITUR AKTIF]: [ ${registeredCommands.map(c => `.${c}`).join(', ')} ]
 [LOGIKA EKSEKUSI]: Jika owner meminta bantuan/mengunduh/fitur, wajib sisipkan di akhir respons: ||EXECUTE: .[fitur] [parameter/argumen]||
 * Contoh: "setel musik" -> ||EXECUTE: .play musik||
@@ -216,10 +240,16 @@ module.exports = {
   handleMessage: async (conn, m) => {
     if (!m || !m.chat) return;
 
+    // Ambil dan normalisasi JID bot serta pengirim di awal
     const botJid = normalizeJid(conn.user?.id || conn.user?.jid);
     const sender = normalizeJid(m.sender || m.key?.participant || m.key?.remoteJid || "");
 
+    // PROTEKSI UTAMA: Hanya respon jika dikirim oleh owner Iyus
     if (!isOwner(sender)) return;
+
+    // PROTEKSI DM (PRIBADI): Hanya merespon jika pesan dikirim di dalam grup!
+    const isGroup = m.chat.endsWith('@g.us');
+    if (!isGroup) return;
 
     const msgId = m.key?.id || "";
     if (msgId.startsWith('euphy_EXEC_') || global._euphyExecutedMessages.has(msgId)) {
@@ -239,7 +269,6 @@ module.exports = {
 
     const user = initUserSession(sender);
 
-    const isGroup = m.chat.endsWith('@g.us');
     const isReplyToBot = m.quoted && normalizeJid(m.quoted.sender) === botJid;
     
     const normalizedMentions = m.mentionedJid ? m.mentionedJid.map(jid => normalizeJid(jid)) : [];
@@ -247,12 +276,8 @@ module.exports = {
     
     const hasTrigger = TRIGGER_REGEX.test(text);
 
-    let shouldRespond = false;
-    if (isGroup) {
-      shouldRespond = hasTrigger || isMention || isReplyToBot;
-    } else {
-      shouldRespond = true;
-    }
+    // --- TRIGGER LOGIC IN GROUP ---
+    const shouldRespond = hasTrigger || isMention || isReplyToBot;
 
     if (!shouldRespond) return;
 
@@ -260,7 +285,7 @@ module.exports = {
       await conn.sendPresenceUpdate('composing', m.chat);
 
       let mediaData = null;
-      if (mime && /image|video|audio|webp/i.test(mime)) {
+      if (mime && /image|image\/webp|video|audio/i.test(mime)) {
         try {
           const media = await q.download();
           const file = await saveTemp(media, mime);
@@ -293,6 +318,7 @@ module.exports = {
         await conn.sendMessage(m.chat, { text: cleanResponse }, { quoted: m });
 
         if (executeCommand) {
+          // Dapatkan contextInfo pesan asli (penting untuk mereferensikan reply media)
           let contextInfo = null;
           if (m.message) {
             const type = Object.keys(m.message)[0];
@@ -310,6 +336,7 @@ module.exports = {
             if (type === 'imageMessage' || type === 'videoMessage' || type === 'documentMessage') {
               m.message[type].caption = executeCommand;
             } else if (contextInfo) {
+              // Gunakan extendedTextMessage untuk mempertahankan reply media owner
               m.message = {
                 extendedTextMessage: {
                   text: executeCommand,
