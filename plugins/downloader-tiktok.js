@@ -1,64 +1,21 @@
-/**
- * Euphy-Bot - TikTok DL (Scraper TMate Edition) ✨
- * Support: Video No WM, Audio, & Photo Slides
- */
 
 const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
-const { getRandom } = require('../lib/myfunc'); 
+
+const defaultIdch = typeof global.idch !== 'undefined' ? global.idch : '-';
+const defaultNamech = typeof global.namech !== 'undefined' ? global.namech : 'WhatsApp';
 
 const handleTikTok = async (tiktokUrl) => {
     try {
-        const initialRes = await axios.get('https://tmate.cc/id', {
-            headers: { 'User-Agent': 'Mozilla/5.0' }
-        });
-        const cookie = initialRes.headers['set-cookie']?.map(c => c.split(';')[0]).join('; ') || '';
-        const tokenMatch = initialRes.data.match(/<input[^>]+name="token"[^>]+value="([^"]+)"/i);
-        const token = tokenMatch?.[1];
+        const res = await axios.get(`https://www.api-junzz.web.id/download/tiktok?url=${encodeURIComponent(tiktokUrl)}`);
+        const data = res.data;
 
-        if (!token) throw new Error('Gagal ambil token TMate');
+        if (!data || data.status !== true) {
+            throw new Error(data.message || 'Gagal mengambil data dari API');
+        }
 
-        const params = new URLSearchParams();
-        params.append('url', tiktokUrl);
-        params.append('token', token);
-
-        const res = await axios.post('https://tmate.cc/action', params.toString(), {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'User-Agent': 'Mozilla/5.0',
-                'Referer': 'https://tmate.cc/id',
-                'Cookie': cookie
-            }
-        });
-
-        const html = res.data?.data;
-        if (!html) throw new Error('Data TikTok tidak ditemukan');
-
-        const titleMatch = html.match(/<h1[^>]*>(.*?)<\/h1>/i);
-        const title = titleMatch?.[1]?.replace(/<[^>]+>/g, '').trim() || 'Tanpa Judul';
-
-        const matches = [...html.matchAll(/<a[^>]+href="(https:\/\/[^"]+)"[^>]*>\s*<span>\s*<span>([^<]*)<\/span><\/span><\/a>/gi)];
-        const links = matches.map(([_, href, label]) => ({ href, label: label.trim() }));
-
-        const video = links.find(v => /download without watermark/i.test(v.label))?.href;
-        const audio = links.find(v => /download mp3 audio/i.test(v.label))?.href;
-        
-        const imageMatches = [...html.matchAll(/<img[^>]+src="(https:\/\/tikcdn\.app\/a\/images\/[^"]+)"/gi)];
-        const images = [...new Set(imageMatches.map(m => m[1]))];
-
-        return {
-            status: "success",
-            result: {
-                type: images.length > 0 ? 'image' : 'video',
-                title,
-                video: video || null,
-                audio: audio || null,
-                images: images.length > 0 ? images : null
-            }
-        };
+        return data.result;
     } catch (error) {
-        throw new Error(`Scraper Error: ${error.message}`);
+        throw new Error(`API Error: ${error.message}`);
     }
 };
 
@@ -67,23 +24,23 @@ module.exports = {
     category: 'downloader',
     noPrefix: true,
     call: async (conn, m, { args }) => {
-        if (!args[0] || !args[0].match(/tiktok.com/gi)) return m.reply("Mana link TikTok-nya?");
+        if (!args[0] || !args[0].match(/tiktok.com/gi)) return m.reply("Mana link TikTok-nya, Yus?");
 
         try {
             await conn.sendMessage(m.chat, { react: { text: "🙎🏻", key: m.key } });
 
-            const data = await handleTikTok(args[0]);
-            const { type, title, video, audio, images } = data.result;
+            const result = await handleTikTok(args[0]);
+            const title = result.title || 'Tanpa Judul';
+            const video = result.video_hd || result.video_sd;
+            const audio = result.mp3;
+            const images = result.images;
 
-            // --- 1. LOGIKA JIKA TIKTOK SLIDE (FOTO) ---
-            if (type === 'image' && images) {
+            if (result.type === 'image' && images && Array.isArray(images)) {
                 for (let img of images) {
                     await conn.sendMessage(m.chat, { image: { url: img } }, { quoted: m });
                 }
-                await m.reply(`> Berhasil kirim *${images.length}* foto slide.`);
+                await m.reply(`> Berhasil mengirim *${images.length}* foto slide.`);
             } 
-            
-            // --- 2. LOGIKA JIKA VIDEO ---
             else if (video) {
                 await conn.sendMessage(m.chat, {
                     video: { url: video },
@@ -91,15 +48,14 @@ module.exports = {
                     contextInfo: {
                         isForwarded: true,
                         forwardedNewsletterMessageInfo: {
-                            newsletterJid: idch,
-                            newsletterName: namech,
+                            newsletterJid: typeof idch !== 'undefined' ? idch : defaultIdch,
+                            newsletterName: typeof namech !== 'undefined' ? namech : defaultNamech,
                             serverMessageId: 143
                         }
                     }
                 }, { quoted: m });
-            } // <-- SEBELUMNYA KURANG TUTUP KURUNG KURAWAL DI SINI!
+            }
 
-            // --- 3. KIRIM AUDIO (DARI SCRAPE LANGSUNG) ---
             if (audio) {
                 await conn.sendMessage(m.chat, { 
                     audio: { url: audio }, 
@@ -108,11 +64,11 @@ module.exports = {
                 }, { quoted: m });
             }
 
-            await conn.sendMessage(m.chat, { react: { text: "😁", key: m.key } });
+            await conn.sendMessage(m.chat, { react: { text: "💚", key: m.key } });
 
         } catch (e) {
-            console.error(e);
-            m.reply(`> Gagal: ${e.message}`);
+            console.error('[TIKTOK-ERROR]', e);
+            m.reply(`> Gagal nih: ${e.message}`);
         }
     }
 };
