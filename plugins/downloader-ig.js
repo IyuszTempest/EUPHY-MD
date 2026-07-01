@@ -1,77 +1,80 @@
-/**
- * Plugin: Instagram Downloader (All-in-One) 📸🎥
- * Deskripsi: Mengunduh foto, carousel, atau video Reels/Post dari Instagram via Theresav API.
- * Style: Clean & Minimalist ✨
- */
+const axios = require('axios');
 
-const fetch = require('node-fetch');
+const defaultIdch = typeof global.idch !== 'undefined' ? global.idch : '-';
+const defaultNamech = typeof global.namech !== 'undefined' ? global.namech : 'WhatsApp';
+
+const handleInstagram = async (instagramUrl) => {
+    try {
+        const res = await axios.get(`https://www.api-junzz.web.id/download/instagram?url=${encodeURIComponent(instagramUrl)}`);
+        const data = res.data;
+
+        if (!data || data.status !== true) {
+            throw new Error(data.message || 'Gagal mengambil data dari API');
+        }
+
+        return data.result;
+    } catch (error) {
+        throw new Error(`API Error: ${error.message}`);
+    }
+};
 
 module.exports = {
-    command: ['ig', 'instagram', 'igdl', 'reels'],
+    command: ['ig', 'igdl', 'instagram'],
     category: 'downloader',
     noPrefix: true,
-    call: async (conn, m, { usedPrefix, command, text }) => {
-        if (!text) {
-            await conn.sendMessage(m.chat, { react: { text: '❗', key: m.key } });
-            return m.reply(`Mana link Instagram-nya?\nContoh: *${command} https://www.instagram.com/p/xxxx*`);
-        }
-        if (!/instagram\.com\/(reel|reels|p|stories)/i.test(text)) {
-            await conn.sendMessage(m.chat, { react: { text: '❗', key: m.key } });
-            return m.reply('Tautan tidak valid! Pastikan link berasal dari Instagram Post, Reels, atau Stories.');
-        }
+    call: async (conn, m, { args }) => {
+        if (!args[0] || !args[0].match(/instagram.com/gi)) return m.reply("Mana link Instagram-nya?");
 
         try {
-            await conn.sendMessage(m.chat, { react: { text: '📥', key: m.key } });
+            await conn.sendMessage(m.chat, { react: { text: "🙎🏻", key: m.key } });
 
-            const res = await fetch(`https://api.theresav.biz.id/download/aio?url=${encodeURIComponent(text.trim())}&apikey=${global.thrsavapi}`);
-            
-            if (!res.ok) throw new Error(`Server API Error: ${res.status} ${res.statusText}`);
-            
-            const json = await res.json();
+            const result = await handleInstagram(args[0]);
 
-            if (!json.status || !json.result || !json.result.medias || json.result.medias.length === 0) {
-                throw new Error('Gagal mengekstrak media dari tautan tersebut. Pastikan akun tidak diprivat.');
+            if (!result || !Array.isArray(result) || result.length === 0) {
+                throw new Error("Media tidak ditemukan atau link tidak valid.");
             }
 
-            const data = json.result;
-            const captionText = data.title && data.title !== 'instagram' ? data.title.trim() : '*Instagram Downloader Done*';
-
-            const validMedias = data.medias.filter(media => media.url);
-
-            for (let i = 0; i < validMedias.length; i++) {
-                const media = validMedias[i];
-                const isFirst = i === 0;
+            for (let i = 0; i < result.length; i++) {
+                const item = result[i];
+                const mediaUrl = item.url_download;
+                const isVideo = mediaUrl.includes('.mp4') || (item.quality && /video/i.test(item.quality));
                 
-                const sendOptions = {
-                    contextInfo: {
-                        mentionedJid: [m.sender],
-                        forwardingScore: 999,
-                        isForwarded: true,
-                        forwardedNewsletterMessageInfo: {
-                            newsletterJid: global.idch,
-                            newsletterName: global.namech,
-                            serverMessageId: 143
+                const caption = i === 0 ? `> Berhasil mengunduh *${result.length}* media dari Instagram.` : '';
+
+                if (isVideo) {
+                    await conn.sendMessage(m.chat, {
+                        video: { url: mediaUrl },
+                        caption: caption,
+                        contextInfo: {
+                            isForwarded: true,
+                            forwardedNewsletterMessageInfo: {
+                                newsletterJid: typeof idch !== 'undefined' ? idch : defaultIdch,
+                                newsletterName: typeof namech !== 'undefined' ? namech : defaultNamech,
+                                serverMessageId: 143
+                            }
                         }
-                    }
-                };
-
-                if (isFirst) {
-                    sendOptions.caption = captionText;
-                }
-
-                if (media.type === 'video' || media.ext === 'mp4') {
-                    await conn.sendMessage(m.chat, { video: { url: media.url }, ...sendOptions }, { quoted: m });
-                } else if (media.type === 'image' || ['jpg', 'jpeg', 'png', 'webp'].includes(media.ext)) {
-                    await conn.sendMessage(m.chat, { image: { url: media.url }, ...sendOptions }, { quoted: m });
+                    }, { quoted: m });
+                } else {
+                    await conn.sendMessage(m.chat, {
+                        image: { url: mediaUrl },
+                        caption: caption,
+                        contextInfo: {
+                            isForwarded: true,
+                            forwardedNewsletterMessageInfo: {
+                                newsletterJid: typeof idch !== 'undefined' ? idch : defaultIdch,
+                                newsletterName: typeof namech !== 'undefined' ? namech : defaultNamech,
+                                serverMessageId: 143
+                            }
+                        }
+                    }, { quoted: m });
                 }
             }
 
-            await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
+            await conn.sendMessage(m.chat, { react: { text: "💚", key: m.key } });
 
-        } catch (err) {
-            console.error("Theresav IGDL Error:", err);
-            await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } });
-            m.reply(`❌ *Unduhan gagal:* ${err.message || "Terjadi masalah pada API Downloader."}`);
+        } catch (e) {
+            console.error('[INSTAGRAM-ERROR]', e);
+            m.reply(`> Gagal nih: ${e.message}`);
         }
     }
 };
