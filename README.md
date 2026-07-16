@@ -7,7 +7,7 @@
 
 [![Node.js](https://img.shields.io/badge/Node.js-24+-800000?style=for-the-badge&logo=nodedotjs)](https://nodejs.org)
 [![Library](https://img.shields.io/badge/Library-neodevxsadmd/baileys-800000?style=for-the-badge&logo=whatsapp)](#)
-<img src="https://img.shields.io/badge/Maintained%3F-yes-maroon.svg?style=for-the-badge" alt="Maintained">
+<img src="https://img.shields.io/badge/Maintained%3F-no-maroon.svg?style=for-the-badge" alt="Maintained">
 <img src="https://img.shields.io/badge/license-MIT-maroon.svg?style=for-the-badge" alt="License MIT">
 
 </div>
